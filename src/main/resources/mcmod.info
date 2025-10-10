@@ -1,0 +1,16 @@
+[
+{
+  "modid": "burgmod",
+  "name": "BurgMod",
+  "description": "Mod with features that help with advanced parkour.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["bzzrg"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
