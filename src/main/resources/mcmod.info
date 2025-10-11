@@ -2,7 +2,7 @@
 {
   "modid": "burgmod",
   "name": "BurgMod",
-  "description": "Mod with features that help with advanced parkour.",
+  "description": "Mod that has features for advanced parkour.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",

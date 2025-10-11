@@ -12,9 +12,9 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.0"              // replace with the version of your mod that you have in your main mod file
-group = "com.bzzrg.burgmod" // replace with your package name see http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "BurgMod"   // this will be the name of the .jar it can be whatever you like
+version = "1.0.0" // the version of your mod that you have in your main mod file
+group = "com.bzzrg.burgmod" // your package name see http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "BurgMod" // the name of the .jar it can be whatever you like
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
