@@ -181,9 +181,8 @@ public class StrategyEditorGui extends GuiScreen {
 
         nextButtonId = 10;
 
-        clampListHeight();
-
         loadStrategy();
+        clampListHeight();
         syncListY();
     }
 
