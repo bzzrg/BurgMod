@@ -225,7 +225,7 @@ public class StrategyEditorGui extends GuiScreen {
     }
 
     public void syncListY() {
-        final int scrollAmount = scaledY(0.7);
+        final int scrollAmount = scaledY(0.6);
         boolean finished = true;
 
         // Update logic for jump slots
