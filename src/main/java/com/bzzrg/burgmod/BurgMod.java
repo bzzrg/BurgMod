@@ -1,9 +1,9 @@
 package com.bzzrg.burgmod;
 
 import com.bzzrg.burgmod.config.InputStatusConfig;
-import com.bzzrg.burgmod.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyEditorBind;
-import com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyEditorGui;
+import com.bzzrg.burgmod.inputstatus.InputSLabel;
+import com.bzzrg.burgmod.inputstatus.InputSConfigBind;
+import com.bzzrg.burgmod.inputstatus.InputSConfigGui;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,8 +31,8 @@ public class BurgMod {
         ClientCommandHandler.instance.registerCommand(new MainCommand());
         KeyBinding bind = new KeyBinding("Open Strategy Editor", Keyboard.KEY_O, "BurgMod");
         ClientRegistry.registerKeyBinding(bind);
-        MinecraftForge.EVENT_BUS.register(new StrategyEditorBind(bind));
-        MinecraftForge.EVENT_BUS.register(new InputStatusLabel());
-        StrategyEditorGui.loadStrategy();
+        MinecraftForge.EVENT_BUS.register(new InputSConfigBind(bind));
+        MinecraftForge.EVENT_BUS.register(new InputSLabel());
+        InputSConfigGui.loadStrategy();
     }
 }

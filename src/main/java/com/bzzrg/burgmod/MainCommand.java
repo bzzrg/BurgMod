@@ -38,14 +38,18 @@ public class MainCommand extends CommandBase {
     public void processCommand(ICommandSender iCommandSender, String[] strings) {
         if (strings.length == 0) {
             sendMessage("\u00A7bUsage:");
+            sendMessage("\u00A77- \u00A7e/burgmod config");
             sendMessage("\u00A77- \u00A7e/burgmod color1");
             sendMessage("\u00A77- \u00A7e/burgmod color2");
+            sendMessage("\u00A78(Check MC controls for BurgMod key binds)");
             return;
         }
 
         List<EnumChatFormatting> colors = Arrays.stream(EnumChatFormatting.values()).filter(EnumChatFormatting::isColor).collect(Collectors.toList());
 
         switch (strings[0]) {
+            case "config":
+
             case "color1":
 
                 try {

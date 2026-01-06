@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus.strategyeditor;
+package com.bzzrg.burgmod.inputstatus;
 
 import com.bzzrg.burgmod.config.InputStatusConfig;
 import com.google.common.collect.BiMap;
@@ -7,11 +7,11 @@ import net.minecraft.client.gui.GuiButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.bzzrg.burgmod.helpers.ModHelper.scaledX;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyEditorGui.*;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyJump.strategyJumps;
+import static com.bzzrg.burgmod.inputstatus.StrategyJump.strategyJumps;
 
 public class StrategyTick {
 
@@ -30,22 +30,23 @@ public class StrategyTick {
         strategyTicks.add(tickNum, this);
 
         for (InputType inputType : InputType.values()) {
-            final int tickX = LIST_LEFT.get() + scaledX(3) + (BUTTON_HEIGHT.get() + scaledX(0.5)) * (inputType.ordinal());
-            inputButtons.put(inputType, new CustomButton(nextButtonId++, tickX, 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), correctInputs.contains(inputType) ? "\u00A7a" + inputType : "\u00A7c" + inputType));
+            final int tickX = InputSConfigGui.LIST_LEFT.get() + scaledX(3) + (InputSConfigGui.BUTTON_HEIGHT.get() + scaledX(0.5)) * (inputType.ordinal());
+            inputButtons.put(inputType, new CustomButton(InputSConfigGui.nextButtonId++, tickX, 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), correctInputs.contains(inputType) ? "\u00A7a" + inputType : "\u00A7c" + inputType));
         }
 
-        inputButtons.get(InputType.SPR).enabled = !InputStatusConfig.toggleSprintMode;
+        Objects.requireNonNull(inputButtons.get(InputType.SPR)).enabled = !InputStatusConfig.toggleSprintMode; // inputButtons.get will never return null here bc of previous for loop, requireNonNull is so IDE doesn't warn
+
     }
 
     public static void addLoneTick(Set<InputType> correctInputs, int tickNum) {
         StrategyTick tick = new StrategyTick(correctInputs, tickNum);
 
-        final int duplicateX = LIST_LEFT.get() + scaledX(3) + (BUTTON_HEIGHT.get() + scaledX(0.5)) * (InputType.AIR.ordinal() + 1);
+        final int duplicateX = InputSConfigGui.LIST_LEFT.get() + scaledX(3) + (InputSConfigGui.BUTTON_HEIGHT.get() + scaledX(0.5)) * (InputType.AIR.ordinal() + 1);
 
-        tick.duplicateButton = new CustomButton(nextButtonId++, duplicateX, 0, scaledX(7), BUTTON_HEIGHT.get(), "Duplicate");
-        tick.removeButton = new CustomButton(nextButtonId++, duplicateX + scaledX(7) + scaledX(0.5), 0, scaledX(6), BUTTON_HEIGHT.get(), "Remove");
+        tick.duplicateButton = new CustomButton(InputSConfigGui.nextButtonId++, duplicateX, 0, scaledX(7), InputSConfigGui.BUTTON_HEIGHT.get(), "Duplicate");
+        tick.removeButton = new CustomButton(InputSConfigGui.nextButtonId++, duplicateX + scaledX(7) + scaledX(0.5), 0, scaledX(6), InputSConfigGui.BUTTON_HEIGHT.get(), "Remove");
 
-        if (gui != null) gui.displayedButtons.addAll(tick.getButtons());
+        if (InputSConfigGui.gui != null) InputSConfigGui.gui.displayedButtons.addAll(tick.getButtons());
     }
 
     public static void addJumpTick(Set<InputType> correctInputs, int tickNum, StrategyJump jump) {
@@ -79,7 +80,7 @@ public class StrategyTick {
 
     public void remove() {
         strategyTicks.remove(this);
-        if (gui != null) gui.displayedButtons.removeAll(getButtons());
+        if (InputSConfigGui.gui != null) InputSConfigGui.gui.displayedButtons.removeAll(getButtons());
     }
 
     public List<GuiButton> getButtons() {

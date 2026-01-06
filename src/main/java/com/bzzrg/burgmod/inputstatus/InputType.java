@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus.strategyeditor;
+package com.bzzrg.burgmod.inputstatus;
 
 public enum InputType {
     W,

@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus.strategyeditor;
+package com.bzzrg.burgmod.inputstatus;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -10,9 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static com.bzzrg.burgmod.helpers.ModHelper.scaledX;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.InputType.*;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyEditorGui.*;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyTick.strategyTicks;
+import static com.bzzrg.burgmod.inputstatus.InputType.*;
 
 public class StrategyJump {
 
@@ -46,25 +44,25 @@ public class StrategyJump {
 
         strategyJumps.add(this);
 
-        AtomicInteger buttonX = new AtomicInteger(LIST_LEFT.get() + scaledX(10));
+        AtomicInteger buttonX = new AtomicInteger(InputSConfigGui.LIST_LEFT.get() + scaledX(10));
         int buttonXGap = scaledX(0.5);
 
         // === Base Buttons ===
-        extendButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u2227");
-        run1TButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), BUTTON_HEIGHT.get(), "\u00A7cRun 1t");
-        cutButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u00A7cCut");
+        extendButton = new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u2227");
+        run1TButton = new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7cRun 1t");
+        cutButton = new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7cCut");
 
         if (jumpType == JumpType.JAM || jumpType == JumpType.HH || jumpType == JumpType.PESSI || jumpType == JumpType.FMM) {
             directionButtons = HashBiMap.create();
             onDirections = new HashSet<>();
 
-            directionButtons.put(W, new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u00A7aW"));
+            directionButtons.put(W, new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7aW"));
             onDirections.add(W);
-            directionButtons.put(A, new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u00A7cA"));
-            directionButtons.put(S, new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u00A7cS"));
-            directionButtons.put(D, new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "\u00A7cD"));
+            directionButtons.put(A, new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7cA"));
+            directionButtons.put(S, new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7cS"));
+            directionButtons.put(D, new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "\u00A7cD"));
         } else if (jumpType != JumpType.BWMM) {
-            directionButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(BUTTON_HEIGHT.get() + buttonXGap), 0, BUTTON_HEIGHT.get(), BUTTON_HEIGHT.get(), "A");
+            directionButton = new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(InputSConfigGui.BUTTON_HEIGHT.get() + buttonXGap), 0, InputSConfigGui.BUTTON_HEIGHT.get(), InputSConfigGui.BUTTON_HEIGHT.get(), "A");
             direction = A;
         }
 
@@ -72,20 +70,20 @@ public class StrategyJump {
         if (jumpType != JumpType.JAM && jumpType != JumpType.WDWA && jumpType != JumpType.BWMM) {
             length = 1;
 
-            lengthSlider = new GuiSlider(nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), BUTTON_HEIGHT.get(), "", "t", 1, 11, 1, false, true, slider -> {
+            lengthSlider = new GuiSlider(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), InputSConfigGui.BUTTON_HEIGHT.get(), "", "t", 1, 11, 1, false, true, slider -> {
                 length = slider.getValueInt();
                 lengthSlider.displayString = length + "t";
                 syncTicks();
-                gui.syncListY();
+                InputSConfigGui.gui.syncListY();
             });
             lengthSlider.displayString = length + "t";
         }
 
         // Remove button
-        removeButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), BUTTON_HEIGHT.get(), "Remove");
+        removeButton = new CustomButton(InputSConfigGui.nextButtonId++, buttonX.getAndAdd(scaledX(6) + buttonXGap), 0, scaledX(6), InputSConfigGui.BUTTON_HEIGHT.get(), "Remove");
 
         // Add new buttons to main button list
-        if (gui != null) gui.displayedButtons.addAll(getButtons());
+        if (InputSConfigGui.gui != null) InputSConfigGui.gui.displayedButtons.addAll(getButtons());
         syncTicks();
     }
 
@@ -101,7 +99,7 @@ public class StrategyJump {
             case BWMM: return "Bwmm";
             case REX: return "Rex";
             case REVERSE_REX: return "Reverse Rex";
-            default: return jumpType.name();
+            default: return jumpType.name(); // Never triggers in practice, failsafe
         }
     }
 
@@ -114,15 +112,17 @@ public class StrategyJump {
         }
 
         // Add 1 spacing per visible tick before this jump
-        for (StrategyTick tick : strategyTicks) {
+        for (StrategyTick tick : StrategyTick.strategyTicks) {
             if (tick.getTickNum() < ticks.get(0).getTickNum() && (tick.jump == null || tick.jump.extended)) listSlot++;
         }
 
         return listSlot;
     }
 
+    // Gets all buttons for this jump (not including the buttons for the ticks within the jump)
     public List<GuiButton> getButtons() {
         List<GuiButton> buttons = new ArrayList<>();
+
         buttons.add(extendButton);
         buttons.add(run1TButton);
         buttons.add(cutButton);
@@ -142,7 +142,7 @@ public class StrategyJump {
     // Update jump to match its fields (called when player updates jump fields via its config buttons)
     public void syncTicks() {
 
-        AtomicInteger tickNum = new AtomicInteger(ticks.isEmpty() ? strategyTicks.size() : ticks.get(0).getTickNum());
+        AtomicInteger tickNum = new AtomicInteger(ticks.isEmpty() ? StrategyTick.strategyTicks.size() : ticks.get(0).getTickNum());
 
         TriConsumer<InputType[], List<InputType>, Integer> addTick = (constantInputTypes, varyingInputTypes, iterations) -> {
             if (constantInputTypes == null) constantInputTypes = new InputType[]{};
@@ -334,7 +334,8 @@ public class StrategyJump {
             }
         }
 
-        if (extended && gui != null) ticks.forEach(t -> gui.displayedButtons.addAll(t.getButtons()));
+        // Since all ticks were just recreated using addJumpTick (based on jump settings), they weren't added to displayed buttons, so this adds them if the jump they are in is in extended view
+        if (extended && InputSConfigGui.gui != null) ticks.forEach(t -> InputSConfigGui.gui.displayedButtons.addAll(t.getButtons()));
     }
 
 }

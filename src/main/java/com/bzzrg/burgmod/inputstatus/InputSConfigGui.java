@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus.strategyeditor;
+package com.bzzrg.burgmod.inputstatus;
 
 import com.bzzrg.burgmod.config.InputStatusConfig;
 import net.minecraft.client.gui.GuiButton;
@@ -13,13 +13,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.helpers.ModHelper.*;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.InputType.*;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyJump.strategyJumps;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyTick.strategyTicks;
+import static com.bzzrg.burgmod.inputstatus.InputType.*;
+import static com.bzzrg.burgmod.inputstatus.StrategyJump.strategyJumps;
+import static com.bzzrg.burgmod.inputstatus.StrategyTick.strategyTicks;
 
-public class StrategyEditorGui extends GuiScreen {
+public class InputSConfigGui extends GuiScreen {
 
-    public static StrategyEditorGui gui = null;
+    public static InputSConfigGui gui = null;
     public List<GuiButton> displayedButtons;
     private boolean smoothListScroll = false;
 

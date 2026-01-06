@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus.strategyeditor;
+package com.bzzrg.burgmod.inputstatus;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;

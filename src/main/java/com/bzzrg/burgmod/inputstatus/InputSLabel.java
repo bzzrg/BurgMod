@@ -1,15 +1,12 @@
 package com.bzzrg.burgmod.inputstatus;
 
 import com.bzzrg.burgmod.config.InputStatusConfig;
-import com.bzzrg.burgmod.inputstatus.strategyeditor.InputType;
-import com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyJump;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.input.Keyboard;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -21,9 +18,9 @@ import static com.bzzrg.burgmod.config.InputStatusConfig.color1;
 import static com.bzzrg.burgmod.config.InputStatusConfig.shortenLabel;
 import static com.bzzrg.burgmod.helpers.ModHelper.scaledX;
 import static com.bzzrg.burgmod.helpers.ModHelper.scaledY;
-import static com.bzzrg.burgmod.inputstatus.strategyeditor.StrategyTick.strategyTicks;
+import static com.bzzrg.burgmod.inputstatus.StrategyTick.strategyTicks;
 
-public class InputStatusLabel {
+public class InputSLabel {
 
     private int tickNum = 0;
     private boolean finished = false;
@@ -87,10 +84,10 @@ public class InputStatusLabel {
         // Get player's current inputs
         Set<InputType> inputs = new HashSet<>();
 
-        if (Keyboard.isKeyDown(mc.gameSettings.keyBindForward.getKeyCode())) inputs.add(InputType.W);
-        if (Keyboard.isKeyDown(mc.gameSettings.keyBindLeft.getKeyCode())) inputs.add(InputType.A);
-        if (Keyboard.isKeyDown(mc.gameSettings.keyBindBack.getKeyCode())) inputs.add(InputType.S);
-        if (Keyboard.isKeyDown(mc.gameSettings.keyBindRight.getKeyCode())) inputs.add(InputType.D);
+        if (mc.gameSettings.keyBindForward.isKeyDown()) inputs.add(InputType.W);
+        if (mc.gameSettings.keyBindLeft.isKeyDown()) inputs.add(InputType.A);
+        if (mc.gameSettings.keyBindBack.isKeyDown()) inputs.add(InputType.S);
+        if (mc.gameSettings.keyBindRight.isKeyDown()) inputs.add(InputType.D);
 
         if (player.isSprinting()) inputs.add(InputType.SPR);
         if (player.isSneaking()) inputs.add(InputType.SNK);
