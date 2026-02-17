@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.inputstatus;
+package com.bzzrg.burgmod.utils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -16,6 +16,7 @@ public class CustomButton extends GuiButton {
         int baseColor = 0x00000000;
         int hoverColor = 0x32FFFFFF;
         int borderColor = 0xFFFFFFFF;
+        int disabledColor = 0xFFFFFF00;
         int borderThickness = 1;
 
         // Hover detection
@@ -24,8 +25,7 @@ public class CustomButton extends GuiButton {
 
         int color = this.hovered ? hoverColor : baseColor;
 
-        // Black if disabled
-        if (!this.enabled) color = 0xFFFFFF00;
+        if (!this.enabled) color = disabledColor;
 
         // Background
         drawRect(xPosition, yPosition, xPosition + width, yPosition + height, color);

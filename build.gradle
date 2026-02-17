@@ -12,7 +12,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.0.1" // the version of your mod that you have in your main mod file
+version = "1.1.0" // the version of your mod that you have in your main mod file
 group = "com.bzzrg.burgmod" // your package name see http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "BurgMod" // the name of the .jar it can be whatever you like
 
