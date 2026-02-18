@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.features.inputstatus;
 
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
-import com.bzzrg.burgmod.utils.ResetHandler;
+import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.utils.ResetHandler.getInputs;
+import static com.bzzrg.burgmod.utils.PluginUtils.getInputs;
 
 public class StrategyRecorder {
 

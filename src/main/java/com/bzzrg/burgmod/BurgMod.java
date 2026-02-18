@@ -9,7 +9,8 @@ import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
 import com.bzzrg.burgmod.features.inputstatus.StrategyRecorder;
 import com.bzzrg.burgmod.features.poschecker.PosCheckerHandler;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
-import com.bzzrg.burgmod.utils.ResetHandler;
+import com.bzzrg.burgmod.utils.resetting.ResetHandler;
+import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -32,7 +33,7 @@ public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.1.2";
 
     public static Minecraft mc;
     public static Logger logger;
@@ -73,6 +74,8 @@ public class BurgMod {
 
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());
         MinecraftForge.EVENT_BUS.register(new PosCheckerHandler());
+
+        MinecraftForge.EVENT_BUS.register(new TeleportTracker());
 
     }
 

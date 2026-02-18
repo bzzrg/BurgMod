@@ -8,10 +8,37 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.bzzrg.burgmod.utils.PluginUtils.isAirborne;
 import static com.bzzrg.burgmod.utils.PluginUtils.sendMessage;
 
 public class PosCheckerHandler {
     public static final List<PosChecker> posCheckers = new ArrayList<>();
+    private static boolean lastInAir = true;
+    private static final List<PosMessageSender> posMessageSenders = new ArrayList<>();
+
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+
+        if (event.phase != TickEvent.Phase.END || player == null) {
+            return;
+        }
+
+        if (isAirborne() && !lastInAir) {
+            for (PosChecker posChecker : posCheckers) {
+                posMessageSenders.add(new PosMessageSender(posChecker));
+            }
+        }
+
+        new ArrayList<>(posMessageSenders).forEach(PosMessageSender::tick);
+
+        lastInAir = isAirborne();
+    }
+
+    public static void onReset() {
+        posMessageSenders.clear();
+    }
 
     public static class PosChecker {
         public final Axis axis;
@@ -58,32 +85,6 @@ public class PosCheckerHandler {
                 posMessageSenders.remove(this);
             }
         }
-    }
-
-    private static boolean lastOnGround = true;
-    private static final List<PosMessageSender> posMessageSenders = new ArrayList<>();
-
-    @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
-
-        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-
-        if (event.phase != TickEvent.Phase.END || player == null) {
-            return;
-        }
-
-
-        if (!player.onGround && lastOnGround) {
-            for (PosChecker posChecker : posCheckers) {
-                posMessageSenders.add(new PosMessageSender(posChecker));
-            }
-        }
-
-        new ArrayList<>(posMessageSenders).forEach(PosMessageSender::tick);
-
-        lastOnGround = player.onGround;
-
-
     }
 
 }

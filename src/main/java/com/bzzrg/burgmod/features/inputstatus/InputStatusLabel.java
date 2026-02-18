@@ -3,7 +3,7 @@ package com.bzzrg.burgmod.features.inputstatus;
 import com.bzzrg.burgmod.config.featureconfig.InputStatusConfig;
 import com.bzzrg.burgmod.features.strategy.StrategyJump;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
-import com.bzzrg.burgmod.utils.ResetHandler;
+import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import static com.bzzrg.burgmod.config.ConfigHandler.color1;
 import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.utils.ResetHandler.getInputs;
+import static com.bzzrg.burgmod.utils.PluginUtils.getInputs;
 
 public class InputStatusLabel {
 
