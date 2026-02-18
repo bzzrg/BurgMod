@@ -2,6 +2,8 @@ package com.bzzrg.burgmod.command;
 
 import com.bzzrg.burgmod.BurgMod;
 import com.bzzrg.burgmod.config.ConfigHandler;
+import com.bzzrg.burgmod.config.featureconfig.PosCheckerConfig;
+import com.bzzrg.burgmod.features.poschecker.PosCheckerHandler;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.EnumChatFormatting;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyFieldsToJson;
 import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.updateStrategyFields;
+import static com.bzzrg.burgmod.features.poschecker.PosCheckerHandler.posCheckers;
 import static com.bzzrg.burgmod.utils.PluginUtils.createDirectory;
 import static com.bzzrg.burgmod.utils.PluginUtils.sendMessage;
 
@@ -46,11 +49,12 @@ public class MainCommand extends CommandBase {
     public void processCommand(ICommandSender iCommandSender, String[] strings) {
 
         Runnable sendMainUsage = () -> {
-            sendMessage("\u00A7bUsage:");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy \u00A77(strat)");
-            sendMessage("\u00A77- \u00A7e/burgmod color1 \u00A77(c1)");
-            sendMessage("\u00A77- \u00A7e/burgmod color2 \u00A77(c2)");
-            sendMessage("\u00A78(Check MC controls for BurgMod key binds)");
+            sendMessage("\u00A71[BurgMod]\u00A7r\u00A7r \u00A7bUsage:");
+            sendMessage("\u00A77- \u00A7e/bm pos \u00A77(Add checkers that send your X/Z pos any amount of ticks (0-100) after jumping)");
+            sendMessage("\u00A77- \u00A7e/bm strat \u00A77(Save strategies under keys or smarter HPK OJ keys)");
+            sendMessage("\u00A77- \u00A7e/bm c1 \u00A77(Color 1 for labels)");
+            sendMessage("\u00A77- \u00A7e/bm c2 \u00A77(Color 2 for labels)");
+            sendMessage("\u00A78(Check MC controls to access more BurgMod config)");
         };
 
         if (strings.length == 0) {
@@ -59,20 +63,95 @@ public class MainCommand extends CommandBase {
         }
 
         Runnable sendStratUsage = () -> {
-            sendMessage("\u00A7bUsage:");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy save <key> \u00A77(Saves strategy under key)");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy load <key> \u00A77(Loads strategy saved under key)");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy delete <key> \u00A77(Deletes strategy saved under key)");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy savehpk <jump #> \u00A77(Saves strategy to OJ Jump #, HPK only)");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy autoloadhpk \u00A77(Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only)");
-            sendMessage("\u00A77- \u00A7e/burgmod strategy list \u00A77(Lists all keys of saved strategies)");
+            sendMessage("\u00A71[BurgMod]\u00A7r\u00A7r \u00A7bUsage (/bm strat):");
+            sendMessage("\u00A77- \u00A7e/bm strat save <key> \u00A77(Saves strategy under key)");
+            sendMessage("\u00A77- \u00A7e/bm strat load <key> \u00A77(Loads strategy saved under key)");
+            sendMessage("\u00A77- \u00A7e/bm strat delete <key> \u00A77(Deletes strategy saved under key)");
+            sendMessage("\u00A77- \u00A7e/bm strat savehpk <jump #> \u00A77(Saves strategy to OJ Jump #, HPK only)");
+            sendMessage("\u00A77- \u00A7e/bm strat autoloadhpk \u00A77(Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only)");
+            sendMessage("\u00A77- \u00A7e/bm strat list \u00A77(Lists all keys of saved strategies)");
+        };
+
+        Runnable sendPosUsage = () -> {
+            sendMessage("\u00A71[BurgMod]\u00A7r\u00A7r \u00A7bUsage (/bm pos):");
+            sendMessage("\u00A77- \u00A7e/bm pos add <X/Z/BOTH> <ticks_after_jump> \u00A77(Adds new pos checker for either X or Z axis any amount of ticks (0-100) after jumping)");
+            sendMessage("\u00A77- \u00A7e/bm pos remove <checker_num> \u00A77(Removes an added pos checker, use /bm pos list for checker numbers)");
+            sendMessage("\u00A77- \u00A7e/bm pos list \u00A77(Lists all added pos checkers and their number)");
         };
 
         List<EnumChatFormatting> colors = Arrays.stream(EnumChatFormatting.values()).filter(EnumChatFormatting::isColor).collect(Collectors.toList());
 
         switch (strings[0]) {
-            case "strategy":
-            case "strat":
+
+            case "pos": {
+                String action;
+                try {
+                    action = strings[1];
+                } catch (Exception e) {
+                    sendPosUsage.run();
+                    return;
+                }
+
+                switch (action) {
+                    case "add":
+
+                        PosCheckerHandler.Axis axis;
+                        try {
+                            axis = PosCheckerHandler.Axis.valueOf(strings[2].toUpperCase());
+                        } catch (Exception e) {
+                            sendPosUsage.run();
+                            break;
+                        }
+
+                        int ticksAfterJump;
+                        try {
+                            ticksAfterJump = Integer.parseInt(strings[3]);
+                            if (ticksAfterJump < 1 || ticksAfterJump > 100) {
+                                sendMessage("\u00A71[BurgMod]\u00A7r\u00A7r \u00A7cTicks after jump must be between 1 and 100!");
+                                break;
+                            }
+                        } catch (Exception e) {
+                            sendPosUsage.run();
+                            break;
+                        }
+
+                        posCheckers.add(new PosCheckerHandler.PosChecker(axis, ticksAfterJump));
+                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r\u00A7r \u00A7aAdded new position checker! Axis: %s, Ticks: %d \u00A77(Checker #%d)",
+                                axis, ticksAfterJump, posCheckers.size()));
+
+                        break;
+                    case "remove":
+                        try {
+                            posCheckers.remove(Integer.parseInt(strings[2]) - 1);
+                        } catch (Exception e) {
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cInput a valid position checker number! (Use /bm pos list to see checker numbers)");
+                            break;
+                        }
+
+                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r \u00A7aRemoved position checker at checker number %d!", Integer.parseInt(strings[2])));
+
+                        break;
+                    case "list":
+
+                        sendMessage("\u00A71[BurgMod]\u00A7r \u00A7bPosition Checkers:");
+                        if (posCheckers.size() == 0) {
+                            sendMessage("\u00A7cNone!");
+                        }
+
+                        for (int i = 0; i < posCheckers.size(); i++) {
+                            PosCheckerHandler.PosChecker posChecker = posCheckers.get(i);
+                            sendMessage(String.format("\u00A77- \u00A7eAxis: %s | Ticks After Jump: %d (Checker #%d)",
+                                    posChecker.axis, posChecker.ticksAfterJump, i+1));
+                        }
+
+                        break;
+                }
+
+                PosCheckerConfig.updateJson();
+
+                break;
+            }
+            case "strat": {
                 String action;
                 try {
                     action = strings[1];
@@ -88,12 +167,12 @@ public class MainCommand extends CommandBase {
                         try {
                             key = strings[2];
                         } catch (Exception e) {
-                            sendMessage("\u00A7cPlease provide a key to save your current strategy to.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cPlease provide a key to save your current strategy to.");
                             break;
                         }
 
                         strategyFieldsToJson(new File(BurgMod.modConfigFolder, "input_status/strategies/" + key + ".json"));
-                        sendMessage("\u00A7aSaved current strategy under key: \u00A7b" + key);
+                        sendMessage("\"u00A71[BurgMod]\u00A7r \u00A7aSaved current strategy under key: \u00A7b" + key);
 
                         break;
                     }
@@ -103,7 +182,7 @@ public class MainCommand extends CommandBase {
                         try {
                             key = strings[2];
                         } catch (Exception e) {
-                            sendMessage("\u00A7cPlease provide a key to load a strategy from.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cPlease provide a key to load a strategy from.");
                             break;
                         }
 
@@ -119,10 +198,10 @@ public class MainCommand extends CommandBase {
                             }
 
                             updateStrategyFields();
-                            sendMessage("\u00A7aLoaded strategy from key: \u00A7b" + key);
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aLoaded strategy from key: \u00A7b" + key);
 
                         } else {
-                            sendMessage("\u00A7cThere is no strategy saved under the provided key.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThere is no strategy saved under the provided key.");
                         }
 
                         break;
@@ -133,14 +212,14 @@ public class MainCommand extends CommandBase {
                         try {
                             key = strings[2];
                         } catch (Exception e) {
-                            sendMessage("\u00A7cPlease provide a key of a strategy to delete.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cPlease provide a key of a strategy to delete.");
                             break;
                         }
 
                         if (new File(BurgMod.modConfigFolder, "input_status/strategies/" + key + ".json").delete()) {
-                            sendMessage("\u00A7aDeleted strategy under key: \u00A7b" + key);
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aDeleted strategy under key: \u00A7b" + key);
                         } else {
-                            sendMessage("\u00A7cThere is no strategy saved under the provided key.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThere is no strategy saved under the provided key.");
                         }
 
                         break;
@@ -150,12 +229,12 @@ public class MainCommand extends CommandBase {
                         try {
                             jumpNum = Integer.parseInt(strings[2]);
                         } catch (Exception e) {
-                            sendMessage("\u00A7cPlease provide a valid jump # to save your current strategy to.");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cPlease provide a valid jump # to save your current strategy to.");
                             break;
                         }
 
                         strategyFieldsToJson(new File(BurgMod.modConfigFolder, "input_status/hpk_strategies/" + jumpNum + ".json"));
-                        sendMessage("\u00A7aSaved current strategy under jump #: \u00A7b" + jumpNum + " \u00A77(used by autoloadhpk)");
+                        sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aSaved current strategy under jump #: \u00A7b" + jumpNum + " \u00A77(used by autoloadhpk)");
                         break;
                     }
                     case "autoloadhpk": {
@@ -163,9 +242,9 @@ public class MainCommand extends CommandBase {
                         ConfigHandler.autoStrategyLoadOn = !ConfigHandler.autoStrategyLoadOn;
 
                         if (ConfigHandler.autoStrategyLoadOn) {
-                            sendMessage("\u00A7aAuto loading for HPK strategies (created with savehpk) is now enabled!");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aAuto loading for HPK strategies (created with savehpk) is now enabled!");
                         } else {
-                            sendMessage("\u00A7eAuto loading for HPK strategies (created with savehpk) is now disabled!");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7eAuto loading for HPK strategies (created with savehpk) is now disabled!");
                         }
 
                         break;
@@ -184,11 +263,11 @@ public class MainCommand extends CommandBase {
                         File[] hpkStrategiesArray = Objects.requireNonNull(hpkStrategies.listFiles()); // In practice, .listFiles will never produce an NPE, requireNonNull is to silence IDE
 
                         if (strategiesArray.length == 0 && hpkStrategiesArray.length == 0) {
-                            sendMessage("\u00A7cYou don't have any strategies saved yet!");
+                            sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cYou don't have any strategies saved yet!");
                             break;
                         }
 
-                        sendMessage("\u00A7bSaved Strategies:");
+                        sendMessage("\u00A71[BurgMod]\u00A7r \u00A7bSaved Strategies:");
 
                         if (strategiesArray.length == 0) {
                             sendMessage("\u00A7cNone!");
@@ -200,7 +279,7 @@ public class MainCommand extends CommandBase {
                         }
 
                         sendMessage("");
-                        sendMessage("\u00A7bSaved HPK Strategies:");
+                        sendMessage("\u00A71[BurgMod]\u00A7r \u00A7bSaved HPK Strategies:");
 
                         if (hpkStrategiesArray.length == 0) {
                             sendMessage("\u00A7cNone!");
@@ -217,31 +296,33 @@ public class MainCommand extends CommandBase {
                         break;
                 }
                 break;
-            case "color1":
-            case "c1":
+            }
+            case "c1": {
                 try {
                     ConfigHandler.color1 = EnumChatFormatting.valueOf(strings[1].toUpperCase()).toString();
                     ConfigHandler.updateConfigFromFields();
-                    sendMessage("\u00A7aColor 1 has been set to: " + ConfigHandler.color1 + strings[1].toUpperCase());
+                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aColor 1 has been set to: " + ConfigHandler.color1 + strings[1].toUpperCase());
                 } catch (Exception e) {
-                    sendMessage("\u00A7cInput a valid MC color code (caps don't matter):");
+                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cInput a valid MC color code (caps don't matter):");
                     sendMessage(colors.stream().map(color -> color + color.name()).collect(Collectors.joining(", ")));
                 }
                 break;
-            case "color2":
-            case "c2":
+            }
+            case "c2": {
                 try {
                     ConfigHandler.color2 = EnumChatFormatting.valueOf(strings[1].toUpperCase()).toString();
                     ConfigHandler.updateConfigFromFields();
-                    sendMessage("\u00A7aColor 2 has been set to: " + ConfigHandler.color2 + strings[1].toUpperCase());
+                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7aColor 2 has been set to: " + ConfigHandler.color2 + strings[1].toUpperCase());
                 } catch (Exception e) {
-                    sendMessage("\u00A7cInput a valid MC color code (caps don't matter):");
+                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cInput a valid MC color code (caps don't matter):");
                     sendMessage(colors.stream().map(color -> color + color.name()).collect(Collectors.joining(", ")));
                 }
                 break;
-            default:
+            }
+            default: {
                 sendMainUsage.run();
                 break;
+            }
         }
     }
 }

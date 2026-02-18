@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.bzzrg.burgmod.config.ConfigHandler.color1;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.strategyTicks;
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.utils.ResetHandler.getInputs;
 
 public class InputStatusLabel {
@@ -39,7 +39,7 @@ public class InputStatusLabel {
     }
 
     @SubscribeEvent
-    public void onTickChange(TickEvent.ClientTickEvent event) {
+    public void onClientTick(TickEvent.ClientTickEvent event) {
 
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().thePlayer == null || finished || !ResetHandler.movedSinceReset) {
             return;

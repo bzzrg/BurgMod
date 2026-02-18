@@ -17,13 +17,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.updateStrategyFields;
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.updateStrategyJson;
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.features.inputstatus.StrategyRecorder.recordedStrategy;
-import static com.bzzrg.burgmod.features.strategy.StrategyJump.strategyJumps;
 import static com.bzzrg.burgmod.features.strategy.StrategyTick.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyTick.addLoneTick;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.strategyTicks;
 import static com.bzzrg.burgmod.utils.PluginUtils.*;
 
 public class StrategyConfigGui extends GuiScreen {
@@ -258,7 +255,7 @@ public class StrategyConfigGui extends GuiScreen {
                     jumpType = StrategyJump.JumpType.valueOf(jumpTextField.getText().toUpperCase());
                 } catch (IllegalArgumentException e) {
                     mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
-                    sendMessage("\u00A7cInvalid jump name! List of valid jump names:");
+                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cInvalid jump name! List of valid jump names:");
 
                     for (StrategyJump.JumpType t : StrategyJump.JumpType.values()) {
                         sendMessage("\u00A77- \u00A7e" + t);

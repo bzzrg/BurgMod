@@ -14,11 +14,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.features.strategy.StrategyJump.strategyJumps;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.strategyTicks;
 import static com.bzzrg.burgmod.utils.PluginUtils.createDirectory;
 
 public class StrategyConfig {
+
+    public static final List<StrategyTick> strategyTicks = new ArrayList<>();
+    public static final List<StrategyJump> strategyJumps = new ArrayList<>();
+
 
     public static void updateStrategyJson() {
         strategyFieldsToJson(new File(BurgMod.modConfigFolder, "input_status/strategy.json"));

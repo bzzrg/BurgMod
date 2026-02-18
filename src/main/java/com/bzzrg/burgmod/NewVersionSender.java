@@ -26,7 +26,7 @@ public class NewVersionSender {
                 if (latest == null || latest.equals(BurgMod.VERSION)) return; // Stops code under this from running if player has latest version already
 
                 // Create message
-                IChatComponent msg = new ChatComponentText("\u00A7a[BurgMod] \u00A7rA new version of BurgMod is available! \u00A77(" + BurgMod.VERSION + " \u2192 " + latest + ") ");
+                IChatComponent msg = new ChatComponentText("\u00A71[BurgMod]\u00A7r \u00A7rA new version of BurgMod is available! \u00A77(" + BurgMod.VERSION + " \u2192 " + latest + ") ");
                 IChatComponent link = new ChatComponentText("\u00A79[Click to Download]");
                 link.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/bzzrg/BurgMod/releases"));
                 msg.appendSibling(link);

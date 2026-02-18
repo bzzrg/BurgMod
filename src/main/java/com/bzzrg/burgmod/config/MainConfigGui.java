@@ -105,12 +105,12 @@ public class MainConfigGui extends GuiScreen {
                 Minecraft.getMinecraft().displayGuiScreen(new InputStatusConfigGui());
                 break;
             case 2:
-                sendMessage("\u00A7cThis feature is currently being worked on and will come out in a future update.");
+                sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThis feature is currently being worked on and will come out in a future update.");
                 //FortyFiveStatusConfig.enabled = !FortyFiveStatusConfig.enabled;
                 //button.displayString = FortyFiveStatusConfig.enabled ? "\u00A7a45 Status: ON" : "\u00A7c45 Status: OFF";
                 break;
             case 3:
-                sendMessage("\u00A7cThis feature is currently being worked on and will come out in a future update.");
+                sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThis feature is currently being worked on and will come out in a future update.");
                 //Minecraft.getMinecraft().displayGuiScreen(new FortyFiveStatusConfigGui());
                 break;
             case 4:

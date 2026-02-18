@@ -9,12 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyJumps;
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
-import static com.bzzrg.burgmod.features.strategy.StrategyJump.strategyJumps;
 
 public class StrategyTick {
-
-    public static final List<StrategyTick> strategyTicks = new ArrayList<>();
 
     public Set<InputType> correctInputs;
 

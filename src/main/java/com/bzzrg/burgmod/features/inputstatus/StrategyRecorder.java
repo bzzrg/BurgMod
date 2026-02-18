@@ -24,7 +24,7 @@ public class StrategyRecorder {
     }
 
     @SubscribeEvent
-    public void onTickChange(TickEvent.ClientTickEvent event) {
+    public void onClientTick(TickEvent.ClientTickEvent event) {
 
         if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().thePlayer == null || !recording || InputStatusLabel.finished || !ResetHandler.movedSinceReset) {
             return;

@@ -11,14 +11,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyJumps;
+import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyTick.InputType.*;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.strategyTicks;
 
 
 public class StrategyJump {
-
-    public static final List<StrategyJump> strategyJumps = new ArrayList<>();
 
     public final JumpType type;
     public final List<StrategyTick> ticks = new ArrayList<>();

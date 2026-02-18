@@ -4,8 +4,10 @@ import com.bzzrg.burgmod.command.AutoStrategyLoad;
 import com.bzzrg.burgmod.command.MainCommand;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
 import com.bzzrg.burgmod.config.ConfigHandler;
+import com.bzzrg.burgmod.config.featureconfig.PosCheckerConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
 import com.bzzrg.burgmod.features.inputstatus.StrategyRecorder;
+import com.bzzrg.burgmod.features.poschecker.PosCheckerHandler;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
 import com.bzzrg.burgmod.utils.ResetHandler;
 import net.minecraft.client.Minecraft;
@@ -48,6 +50,8 @@ public class BurgMod {
 
         ConfigHandler.updateFieldsFromConfig();
 
+        PosCheckerConfig.updateFields();
+
     }
 
     @EventHandler
@@ -68,6 +72,8 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
 
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());
+        MinecraftForge.EVENT_BUS.register(new PosCheckerHandler());
+
     }
 
 
