@@ -30,10 +30,12 @@ public class PosCheckerHandler {
     }
     public static class PosMessageSender {
         private final Axis axis;
+        private final int ticksAfterJump;
         private int ticksLeft;
 
         public PosMessageSender(PosChecker posChecker) {
             this.axis = posChecker.axis;
+            this.ticksAfterJump = posChecker.ticksAfterJump;
             this.ticksLeft = posChecker.ticksAfterJump;
         }
 
@@ -45,11 +47,11 @@ public class PosCheckerHandler {
 
                 if (player != null) {
                     if (axis == Axis.X) {
-                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r X: %.5f", player.posX));
+                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r X: %.5f \u00A77(T%d)", player.posX, ticksAfterJump));
                     } else if (axis == Axis.Z) {
-                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r Z: %.5f", player.posZ));
+                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r Z: %.5f \u00A77(T%d)", player.posZ, ticksAfterJump));
                     } else if (axis == Axis.BOTH) {
-                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r X: %.5f, Z: %.5f", player.posX, player.posZ));
+                        sendMessage(String.format("\u00A71[BurgMod]\u00A7r X: %.5f, Z: %.5f \u00A77(T%d)", player.posX, player.posZ, ticksAfterJump));
                     }
                 }
 
