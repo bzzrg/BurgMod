@@ -23,6 +23,8 @@ public class NewVersionSender {
 
                 // Get and compare latest version
                 String latest = reader.readLine();
+                System.out.printf("latest: %s, actual: %s%n", latest, BurgMod.VERSION);
+
                 if (latest == null || latest.equals(BurgMod.VERSION)) return; // Stops code under this from running if player has latest version already
 
                 // Create message
