@@ -1,13 +1,15 @@
 package com.bzzrg.burgmod;
 
-import com.bzzrg.burgmod.command.AutoStrategyLoad;
-import com.bzzrg.burgmod.command.MainCommand;
-import com.bzzrg.burgmod.config.MainConfigGuiBind;
+import com.bzzrg.burgmod.command.BMCommand;
+import com.bzzrg.burgmod.command.PosCheckersLimitBoxDrawer;
 import com.bzzrg.burgmod.config.ConfigHandler;
-import com.bzzrg.burgmod.config.featureconfig.PosCheckerConfig;
+import com.bzzrg.burgmod.config.MainConfigGuiBind;
+import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.inputstatus.StrategyRecorder;
-import com.bzzrg.burgmod.features.poschecker.PosCheckerHandler;
+import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
+import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
+import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
@@ -25,15 +27,15 @@ import org.lwjgl.input.Keyboard;
 
 import java.io.File;
 
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.updateStrategyFields;
-import static com.bzzrg.burgmod.utils.PluginUtils.createDirectory;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.updateStrategyFields;
+import static com.bzzrg.burgmod.utils.GeneralUtils.createDirectory;
 
 @Mod(modid = BurgMod.MODID, name = BurgMod.MODNAME, version = BurgMod.VERSION)
 public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.1.4";
 
     public static Minecraft mc;
     public static Logger logger;
@@ -49,15 +51,15 @@ public class BurgMod {
         modConfigFolder = new File(event.getModConfigurationDirectory(), "BurgMod");
         createDirectory(modConfigFolder);
 
-        ConfigHandler.updateFieldsFromConfig();
+        ConfigHandler.updateFields();
 
-        PosCheckerConfig.updateFields();
+        PosCheckersConfig.updateFields();
 
     }
 
     @EventHandler
     public void initialize(FMLInitializationEvent event) {
-        ClientCommandHandler.instance.registerCommand(new MainCommand());
+        ClientCommandHandler.instance.registerCommand(new BMCommand());
 
         KeyBinding bind = new KeyBinding("Open Config Gui", Keyboard.KEY_B, "BurgMod");
         ClientRegistry.registerKeyBinding(bind);
@@ -73,9 +75,11 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
 
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());
-        MinecraftForge.EVENT_BUS.register(new PosCheckerHandler());
+        MinecraftForge.EVENT_BUS.register(new PosCheckersHandler());
 
         MinecraftForge.EVENT_BUS.register(new TeleportTracker());
+        MinecraftForge.EVENT_BUS.register(new PosCheckersLimitBoxDrawer());
+        MinecraftForge.EVENT_BUS.register(new StrategyPreviewer());
 
     }
 

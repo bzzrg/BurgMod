@@ -1,53 +1,42 @@
 package com.bzzrg.burgmod.config;
 
 import com.bzzrg.burgmod.BurgMod;
-import com.bzzrg.burgmod.config.featureconfig.FortyFiveStatusConfig;
-import com.bzzrg.burgmod.config.featureconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.featureconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.config.basicconfig.FortyFiveStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
+import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
 import net.minecraftforge.common.config.Configuration;
 
 public class ConfigHandler {
 
-    public static String color1 = "\u00A76";
-    public static String color2 = "\u00A7f";
-    public static boolean autoStrategyLoadOn = false;
-
     public static Configuration config;
 
-    public static void updateConfigFromFields() { // fields are generally updated through guis, so this should be called on gui close
+    public static void updateConfigFile() { // fields are generally updated through guis, so this should be called on gui close
         try {
-            config.get("general", "color1", color1).set(color1);
-            config.get("general", "color2", color2).set(color2);
-            config.get("general", "autoStrategyLoadOn", autoStrategyLoadOn).setValue(autoStrategyLoadOn);
+            GeneralConfig.updateConfigFile();
+            InputStatusConfig.updateConfigFile();
+            FortyFiveStatusConfig.updateConfigFile();
+            TrajectoryConfig.updateConfigFile();
 
-            InputStatusConfig.updateConfigFromFields();
-            FortyFiveStatusConfig.updateConfigFromFields();
-            TrajectoryConfig.updateConfigFromFields();
-
-            if (config.hasChanged()) {
-                config.save();
-            }
+            if (config.hasChanged()) config.save(); // saves changes to Configuration object to the actual file
 
         } catch (Exception e) {
-            BurgMod.logger.error("Error updating config from fields for BurgMod", e);
+            BurgMod.logger.error("Error updating config file for BurgMod", e);
         }
     }
 
-    public static void updateFieldsFromConfig() { // calls once on startup to prep fields
+    public static void updateFields() { // calls once on startup to prep fields
         try {
             config = new Configuration(BurgMod.modConfigFile);
             config.load();
 
-            color1 = config.get("general", "color1", color1, "").getString();
-            color2 = config.get("general", "color2", color2, "").getString();
-            autoStrategyLoadOn = config.get("general", "autoStrategyLoadOn", autoStrategyLoadOn, "").getBoolean();
-
-            InputStatusConfig.updateFieldsFromConfig();
-            FortyFiveStatusConfig.updateFieldsFromConfig();
-            TrajectoryConfig.updateFieldsFromConfig();
+            GeneralConfig.updateFields();
+            InputStatusConfig.updateFields();
+            FortyFiveStatusConfig.updateFields();
+            TrajectoryConfig.updateFields();
 
         } catch (Exception e) {
-            BurgMod.logger.error("Error updating fields from config for BurgMod", e);
+            BurgMod.logger.error("Error updating fields for BurgMod", e);
         }
     }
 

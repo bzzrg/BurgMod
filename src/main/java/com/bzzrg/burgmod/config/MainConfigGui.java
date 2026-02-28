@@ -1,8 +1,8 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.featureconfig.FortyFiveStatusConfig;
-import com.bzzrg.burgmod.config.featureconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.featureconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.config.basicconfig.FortyFiveStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusConfigGui;
 import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryConfigGui;
@@ -12,7 +12,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.opengl.GL11;
 
-import static com.bzzrg.burgmod.utils.PluginUtils.sendMessage;
+import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
 
 public class MainConfigGui extends GuiScreen {
 
@@ -105,12 +105,12 @@ public class MainConfigGui extends GuiScreen {
                 Minecraft.getMinecraft().displayGuiScreen(new InputStatusConfigGui());
                 break;
             case 2:
-                sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThis feature is currently being worked on and will come out in a future update.");
+                bmChat("\u00A7cThis feature is currently being worked on and will come out in a future update.");
                 //FortyFiveStatusConfig.enabled = !FortyFiveStatusConfig.enabled;
                 //button.displayString = FortyFiveStatusConfig.enabled ? "\u00A7a45 Status: ON" : "\u00A7c45 Status: OFF";
                 break;
             case 3:
-                sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cThis feature is currently being worked on and will come out in a future update.");
+                bmChat("\u00A7cThis feature is currently being worked on and will come out in a future update.");
                 //Minecraft.getMinecraft().displayGuiScreen(new FortyFiveStatusConfigGui());
                 break;
             case 4:
@@ -130,7 +130,7 @@ public class MainConfigGui extends GuiScreen {
     }
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFromFields();
+        ConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 }

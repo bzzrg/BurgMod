@@ -11,10 +11,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyJumps;
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyJumps;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.InputType.*;
+import static com.bzzrg.burgmod.features.strategy.InputType.*;
 
 
 public class StrategyJump {
@@ -33,11 +33,11 @@ public class StrategyJump {
     public final GuiButton cutButton;
     public boolean cut = false;
 
-    public BiMap<StrategyTick.InputType, GuiButton> directionButtons = null;
-    public Set<StrategyTick.InputType> directions = null;
+    public BiMap<InputType, GuiButton> directionButtons = null;
+    public Set<InputType> directions = null;
 
     public GuiButton directionButton = null;
-    public StrategyTick.InputType direction = null;
+    public InputType direction = null;
 
     public GuiSlider lengthSlider = null;
     public Integer length = null;
@@ -79,7 +79,7 @@ public class StrategyJump {
             lengthSlider = new CustomSlider(nextButtonId++, buttonX.getAndAdd(lengthSliderLength + buttonGap), 0, lengthSliderLength, buttonHeight, "", "t", 1, 11, length, false, true, slider -> {
                 length = slider.getValueInt();
                 lengthSlider.displayString = length + "t";
-                updateTicks();
+                this.updateTicks();
                 gui.updateListY();
             });
             lengthSlider.displayString = length + "t";
@@ -93,7 +93,7 @@ public class StrategyJump {
             gui.displayedButtons.addAll(getButtons());
         }
 
-        updateTicks();
+        this.updateTicks();
     }
 
     public String getName() {
@@ -156,30 +156,38 @@ public class StrategyJump {
 
     }
 
+    public void remove() {
+        this.removeTicks();
+        if (gui != null) gui.displayedButtons.removeAll(this.getButtons());
+        strategyJumps.remove(this);
+    }
+
     // Update jump to match its fields (called when player updates jump fields via its config buttons)
     public void updateTicks() {
 
-        TriConsumer<StrategyTick.InputType[], List<StrategyTick.InputType>, Integer> addTick = (constantInputTypes, varyingInputTypes, iterations) -> {
-            if (constantInputTypes == null) constantInputTypes = new StrategyTick.InputType[]{};
+        int firstTickIndex = ticks.isEmpty() ? strategyTicks.size() : ticks.get(0).getTickNum();
+
+        TriConsumer<InputType[], List<InputType>, Integer> addTick = (constantInputTypes, varyingInputTypes, iterations) -> {
+            if (constantInputTypes == null) constantInputTypes = new InputType[]{};
             if (varyingInputTypes == null) varyingInputTypes = new ArrayList<>();
 
-            List<StrategyTick.InputType> mergedInputTypes = new ArrayList<>(Arrays.asList(constantInputTypes));
+            List<InputType> mergedInputTypes = new ArrayList<>(Arrays.asList(constantInputTypes));
             mergedInputTypes.addAll(varyingInputTypes);
 
-            IntStream.range(0, iterations).forEach(i -> StrategyTick.addJumpTick(this, new HashSet<>(mergedInputTypes)));
+            IntStream.range(0, iterations).forEach(i -> StrategyTick.addJumpTick(this, new HashSet<>(mergedInputTypes), firstTickIndex + ticks.size()));
         };
 
-        removeTicks();
+        this.removeTicks();
 
         switch (type) {
             case JAM: {
-                List<StrategyTick.InputType> directions = new ArrayList<>(this.directions);
+                List<InputType> directions = new ArrayList<>(this.directions);
                 if (directions.contains(W)) directions.add(SPR);
 
                 if (cut) {
-                    addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 1);
+                    addTick.accept(new InputType[]{AIR}, directions, 1);
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 11);
+                    addTick.accept(new InputType[]{AIR}, directions, 11);
                     addTick.accept(null, directions, 1);
                     if (run1T) addTick.accept(null, directions, 1);
                 }
@@ -187,15 +195,15 @@ public class StrategyJump {
                 break;
             }
             case HH: {
-                List<StrategyTick.InputType> directions = new ArrayList<>(this.directions);
+                List<InputType> directions = new ArrayList<>(this.directions);
                 if (directions.contains(W)) directions.add(SPR);
 
                 addTick.accept(null, directions, length);
 
                 if (cut) {
-                    addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 1);
+                    addTick.accept(new InputType[]{AIR}, directions, 1);
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 11);
+                    addTick.accept(new InputType[]{AIR}, directions, 11);
                     addTick.accept(null, directions, 1);
                     if (run1T) addTick.accept(null, directions, 1);
                 }
@@ -203,19 +211,19 @@ public class StrategyJump {
                 break;
             }
             case PESSI: {
-                List<StrategyTick.InputType> directions = new ArrayList<>(this.directions);
+                List<InputType> directions = new ArrayList<>(this.directions);
                 if (directions.contains(W)) directions.add(SPR);
 
-                addTick.accept(new StrategyTick.InputType[]{AIR}, null, length);
+                addTick.accept(new InputType[]{AIR}, null, length);
 
                 if (cut) {
                     if (length == 11) {
                         addTick.accept(null, directions, 1);
                     } else {
-                        addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 1);
+                        addTick.accept(new InputType[]{AIR}, directions, 1);
                     }
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{AIR}, directions, 11 - length);
+                    addTick.accept(new InputType[]{AIR}, directions, 11 - length);
                     addTick.accept(null, directions, 1);
                     if (run1T) addTick.accept(null, directions, 1);
                 }
@@ -223,123 +231,123 @@ public class StrategyJump {
                 break;
             }
             case FMM: {
-                List<StrategyTick.InputType> directions = new ArrayList<>(this.directions);
+                List<InputType> directions = new ArrayList<>(this.directions);
 
-                addTick.accept(new StrategyTick.InputType[]{AIR}, directions, length);
+                addTick.accept(new InputType[]{AIR}, directions, length);
 
                 if (cut) {
                     if (length == 11) {
-                        addTick.accept(new StrategyTick.InputType[]{SPR}, directions, 1);
+                        addTick.accept(new InputType[]{SPR}, directions, 1);
                     } else {
-                        addTick.accept(new StrategyTick.InputType[]{SPR, AIR}, directions, 1);
+                        addTick.accept(new InputType[]{SPR, AIR}, directions, 1);
                     }
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{SPR, AIR}, directions, 11 - length);
-                    addTick.accept(new StrategyTick.InputType[]{SPR}, directions, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{SPR}, directions, 1);
+                    addTick.accept(new InputType[]{SPR, AIR}, directions, 11 - length);
+                    addTick.accept(new InputType[]{SPR}, directions, 1);
+                    if (run1T) addTick.accept(new InputType[]{SPR}, directions, 1);
                 }
 
                 break;
             }
             case MARK: {
-                List<StrategyTick.InputType> direction = Collections.singletonList(this.direction);
+                List<InputType> direction = Collections.singletonList(this.direction);
 
-                addTick.accept(new StrategyTick.InputType[]{AIR}, direction, length);
+                addTick.accept(new InputType[]{AIR}, direction, length);
 
                 if (cut) {
                     if (length == 11) {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
+                        addTick.accept(new InputType[]{W, SPR}, direction, 1);
                     } else {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 1);
+                        addTick.accept(new InputType[]{W, SPR, AIR}, direction, 1);
                     }
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 11 - length);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11 - length);
+                    addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
                 }
 
                 break;
             }
             case WAD: {
-                List<StrategyTick.InputType> direction = Collections.singletonList(this.direction);
+                List<InputType> direction = Collections.singletonList(this.direction);
 
-                addTick.accept(new StrategyTick.InputType[]{W, A, D, SPR, AIR}, null, length);
+                addTick.accept(new InputType[]{W, A, D, SPR, AIR}, null, length);
 
                 if (cut) {
                     if (length == 11) {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
+                        addTick.accept(new InputType[]{W, SPR}, direction, 1);
                     } else {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 1);
+                        addTick.accept(new InputType[]{W, SPR, AIR}, direction, 1);
                     }
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 11 - length);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11 - length);
+                    addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
                 }
 
                 break;
             }
             case WDWA: {
-                List<StrategyTick.InputType> direction = Collections.singletonList(this.direction);
+                List<InputType> direction = Collections.singletonList(this.direction);
 
                 if (cut) {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, direction, 1);
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, 11);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, direction, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11);
+                    addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
                 }
 
                 break;
             }
             case BWMM: {
-                addTick.accept(new StrategyTick.InputType[]{S, AIR}, null, 11);
-                addTick.accept(new StrategyTick.InputType[]{S}, null, 2);
+                addTick.accept(new InputType[]{S, AIR}, null, 11);
+                addTick.accept(new InputType[]{S}, null, 2);
 
                 if (cut) {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, null, 1);
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 11);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, null, 11);
+                    addTick.accept(new InputType[]{W, SPR}, null, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
                 }
 
                 break;
             }
             case REX: {
-                List<StrategyTick.InputType> direction = Collections.singletonList(this.direction);
+                List<InputType> direction = Collections.singletonList(this.direction);
 
-                addTick.accept(new StrategyTick.InputType[]{S, AIR}, null, 11);
-                addTick.accept(new StrategyTick.InputType[]{S}, null, 2);
-                addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, direction, length);
+                addTick.accept(new InputType[]{S, AIR}, null, 11);
+                addTick.accept(new InputType[]{S}, null, 2);
+                addTick.accept(new InputType[]{W, SPR, AIR}, direction, length);
 
                 if (cut) {
                     if (length == 11) {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
+                        addTick.accept(new InputType[]{W, SPR}, null, 1);
                     } else {
-                        addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 1);
+                        addTick.accept(new InputType[]{W, SPR, AIR}, null, 1);
                     }
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 11 - length);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, null, 11 - length);
+                    addTick.accept(new InputType[]{W, SPR}, null, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
                 }
 
                 break;
             }
             case REVERSE_REX: {
-                List<StrategyTick.InputType> direction = Collections.singletonList(this.direction);
+                List<InputType> direction = Collections.singletonList(this.direction);
 
-                addTick.accept(new StrategyTick.InputType[]{S, AIR}, direction, length);
-                addTick.accept(new StrategyTick.InputType[]{S, AIR}, null, 11 - length);
-                addTick.accept(new StrategyTick.InputType[]{S}, null, 2);
+                addTick.accept(new InputType[]{S, AIR}, direction, length);
+                addTick.accept(new InputType[]{S, AIR}, null, 11 - length);
+                addTick.accept(new InputType[]{S}, null, 2);
 
                 if (cut) {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, null, 1);
                 } else {
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR, AIR}, null, 11);
-                    addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
-                    if (run1T) addTick.accept(new StrategyTick.InputType[]{W, SPR}, null, 1);
+                    addTick.accept(new InputType[]{W, SPR, AIR}, null, 11);
+                    addTick.accept(new InputType[]{W, SPR}, null, 1);
+                    if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
                 }
 
                 break;
@@ -348,18 +356,5 @@ public class StrategyJump {
 
         // Since all ticks were just recreated using addJumpTick (based on jump settings), they weren't added to displayed buttons, so this adds them if the jump they are in is in extended view
         if (extended && gui != null) ticks.forEach(t -> gui.displayedButtons.addAll(t.getButtons()));
-    }
-
-    public enum JumpType {
-        JAM,
-        HH,
-        PESSI,
-        FMM,
-        MARK,
-        WAD,
-        WDWA,
-        BWMM,
-        REX,
-        REVERSE_REX,
     }
 }

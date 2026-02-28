@@ -1,7 +1,6 @@
 package com.bzzrg.burgmod.features.strategy;
 
 import com.bzzrg.burgmod.config.MainConfigGui;
-import com.bzzrg.burgmod.features.inputstatus.StrategyRecorder;
 import com.bzzrg.burgmod.utils.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -17,18 +16,18 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.*;
-import static com.bzzrg.burgmod.features.inputstatus.StrategyRecorder.recordedStrategy;
-import static com.bzzrg.burgmod.features.strategy.StrategyTick.InputType.*;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
+import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
+import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyTick.addLoneTick;
-import static com.bzzrg.burgmod.utils.PluginUtils.*;
+import static com.bzzrg.burgmod.utils.GeneralUtils.*;
 
 public class StrategyConfigGui extends GuiScreen {
 
     public static StrategyConfigGui gui = null;
     public List<GuiButton> displayedButtons;
 
-    public static int nextButtonId = 7; // Should be the last initiated button's button ID in initGui + 1
+    public static int nextButtonId = 8; // Should be the last initiated button's button ID in initGui + 1
 
     public static final int buttonGap = 5;
     public static final int buttonHeight = 23;
@@ -72,10 +71,11 @@ public class StrategyConfigGui extends GuiScreen {
         displayedButtons.add(new CustomButton(3, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Clear Strategy"));
         displayedButtons.add(new CustomButton(4, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Mirror Strategy"));
         displayedButtons.add(new CustomButton(5, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy"));
+        displayedButtons.add(new CustomButton(6, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Preview Strategy"));
 
         // Add back button at bottom left
         final int realHeight = height - 1;
-        displayedButtons.add(new CustomButton(6, buttonGap, realHeight - buttonGap - buttonHeight, buttonHeight, buttonHeight, "<"));
+        displayedButtons.add(new CustomButton(7, buttonGap, realHeight - buttonGap - buttonHeight, buttonHeight, buttonHeight, "<"));
 
         // IF YOU CHANGE THESE BUTTON IDS ABOVE, CHANGE nextButtonID FIELD AT TOP OF CLASS
 
@@ -89,6 +89,11 @@ public class StrategyConfigGui extends GuiScreen {
     public void onGuiClosed() {
         updateStrategyJson();
         gui = null;
+
+        if (strategyTicks.stream().anyMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
+            bmChat("\u00A7cWARNING: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
+        }
+
         super.onGuiClosed();
     }
 
@@ -249,16 +254,16 @@ public class StrategyConfigGui extends GuiScreen {
                 break;
             }
             case 2: { // Add Jump
-                StrategyJump.JumpType jumpType;
+                JumpType jumpType;
 
                 try {
-                    jumpType = StrategyJump.JumpType.valueOf(jumpTextField.getText().toUpperCase());
+                    jumpType = JumpType.valueOf(jumpTextField.getText().toUpperCase());
                 } catch (IllegalArgumentException e) {
                     mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
-                    sendMessage("\u00A71[BurgMod]\u00A7r \u00A7cInvalid jump name! List of valid jump names:");
+                    bmChat("\u00A7cInvalid jump name! List of valid jump names:");
 
-                    for (StrategyJump.JumpType t : StrategyJump.JumpType.values()) {
-                        sendMessage("\u00A77- \u00A7e" + t);
+                    for (JumpType t : JumpType.values()) {
+                        chat("\u00A77- \u00A7e" + t);
                     }
                     return;
                 }
@@ -268,15 +273,13 @@ public class StrategyConfigGui extends GuiScreen {
             }
 
             case 3: { // Clear Strategy
-                strategyTicks.forEach(t -> displayedButtons.removeAll(t.getButtons()));
-                strategyJumps.forEach(j -> displayedButtons.removeAll(j.getButtons()));
-                strategyTicks.clear();
-                strategyJumps.clear();
+                strategyTicks.forEach(StrategyTick::remove);
+                strategyJumps.forEach(StrategyJump::remove);
                 break;
             }
             case 4: { // Mirror Strategy
                 for (StrategyTick t : strategyTicks) {
-                    List<StrategyTick.InputType> correctInputs = new ArrayList<>(t.correctInputs);
+                    List<InputType> correctInputs = new ArrayList<>(t.correctInputs);
 
                     if (t.correctInputs.contains(A)) {
                         correctInputs.remove(A);
@@ -295,7 +298,7 @@ public class StrategyConfigGui extends GuiScreen {
 
                 for (StrategyJump j : strategyJumps) {
                     if (j.directions != null) {
-                        List<StrategyTick.InputType> onDirections = new ArrayList<>(j.directions);
+                        List<InputType> onDirections = new ArrayList<>(j.directions);
 
                         if (j.directions.contains(A)) {
                             onDirections.remove(A);
@@ -323,7 +326,7 @@ public class StrategyConfigGui extends GuiScreen {
                 StrategyRecorder.recording = !StrategyRecorder.recording;
                 button.displayString = StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy";
 
-                if (!StrategyRecorder.recording && !recordedStrategy.isEmpty()) {
+                if (!StrategyRecorder.recording) {
 
                     while (true) {
 
@@ -331,9 +334,7 @@ public class StrategyConfigGui extends GuiScreen {
                             break;
                         }
 
-                        Set<StrategyTick.InputType> inputs = recordedStrategy.get(recordedStrategy.size() - 1);
-
-                        System.out.println("processing inputs: " + inputs);
+                        Set<InputType> inputs = recordedStrategy.get(recordedStrategy.size() - 1);
 
                         if (inputs.isEmpty()) {
                             recordedStrategy.remove(inputs);
@@ -343,15 +344,10 @@ public class StrategyConfigGui extends GuiScreen {
 
                     }
 
-                    System.out.println(recordedStrategy);
+                    strategyTicks.forEach(StrategyTick::remove);
+                    strategyJumps.forEach(StrategyJump::remove);
 
-                    // the thing above me processes correctly, probably an issue under this
-
-                    strategyTicks.clear();
-                    strategyJumps.clear();
-
-
-                    for (Set<StrategyTick.InputType> inputs : recordedStrategy) {
+                    for (Set<InputType> inputs : recordedStrategy) {
                         addLoneTick(strategyTicks.size(), inputs);
                     }
 
@@ -360,7 +356,13 @@ public class StrategyConfigGui extends GuiScreen {
 
                 break;
             }
-            case 6: { // Back Button
+            case 6:
+                mc.thePlayer.closeScreen();
+                if (strategyTicks.stream().noneMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
+                    StrategyPreviewer.draw();
+                }
+                break;
+            case 7: { // Back Button
                 Minecraft.getMinecraft().displayGuiScreen(new MainConfigGui());
                 break;
             }
@@ -379,7 +381,7 @@ public class StrategyConfigGui extends GuiScreen {
                         tick.remove();
 
                     } else {
-                        StrategyTick.InputType inputType = tick.inputButtons.inverse().get(button);
+                        InputType inputType = tick.inputButtons.inverse().get(button);
 
                         if (inputType == null) return; // Purely for safety, but in practice, inputType will never = null
 
@@ -423,7 +425,7 @@ public class StrategyConfigGui extends GuiScreen {
 
                         jump.updateTicks();
                     } else if (jump.directionButtons != null && jump.directionButtons.containsValue(button)) { // Direction buttons for jumps
-                        StrategyTick.InputType inputType = jump.directionButtons.inverse().get(button);
+                        InputType inputType = jump.directionButtons.inverse().get(button);
 
                         if (jump.directions.contains(inputType)) {
                             jump.directions.remove(inputType);
@@ -436,15 +438,11 @@ public class StrategyConfigGui extends GuiScreen {
                         jump.updateTicks();
 
                     } else if (button == jump.directionButton) { // Direction buttons for jumps
-                        jump.direction = jump.direction == StrategyTick.InputType.A ? StrategyTick.InputType.D : StrategyTick.InputType.A;
-                        button.displayString = jump.direction == StrategyTick.InputType.A ? "A" : "D";
+                        jump.direction = jump.direction == InputType.A ? InputType.D : InputType.A;
+                        button.displayString = jump.direction == InputType.A ? "A" : "D";
                         jump.updateTicks();
                     } else if (button == jump.removeButton) { // Remove button for jumps
-
-                        jump.removeTicks();
-                        displayedButtons.removeAll(jump.getButtons());
-                        strategyJumps.remove(jump);
-
+                        jump.remove();
                     }
                 }
             }

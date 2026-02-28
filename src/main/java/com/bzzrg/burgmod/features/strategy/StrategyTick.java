@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyJumps;
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyJumps;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
 
 public class StrategyTick {
@@ -49,8 +49,9 @@ public class StrategyTick {
         }
     }
 
-    public static void addJumpTick(StrategyJump jump, Set<InputType> correctInputs) { // Call clampListY and updateListY every time you run this
-        StrategyTick tick = new StrategyTick(strategyTicks.size(), correctInputs);
+    // Call clampListY and updateListY every time you run this
+    public static void addJumpTick(StrategyJump jump, Set<InputType> correctInputs, int tickIndex) {  // tickIndex needed for tick insertion if jump isn’t the latest thing in strategy and it's refreshed.
+        StrategyTick tick = new StrategyTick(tickIndex, correctInputs);
         jump.ticks.add(tick);
         tick.jump = jump;
     }
@@ -84,9 +85,8 @@ public class StrategyTick {
 
     public void remove() {
         strategyTicks.remove(this);
-        if (gui != null) {
-            gui.displayedButtons.removeAll(getButtons());
-        }
+        if (gui != null) gui.displayedButtons.removeAll(getButtons());
+
     }
 
     public List<GuiButton> getButtons() {
@@ -94,15 +94,5 @@ public class StrategyTick {
         if (duplicateButton != null) buttons.add(duplicateButton);
         if (removeButton != null) buttons.add(removeButton);
         return buttons;
-    }
-
-    public enum InputType {
-        W,
-        A,
-        S,
-        D,
-        SPR,
-        SNK,
-        AIR
     }
 }

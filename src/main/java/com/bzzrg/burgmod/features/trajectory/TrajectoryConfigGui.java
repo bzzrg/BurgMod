@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod.features.trajectory;
 
-import com.bzzrg.burgmod.config.featureconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
 import com.bzzrg.burgmod.features.FeatureConfigGui;
 
 public class TrajectoryConfigGui extends FeatureConfigGui {

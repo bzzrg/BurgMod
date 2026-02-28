@@ -1,23 +1,20 @@
 package com.bzzrg.burgmod.features.inputstatus;
 
-import com.bzzrg.burgmod.config.featureconfig.InputStatusConfig;
-import com.bzzrg.burgmod.features.strategy.StrategyJump;
-import com.bzzrg.burgmod.features.strategy.StrategyTick;
+import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.features.strategy.InputType;
+import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.bzzrg.burgmod.config.ConfigHandler.color1;
-import static com.bzzrg.burgmod.config.featureconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.utils.PluginUtils.getInputs;
+import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
+import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
 
 public class InputStatusLabel {
 
@@ -56,10 +53,10 @@ public class InputStatusLabel {
         }
 
         // Get player's current inputs
-        Set<StrategyTick.InputType> inputs = getInputs();
+        Set<InputType> inputs = getInputs();
 
         // Get correct inputs
-        Set<StrategyTick.InputType> correctInputs;
+        Set<InputType> correctInputs;
         try {
             correctInputs = new HashSet<>(strategyTicks.get(tickNum).correctInputs);
 
@@ -72,22 +69,37 @@ public class InputStatusLabel {
         // Input fail logic
         if (!inputs.equals(correctInputs)) {
 
-            Set<StrategyTick.InputType> missing = new HashSet<>(correctInputs);
-            missing.removeAll(inputs);
-
-            Set<StrategyTick.InputType> extra = new HashSet<>(inputs);
-            extra.removeAll(correctInputs);
-
-            Comparator<StrategyTick.InputType> byEnum = Comparator.comparingInt(Enum::ordinal);
-
-            String reason = Stream.concat(missing.stream().sorted(byEnum).map(i -> "\u00A7e" + i), extra.stream().sorted(byEnum).map(i -> "\u00A7a" + i)).collect(Collectors.joining("\u00A7c,"));
             String failed = InputStatusConfig.shortenLabel ? "\u2716" : "Failed";
+            label = color1 + "Input Status: \u00A7c" + failed;
 
-            StrategyJump jump = strategyTicks.get(tickNum).jump;
-            if (jump == null) {
-                label = color1 + "Input Status: \u00A7c" + failed + " (T" + (tickNum + 1) + " | " + reason + "\u00A7c)";
-            } else {
-                label = color1 + "Input Status: \u00A7c" + failed + " (" + jump.getName() + " | T" + (jump.ticks.indexOf(strategyTicks.get(tickNum)) + 1) + " | " + reason + "\u00A7c)";
+            if (InputStatusConfig.showFailTick) label += " (T" + (tickNum+1) + ")";
+
+            if (InputStatusConfig.showFailReason) {
+
+                StringBuilder failReason = new StringBuilder();
+                failReason.append(" (");
+
+                for (InputType type : InputType.values()) {
+                    boolean pressed = inputs.contains(type);
+                    boolean needed  = correctInputs.contains(type);
+                    if (!pressed && !needed) continue;
+
+                    if (failReason.length() > 2) failReason.append("\u00A7c, ");
+
+                    if (pressed && needed) {
+                        failReason.append("\u00A7a").append(type.name());
+                    } else if (needed) {
+                        failReason.append("\u00A7e\u00A7m").append(type.name());
+                    } else {
+                        failReason.append("\u00A7e\u00A7l").append(type.name());
+                    }
+
+                    failReason.append("\u00A7r");
+                }
+
+                failReason.append("\u00A7c)");
+
+                label += failReason;
             }
 
             finished = true;

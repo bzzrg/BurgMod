@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.config.featureconfig;
+package com.bzzrg.burgmod.config.basicconfig;
 
 import static com.bzzrg.burgmod.config.ConfigHandler.config;
 
@@ -13,7 +13,7 @@ public class TrajectoryConfig {
     public static float thickness = 0.05f;
     public static int tickLength = 50;
 
-    public static void updateConfigFromFields() {
+    public static void updateConfigFile() {
         config.get("trajectory", "enabled", enabled).setValue(enabled);
 
         config.get("trajectory", "colorRed", colorRed).setValue(colorRed);
@@ -25,7 +25,7 @@ public class TrajectoryConfig {
 
     }
 
-    public static void updateFieldsFromConfig() {
+    public static void updateFields() {
         enabled = config.get("trajectory", "enabled", enabled).getBoolean();
 
         colorRed = (float) config.get("trajectory", "colorRed", colorRed).getDouble();

@@ -1,6 +1,7 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.featureconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
+import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
 import com.bzzrg.burgmod.utils.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -15,7 +16,7 @@ public class EditPositionsGui extends GuiScreen {
     private boolean dragging = false;
     private int dragOffsetX, dragOffsetY;
 
-    private final String labelText = ConfigHandler.color1 + "Input Status: " + ConfigHandler.color2 + "Relocating...";
+    private final String labelText = GeneralConfig.color1 + "Input Status: " + GeneralConfig.color2 + "Relocating...";
 
     @Override
     public void initGui() {
@@ -69,7 +70,7 @@ public class EditPositionsGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFromFields();
+        ConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 

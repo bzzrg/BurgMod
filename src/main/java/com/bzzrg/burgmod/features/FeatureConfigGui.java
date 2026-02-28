@@ -170,7 +170,7 @@ public class FeatureConfigGui extends GuiScreen {
     }
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFromFields();
+        ConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 }

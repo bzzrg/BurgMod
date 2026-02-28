@@ -1,6 +1,8 @@
-package com.bzzrg.burgmod.config.featureconfig;
+package com.bzzrg.burgmod.config.specialconfig;
 
 import com.bzzrg.burgmod.BurgMod;
+import com.bzzrg.burgmod.features.strategy.InputType;
+import com.bzzrg.burgmod.features.strategy.JumpType;
 import com.bzzrg.burgmod.features.strategy.StrategyJump;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
 import com.google.gson.*;
@@ -14,7 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.utils.PluginUtils.createDirectory;
+import static com.bzzrg.burgmod.utils.GeneralUtils.createDirectory;
 
 public class StrategyConfig {
 
@@ -118,8 +120,8 @@ public class StrategyConfig {
 
                 if (element instanceof JsonArray) { // Lone ticks
 
-                    Set<StrategyTick.InputType> correctInputs = new HashSet<>();
-                    element.getAsJsonArray().forEach(elem -> correctInputs.add(StrategyTick.InputType.valueOf(elem.getAsString())));
+                    Set<InputType> correctInputs = new HashSet<>();
+                    element.getAsJsonArray().forEach(elem -> correctInputs.add(InputType.valueOf(elem.getAsString())));
 
                     StrategyTick.addLoneTick(strategyTicks.size(), correctInputs);
 
@@ -128,7 +130,7 @@ public class StrategyConfig {
                     // Jump info
                     JsonObject jumpJson = (JsonObject) element;
 
-                    StrategyJump.JumpType type = StrategyJump.JumpType.valueOf(jumpJson.get("type").getAsString());
+                    JumpType type = JumpType.valueOf(jumpJson.get("type").getAsString());
                     StrategyJump jump = new StrategyJump(type);
 
                     jump.run1T = jumpJson.get("run1T").getAsBoolean();
@@ -139,18 +141,18 @@ public class StrategyConfig {
                     if (jumpJson.has("directions")) {
 
                         jump.directions.clear();
-                        jump.directionButtons.get(StrategyTick.InputType.W).displayString = "\u00A7cW";
+                        jump.directionButtons.get(InputType.W).displayString = "\u00A7cW";
 
                         JsonArray directionsArray = jumpJson.getAsJsonArray("directions");
 
                         for (JsonElement elem : directionsArray) {
-                            StrategyTick.InputType inputType = StrategyTick.InputType.valueOf(elem.getAsString());
+                            InputType inputType = InputType.valueOf(elem.getAsString());
                             jump.directions.add(inputType);
                             jump.directionButtons.get(inputType).displayString = "\u00A7a" + inputType.name();
                         }
 
                     } else if (jumpJson.has("direction")) {
-                        jump.direction = StrategyTick.InputType.valueOf(jumpJson.get("direction").getAsString());
+                        jump.direction = InputType.valueOf(jumpJson.get("direction").getAsString());
                         jump.directionButton.displayString = jump.direction.name();
 
                     }
@@ -168,10 +170,10 @@ public class StrategyConfig {
 
                     for (JsonElement jumpTick : jumpTickArray) {
 
-                        Set<StrategyTick.InputType> correctInputs = new HashSet<>();
-                        jumpTick.getAsJsonArray().forEach(elem -> correctInputs.add(StrategyTick.InputType.valueOf(elem.getAsString())));
+                        Set<InputType> correctInputs = new HashSet<>();
+                        jumpTick.getAsJsonArray().forEach(elem -> correctInputs.add(InputType.valueOf(elem.getAsString())));
 
-                        StrategyTick.addJumpTick(jump, correctInputs);
+                        StrategyTick.addJumpTick(jump, correctInputs, strategyTicks.size());
                     }
 
                 }

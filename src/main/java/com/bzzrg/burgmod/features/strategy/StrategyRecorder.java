@@ -1,6 +1,6 @@
-package com.bzzrg.burgmod.features.inputstatus;
+package com.bzzrg.burgmod.features.strategy;
 
-import com.bzzrg.burgmod.features.strategy.StrategyTick;
+import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.utils.PluginUtils.getInputs;
+import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
 
 public class StrategyRecorder {
 
     public static boolean recording = false;
-    public static final List<Set<StrategyTick.InputType>> recordedStrategy = new ArrayList<>();
+    public static final List<Set<InputType>> recordedStrategy = new ArrayList<>();
 
     public static void onReset() {
         if (recording) {
@@ -31,11 +31,8 @@ public class StrategyRecorder {
         }
 
         // Get player's current inputs
-        Set<StrategyTick.InputType> inputs = getInputs();
+        Set<InputType> inputs = getInputs();
         recordedStrategy.add(inputs);
-
-        System.out.println("added inputs to recordedStrategy: " + inputs);
-
     }
 
 }

@@ -1,8 +1,8 @@
 package com.bzzrg.burgmod.utils.resetting;
 
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.inputstatus.StrategyRecorder;
-import com.bzzrg.burgmod.features.poschecker.PosCheckerHandler;
+import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -22,7 +22,7 @@ public class ResetHandler {
             movedSinceReset = false;
             InputStatusLabel.onReset();
             StrategyRecorder.onReset();
-            PosCheckerHandler.onReset();
+            PosCheckersHandler.onReset();
         } else if (player.posX - lastX != 0 || player.posY - lastY != 0 || player.posZ - lastZ != 0) {
             movedSinceReset = true;
         }
