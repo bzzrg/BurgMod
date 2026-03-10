@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.config;
 
 import com.bzzrg.burgmod.BurgMod;
-import com.bzzrg.burgmod.config.basicconfig.FortyFiveStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
 import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
@@ -15,7 +15,7 @@ public class ConfigHandler {
         try {
             GeneralConfig.updateConfigFile();
             InputStatusConfig.updateConfigFile();
-            FortyFiveStatusConfig.updateConfigFile();
+            Perfect45OffsetConfig.updateConfigFile();
             TrajectoryConfig.updateConfigFile();
 
             if (config.hasChanged()) config.save(); // saves changes to Configuration object to the actual file
@@ -32,7 +32,7 @@ public class ConfigHandler {
 
             GeneralConfig.updateFields();
             InputStatusConfig.updateFields();
-            FortyFiveStatusConfig.updateFields();
+            Perfect45OffsetConfig.updateFields();
             TrajectoryConfig.updateFields();
 
         } catch (Exception e) {

@@ -1,22 +1,22 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.basicconfig.FortyFiveStatusConfig;
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusConfigGui;
+import com.bzzrg.burgmod.features.perfect45offset.Perfect45OffsetConfigGui;
 import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryConfigGui;
-import com.bzzrg.burgmod.utils.CustomButton;
+import com.bzzrg.burgmod.utils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.client.ClientCommandHandler;
 import org.lwjgl.opengl.GL11;
-
-import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
 
 public class MainConfigGui extends GuiScreen {
 
-    private static final int buttonHeight = 23;
+    private static final int buttonHeight = 25;
     private static final int buttonGap = 5;
 
     @Override
@@ -26,7 +26,7 @@ public class MainConfigGui extends GuiScreen {
 
         int longButtonWidth = 150;
         int squareButtonSize = buttonHeight;
-        int rowTotalWidth = longButtonWidth + buttonGap + squareButtonSize;
+        int rowTotalWidth = longButtonWidth + buttonGap + squareButtonSize + buttonGap + squareButtonSize;
         int rowStartX = centerX - rowTotalWidth / 2;
 
         int startY = (height - 84) / 2;
@@ -39,22 +39,20 @@ public class MainConfigGui extends GuiScreen {
 
             switch (i) {
                 case 0: buttonName = InputStatusConfig.enabled ? "\u00A7aInput Status: ON" : "\u00A7cInput Status: OFF"; break;
-                case 1: buttonName = FortyFiveStatusConfig.enabled ? "\u00A7a45 Status: ON" : "\u00A7c45 Status: OFF"; break;
+                case 1: buttonName = Perfect45OffsetConfig.enabled ? "\u00A7a45 Status: ON" : "\u00A7c45 Status: OFF"; break;
                 case 2: buttonName = TrajectoryConfig.enabled ? "\u00A7aTrajectory: ON" : "\u00A7cTrajectory: OFF"; break;
             }
 
-            // Toggle button for feature
             buttonList.add(new CustomButton(
-                    i * 2,
+                    i * 3,
                     rowStartX,
                     y,
                     longButtonWidth,
                     buttonHeight,
                     buttonName));
 
-            // Config button for feature
             buttonList.add(new CustomButton(
-                    i * 2 + 1,
+                    i * 3 + 1,
                     rowStartX + longButtonWidth + buttonGap,
                     y,
                     squareButtonSize,
@@ -62,21 +60,34 @@ public class MainConfigGui extends GuiScreen {
                     "\u2699"
             ));
 
+            buttonList.add(new CustomButton(
+                    i * 3 + 2,
+                    rowStartX + longButtonWidth + buttonGap + squareButtonSize + buttonGap,
+                    y,
+                    squareButtonSize,
+                    squareButtonSize,
+                    "?"
+            ));
         }
+
         final int realWidth = width - 1;
         final int realHeight = height - 1;
         final int cornerButtonWidth = 80;
         final int cornerButtonX = realWidth - buttonGap - cornerButtonWidth;
-        buttonList.add(new CustomButton(6, cornerButtonX, realHeight - (buttonHeight + buttonGap), cornerButtonWidth, buttonHeight, "Edit Positions"));
-        buttonList.add(new CustomButton(7, cornerButtonX, realHeight - (buttonHeight + buttonGap) * 2, cornerButtonWidth, buttonHeight, "Edit Strategy"));
 
+        buttonList.add(new CustomButton(9, cornerButtonX, realHeight - (buttonHeight + buttonGap), cornerButtonWidth, buttonHeight, "Edit Positions"));
+
+        buttonList.add(new CustomButton(10, cornerButtonX, realHeight - (buttonHeight + buttonGap) * 2, cornerButtonWidth, buttonHeight, "Edit Strategy"));
+
+        buttonList.add(new CustomButton(11, cornerButtonX - buttonHeight - buttonGap, realHeight - (buttonHeight + buttonGap) * 2, buttonHeight, buttonHeight, "?"));
+
+        buttonList.add(new CustomButton(12, 6, realHeight - (buttonHeight + buttonGap), 110, buttonHeight, "Command Usage"));
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
 
-        // Big BurgMod title
         GL11.glPushMatrix();
         GL11.glScalef(4f, 4f, 1f);
         drawCenteredString(
@@ -88,8 +99,14 @@ public class MainConfigGui extends GuiScreen {
         );
         GL11.glPopMatrix();
 
-        // Info
-        fontRendererObj.drawString("\u00A77Use /bm for extra settings", 6, height - 7 - fontRendererObj.FONT_HEIGHT, 0xFFFFFF);
+        int cmdButtonX = 6;
+
+        fontRendererObj.drawString(
+                "Use /bm for extra settings",
+                cmdButtonX,
+                height - (buttonHeight + buttonGap) - fontRendererObj.FONT_HEIGHT - 6,
+                0xFFFFFF
+        );
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
@@ -105,29 +122,40 @@ public class MainConfigGui extends GuiScreen {
                 Minecraft.getMinecraft().displayGuiScreen(new InputStatusConfigGui());
                 break;
             case 2:
-                bmChat("\u00A7cThis feature is currently being worked on and will come out in a future update.");
-                //FortyFiveStatusConfig.enabled = !FortyFiveStatusConfig.enabled;
-                //button.displayString = FortyFiveStatusConfig.enabled ? "\u00A7a45 Status: ON" : "\u00A7c45 Status: OFF";
                 break;
             case 3:
-                bmChat("\u00A7cThis feature is currently being worked on and will come out in a future update.");
-                //Minecraft.getMinecraft().displayGuiScreen(new FortyFiveStatusConfigGui());
+                Perfect45OffsetConfig.enabled = !Perfect45OffsetConfig.enabled;
+                button.displayString = Perfect45OffsetConfig.enabled ? "\u00A7aPerfect 45 Offset: ON" : "\u00A7cPerfect 45 Offset: OFF";
                 break;
             case 4:
+                Minecraft.getMinecraft().displayGuiScreen(new Perfect45OffsetConfigGui());
+                break;
+            case 5:
+                break;
+            case 6:
                 TrajectoryConfig.enabled = !TrajectoryConfig.enabled;
                 button.displayString = TrajectoryConfig.enabled ? "\u00A7aTrajectory: ON" : "\u00A7cTrajectory: OFF";
                 break;
-            case 5:
+            case 7:
                 Minecraft.getMinecraft().displayGuiScreen(new TrajectoryConfigGui());
                 break;
-            case 6:
+            case 8:
+                break;
+            case 9:
                 Minecraft.getMinecraft().displayGuiScreen(new EditPositionsGui());
                 break;
-            case 7:
+            case 10:
                 Minecraft.getMinecraft().displayGuiScreen(new StrategyConfigGui());
+                break;
+            case 11:
+                break;
+            case 12:
+                mc.displayGuiScreen(null);
+                ClientCommandHandler.instance.executeCommand(mc.thePlayer, "/bm");
                 break;
         }
     }
+
     @Override
     public void onGuiClosed() {
         ConfigHandler.updateConfigFile();

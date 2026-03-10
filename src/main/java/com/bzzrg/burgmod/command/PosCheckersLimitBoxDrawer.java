@@ -33,84 +33,112 @@ public class PosCheckersLimitBoxDrawer {
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
+
         if (!enabled || mc.thePlayer == null) return;
 
-        double cameraX = mc.getRenderManager().viewerPosX;
-        double cameraY = mc.getRenderManager().viewerPosY;
-        double cameraZ = mc.getRenderManager().viewerPosZ;
+        double camX = mc.getRenderManager().viewerPosX;
+        double camY = mc.getRenderManager().viewerPosY;
+        double camZ = mc.getRenderManager().viewerPosZ;
 
-        double worldMinX = PosCheckersConfig.xMin;
-        double worldMaxX = PosCheckersConfig.xMax;
-        double worldMinZ = PosCheckersConfig.zMin;
-        double worldMaxZ = PosCheckersConfig.zMax;
+        double minX = PosCheckersConfig.xMin;
+        double maxX = PosCheckersConfig.xMax;
+        double minZ = PosCheckersConfig.zMin;
+        double maxZ = PosCheckersConfig.zMax;
 
         double playerY = mc.thePlayer.posY;
-        double worldMinY = playerY - 20.0;
-        double worldMaxY = playerY + 20.0;
+        double minY = playerY - 20.0;
+        double maxY = playerY + 20.0;
 
-        AxisAlignedBB box = new AxisAlignedBB(worldMinX, worldMinY, worldMinZ, worldMaxX, worldMaxY, worldMaxZ)
-                .offset(-cameraX, -cameraY, -cameraZ);
+        AxisAlignedBB box = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ)
+                .offset(-camX, -camY, -camZ);
+
+        minX = box.minX; minY = box.minY; minZ = box.minZ;
+        maxX = box.maxX; maxY = box.maxY; maxZ = box.maxZ;
 
         GlStateManager.pushMatrix();
+
         GlStateManager.disableTexture2D();
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-        GlStateManager.disableAlpha();
-        GlStateManager.disableDepth();
-        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(
+                GL11.GL_SRC_ALPHA,
+                GL11.GL_ONE_MINUS_SRC_ALPHA,
+                GL11.GL_ONE,
+                GL11.GL_ZERO
+        );
 
-        // Change these if you want different color/alpha
         GlStateManager.disableCull();
-        GlStateManager.color(0f, 1f, 0f, 0.25f);
-
-        Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldRenderer = tessellator.getWorldRenderer();
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
-
-        double minX = box.minX, minY = box.minY, minZ = box.minZ;
-        double maxX = box.maxX, maxY = box.maxY, maxZ = box.maxZ;
-
-        // Bottom
-        worldRenderer.pos(minX, minY, minZ).endVertex();
-        worldRenderer.pos(maxX, minY, minZ).endVertex();
-        worldRenderer.pos(maxX, minY, maxZ).endVertex();
-        worldRenderer.pos(minX, minY, maxZ).endVertex();
-
-        // Top
-        worldRenderer.pos(minX, maxY, minZ).endVertex();
-        worldRenderer.pos(minX, maxY, maxZ).endVertex();
-        worldRenderer.pos(maxX, maxY, maxZ).endVertex();
-        worldRenderer.pos(maxX, maxY, minZ).endVertex();
-
-        // North
-        worldRenderer.pos(minX, minY, minZ).endVertex();
-        worldRenderer.pos(minX, maxY, minZ).endVertex();
-        worldRenderer.pos(maxX, maxY, minZ).endVertex();
-        worldRenderer.pos(maxX, minY, minZ).endVertex();
-
-        // South
-        worldRenderer.pos(minX, minY, maxZ).endVertex();
-        worldRenderer.pos(maxX, minY, maxZ).endVertex();
-        worldRenderer.pos(maxX, maxY, maxZ).endVertex();
-        worldRenderer.pos(minX, maxY, maxZ).endVertex();
-
-        // West
-        worldRenderer.pos(minX, minY, minZ).endVertex();
-        worldRenderer.pos(minX, minY, maxZ).endVertex();
-        worldRenderer.pos(minX, maxY, maxZ).endVertex();
-        worldRenderer.pos(minX, maxY, minZ).endVertex();
-
-        // East
-        worldRenderer.pos(maxX, minY, minZ).endVertex();
-        worldRenderer.pos(maxX, maxY, minZ).endVertex();
-        worldRenderer.pos(maxX, maxY, maxZ).endVertex();
-        worldRenderer.pos(maxX, minY, maxZ).endVertex();
-
-        tessellator.draw();
-
-        GlStateManager.depthMask(true);
         GlStateManager.enableDepth();
-        GlStateManager.enableAlpha();
+
+        Tessellator tess = Tessellator.getInstance();
+        WorldRenderer wr = tess.getWorldRenderer();
+
+        /* ---------- TRANSPARENT FACES ---------- */
+
+        GlStateManager.depthMask(false);   // IMPORTANT: faces don't block lines
+        GlStateManager.color(0f, 1f, 0f, 0.12f);
+
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+
+        wr.pos(minX,minY,minZ).endVertex();
+        wr.pos(maxX,minY,minZ).endVertex();
+        wr.pos(maxX,minY,maxZ).endVertex();
+        wr.pos(minX,minY,maxZ).endVertex();
+
+        wr.pos(minX,maxY,minZ).endVertex();
+        wr.pos(minX,maxY,maxZ).endVertex();
+        wr.pos(maxX,maxY,maxZ).endVertex();
+        wr.pos(maxX,maxY,minZ).endVertex();
+
+        wr.pos(minX,minY,minZ).endVertex();
+        wr.pos(minX,maxY,minZ).endVertex();
+        wr.pos(maxX,maxY,minZ).endVertex();
+        wr.pos(maxX,minY,minZ).endVertex();
+
+        wr.pos(minX,minY,maxZ).endVertex();
+        wr.pos(maxX,minY,maxZ).endVertex();
+        wr.pos(maxX,maxY,maxZ).endVertex();
+        wr.pos(minX,maxY,maxZ).endVertex();
+
+        wr.pos(minX,minY,minZ).endVertex();
+        wr.pos(minX,minY,maxZ).endVertex();
+        wr.pos(minX,maxY,maxZ).endVertex();
+        wr.pos(minX,maxY,minZ).endVertex();
+
+        wr.pos(maxX,minY,minZ).endVertex();
+        wr.pos(maxX,maxY,minZ).endVertex();
+        wr.pos(maxX,maxY,maxZ).endVertex();
+        wr.pos(maxX,minY,maxZ).endVertex();
+
+        tess.draw();
+
+        /* ---------- OUTLINE ---------- */
+
+        GlStateManager.depthMask(true);    // restore depth writes for lines
+        GL11.glLineWidth(2f);
+
+        GlStateManager.color(0f, 1f, 0f, 1f);
+
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+
+        wr.pos(minX,minY,minZ).endVertex(); wr.pos(maxX,minY,minZ).endVertex();
+        wr.pos(maxX,minY,minZ).endVertex(); wr.pos(maxX,minY,maxZ).endVertex();
+        wr.pos(maxX,minY,maxZ).endVertex(); wr.pos(minX,minY,maxZ).endVertex();
+        wr.pos(minX,minY,maxZ).endVertex(); wr.pos(minX,minY,minZ).endVertex();
+
+        wr.pos(minX,maxY,minZ).endVertex(); wr.pos(maxX,maxY,minZ).endVertex();
+        wr.pos(maxX,maxY,minZ).endVertex(); wr.pos(maxX,maxY,maxZ).endVertex();
+        wr.pos(maxX,maxY,maxZ).endVertex(); wr.pos(minX,maxY,maxZ).endVertex();
+        wr.pos(minX,maxY,maxZ).endVertex(); wr.pos(minX,maxY,minZ).endVertex();
+
+        wr.pos(minX,minY,minZ).endVertex(); wr.pos(minX,maxY,minZ).endVertex();
+        wr.pos(maxX,minY,minZ).endVertex(); wr.pos(maxX,maxY,minZ).endVertex();
+        wr.pos(maxX,minY,maxZ).endVertex(); wr.pos(maxX,maxY,maxZ).endVertex();
+        wr.pos(minX,minY,maxZ).endVertex(); wr.pos(minX,maxY,maxZ).endVertex();
+
+        tess.draw();
+
+        /* ---------- RESTORE STATE ---------- */
+
         GlStateManager.disableBlend();
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();

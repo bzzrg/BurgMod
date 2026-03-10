@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.utils.sim;
+package com.bzzrg.burgmod.utils.simulation;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
@@ -25,6 +25,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
+import static com.bzzrg.burgmod.utils.GeneralUtils.isAirborne;
 
 public class SimUtils {
 
@@ -47,10 +48,8 @@ public class SimUtils {
     }
 
     public static void updateSim(EntityPlayerSP sim, UpdateSimOptions options) { // options can be null, which means method just uses real player's "options"
-
         EntityPlayerSP real = mc.thePlayer;
         if (real == null) return;
-
 
         if (options != null) {
             if (options.W != null || options.S != null) {
@@ -58,7 +57,6 @@ public class SimUtils {
                 if (Boolean.TRUE.equals(options.W)) sim.movementInput.moveForward += 1f;
                 if (Boolean.TRUE.equals(options.S)) sim.movementInput.moveForward -= 1f;
                 if (Boolean.TRUE.equals(options.SNK)) sim.movementInput.moveForward *= 0.3;
-                sim.moveForward = sim.movementInput.moveForward * 0.98f;
             }
 
             if (options.A != null || options.D != null) {
@@ -66,7 +64,6 @@ public class SimUtils {
                 if (Boolean.TRUE.equals(options.A)) sim.movementInput.moveStrafe += 1f;
                 if (Boolean.TRUE.equals(options.D)) sim.movementInput.moveStrafe -= 1f;
                 if (Boolean.TRUE.equals(options.SNK)) sim.movementInput.moveStrafe *= 0.3;
-                sim.moveStrafing = sim.movementInput.moveStrafe * 0.98f;
             }
 
             if (options.SPR != null) sim.setSprinting(options.SPR);
@@ -82,9 +79,6 @@ public class SimUtils {
             if (options.rotationYaw != null) sim.rotationYaw = options.rotationYaw;
         }
 
-        float preMoveForward = sim.moveForward;
-        float preMoveStrafing = sim.moveStrafing;
-
         EffectRenderer old = mc.effectRenderer;
         mc.effectRenderer = new EmptyEffectRenderer(mc.theWorld, mc.renderEngine);
 
@@ -92,15 +86,26 @@ public class SimUtils {
 
         mc.effectRenderer = old;
 
-        // because moveForward and moveStrafing get squared when calling onUpdate() for the sim even though they don't for player, idk why
-        sim.moveForward = preMoveForward;
-        sim.moveStrafing = preMoveStrafing;
     }
 
     public static EntityPlayerSP createPlayerSim(EntityPlayerSP real) {
         EntityPlayerSP sim = new EntityPlayerSP(mc, real.worldObj, new AntiPacketNetHandler(mc, mc.getNetHandler().getNetworkManager(), mc.getNetHandler().getGameProfile()), real.getStatFileWriter()) {
             @Override
             public void playSound(String name, float volume, float pitch) {}
+
+            @Override
+            public void updateEntityActionState() {
+                if (!this.isCurrentViewEntity()) {
+                    this.moveStrafing = this.movementInput.moveStrafe;
+                    this.moveForward = this.movementInput.moveForward;
+                    this.isJumping = this.movementInput.jump;
+                    this.prevRenderArmYaw = this.renderArmYaw;
+                    this.prevRenderArmPitch = this.renderArmPitch;
+                    this.renderArmPitch = (float)((double)this.renderArmPitch + (double)(this.rotationPitch - this.renderArmPitch) * 0.5D);
+                    this.renderArmYaw = (float)((double)this.renderArmYaw + (double)(this.rotationYaw - this.renderArmYaw) * 0.5D);
+                }
+                super.updateEntityActionState();
+            }
         };
 
         sim.copyLocationAndAnglesFrom(real);
@@ -120,7 +125,7 @@ public class SimUtils {
         sim.motionY = real.motionY;
         sim.motionZ = real.motionZ;
 
-        sim.onGround = real.onGround;
+        sim.onGround = !isAirborne();
         sim.isCollidedHorizontally = real.isCollidedHorizontally;
         sim.isCollidedVertically = real.isCollidedVertically;
         sim.isCollided = real.isCollided;

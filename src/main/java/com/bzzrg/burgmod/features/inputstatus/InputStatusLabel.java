@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
@@ -38,12 +39,8 @@ public class InputStatusLabel {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
-        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().thePlayer == null || finished || !ResetHandler.movedSinceReset) {
-            return;
-        }
-
-        if (StrategyRecorder.recording) {
-            label = color1 + "Input Status: \u00A7bRecording Strategy...";
+        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || finished || !ResetHandler.movedSinceReset || StrategyRecorder.recording) {
+            if (StrategyRecorder.recording) label = color1 + "Input Status: \u00A7bRecording Strategy...";
             return;
         }
 
