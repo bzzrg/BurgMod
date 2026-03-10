@@ -1,11 +1,12 @@
 package com.bzzrg.burgmod.features.strategy;
 
 import com.bzzrg.burgmod.config.MainConfigGui;
-import com.bzzrg.burgmod.utils.CustomButton;
+import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
+import com.bzzrg.burgmod.utils.gui.CustomButton;
+import com.bzzrg.burgmod.utils.gui.CustomTextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
@@ -16,9 +17,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig.numOf45s;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
-import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
+import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
 import static com.bzzrg.burgmod.features.strategy.StrategyTick.addLoneTick;
 import static com.bzzrg.burgmod.utils.GeneralUtils.*;
 
@@ -30,7 +32,7 @@ public class StrategyConfigGui extends GuiScreen {
     public static int nextButtonId = 8; // Should be the last initiated button's button ID in initGui + 1
 
     public static final int buttonGap = 5;
-    public static final int buttonHeight = 23;
+    public static final int buttonHeight = 25;
     public static final int sideButtonWidth = 135;
     public static final Supplier<Integer> listLeft = () -> (getScaledWidth() - 341) / 2;
     public static final Supplier<Integer> listRight = () -> getScaledWidth() - (getScaledWidth() - 341) / 2;
@@ -41,7 +43,7 @@ public class StrategyConfigGui extends GuiScreen {
     private static int dynamicListY = listTop + 6;
     private boolean smoothListScroll = false;
 
-    private GuiTextField jumpTextField;
+    private CustomTextField jumpTextField;
 
     @Override
     public void initGui() {
@@ -59,9 +61,9 @@ public class StrategyConfigGui extends GuiScreen {
         displayedButtons.add(new CustomButton(1, leftButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Add Tick"));
 
         displayedButtons.add(new CustomButton(2, leftButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Add Jump"));
-        jumpTextField = new GuiTextField(0, fontRendererObj, leftButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight);
-        jumpTextField.setMaxStringLength(20);
-        jumpTextField.setFocused(true);
+        jumpTextField = new CustomTextField(0, leftButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, null, "Jump Type");
+        jumpTextField.field.setMaxStringLength(20);
+        jumpTextField.field.setFocused(true);
 
         buttonY.set(listTop - borderThickness);
 
@@ -87,14 +89,29 @@ public class StrategyConfigGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
+
         updateStrategyJson();
         gui = null;
 
         if (strategyTicks.stream().anyMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
-            bmChat("\u00A7cWARNING: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
+            bmChat("\u00A7cWARN: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
+            mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
+
+        }
+
+        if (Perfect45OffsetConfig.enabled) {
+            if (StrategyTick.getJumpTick(numOf45s - 1) == null) {
+                bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
+                mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
+            }
+            if (!strategyTicks.isEmpty() && !strategyTicks.get(strategyTicks.size()-1).correctInputs.contains(AIR)) { // If the last tick from strat is not air, send invalid msg
+                bmChat("\u00A7cWARN: Perfect 45 offset feature requires last tick of strategy to be air!");
+                mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
+            }
         }
 
         super.onGuiClosed();
+
     }
 
     public void updateListY() {
@@ -177,6 +194,7 @@ public class StrategyConfigGui extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+
         drawDefaultBackground();
 
         // Draw list border
@@ -185,7 +203,7 @@ public class StrategyConfigGui extends GuiScreen {
         drawRect(listLeft.get() - borderThickness, listTop, listLeft.get(), listBottom.get(), 0xFFFFFFFF); // Left
         drawRect(listRight.get(), listTop, listRight.get() + borderThickness, listBottom.get(), 0xFFFFFFFF); // Right
 
-        jumpTextField.drawTextBox();
+        jumpTextField.draw(mouseX, mouseY);
 
         if (smoothListScroll) updateListY(); // Run this method every frame if smooth scroll so that its smooth (inside the method, smooth logic triggers instead of instant logic if smoothListScroll = true)
 
@@ -210,8 +228,8 @@ public class StrategyConfigGui extends GuiScreen {
                 if (t.jump == null || t.jump.extended) drawString(fontRendererObj, "T" + (t.getTickNum() + 1), listLeft.get() + textXGap , referenceButton.yPosition + textYOffset, 0xFFFFFFFF);
             }
         }
-
         super.drawScreen(mouseX, mouseY, partialTicks);
+
     }
 
 
@@ -257,7 +275,7 @@ public class StrategyConfigGui extends GuiScreen {
                 JumpType jumpType;
 
                 try {
-                    jumpType = JumpType.valueOf(jumpTextField.getText().toUpperCase());
+                    jumpType = JumpType.valueOf(jumpTextField.field.getText().toUpperCase());
                 } catch (IllegalArgumentException e) {
                     mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
                     bmChat("\u00A7cInvalid jump name! List of valid jump names:");
@@ -273,8 +291,8 @@ public class StrategyConfigGui extends GuiScreen {
             }
 
             case 3: { // Clear Strategy
-                strategyTicks.forEach(StrategyTick::remove);
-                strategyJumps.forEach(StrategyJump::remove);
+                new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
+                new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
                 break;
             }
             case 4: { // Mirror Strategy
@@ -344,8 +362,8 @@ public class StrategyConfigGui extends GuiScreen {
 
                     }
 
-                    strategyTicks.forEach(StrategyTick::remove);
-                    strategyJumps.forEach(StrategyJump::remove);
+                    new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
+                    new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
 
                     for (Set<InputType> inputs : recordedStrategy) {
                         addLoneTick(strategyTicks.size(), inputs);
@@ -356,7 +374,7 @@ public class StrategyConfigGui extends GuiScreen {
 
                 break;
             }
-            case 6:
+            case 6: // Preview Strategy
                 mc.thePlayer.closeScreen();
                 if (strategyTicks.stream().noneMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
                     StrategyPreviewer.draw();
@@ -461,7 +479,7 @@ public class StrategyConfigGui extends GuiScreen {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
-        jumpTextField.textboxKeyTyped(typedChar, keyCode);
+        jumpTextField.keyTyped(typedChar, keyCode);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.utils.sim;
+package com.bzzrg.burgmod.utils.simulation;
 
 public class UpdateSimOptions {
     public final Boolean W, A, S, D, JUMP, SPR, SNK;

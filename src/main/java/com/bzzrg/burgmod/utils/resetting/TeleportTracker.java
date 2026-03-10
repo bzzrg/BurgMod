@@ -12,15 +12,15 @@ public class TeleportTracker {
 
     private static final String HANDLER_NAME = "burgmod_tp_hook";
 
-    public static volatile boolean teleportedThisTick = false;
+    public static volatile boolean tpedLastTick = false;
 
     private static volatile boolean installed = false;
     private static volatile Channel installedOn = null;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            teleportedThisTick = false;
+        if (event.phase == TickEvent.Phase.END) {
+            tpedLastTick = false;
             tryInstall();
         }
     }
@@ -79,7 +79,8 @@ public class TeleportTracker {
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                     if (msg instanceof S08PacketPlayerPosLook) {
-                        teleportedThisTick = true;
+                        tpedLastTick = true;
+                        System.out.println("got tp packet");
                     }
                     super.channelRead(ctx, msg);
                 }

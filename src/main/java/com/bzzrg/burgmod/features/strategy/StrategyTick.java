@@ -1,11 +1,12 @@
 package com.bzzrg.burgmod.features.strategy;
 
-import com.bzzrg.burgmod.utils.CustomButton;
+import com.bzzrg.burgmod.utils.gui.CustomButton;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.client.gui.GuiButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -94,5 +95,41 @@ public class StrategyTick {
         if (duplicateButton != null) buttons.add(duplicateButton);
         if (removeButton != null) buttons.add(removeButton);
         return buttons;
+    }
+
+    public static StrategyTick getJumpTick(int distanceFromLast) {
+
+        List<StrategyTick> reversedTicks = new ArrayList<>(strategyTicks);
+        Collections.reverse(reversedTicks);
+
+        int jumpCount = -1;
+        boolean foundAir = false;
+
+        for (StrategyTick tick : reversedTicks) {
+
+            if (tick.correctInputs.contains(InputType.AIR)) {
+
+                // Different logic for very first tick if its a jump since there is no tick right before it to check if it has no air
+                if (tick.getTickNum() == 0) {
+                    jumpCount++;
+                    if (jumpCount == distanceFromLast) {
+                        return tick;
+                    }
+                }
+
+                foundAir = true;
+            }
+
+            if (foundAir && !tick.correctInputs.contains(InputType.AIR)) {
+                jumpCount++;
+                foundAir = false;
+
+                if (jumpCount == distanceFromLast) {
+                    return strategyTicks.get(tick.getTickNum() + 1);
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.utils;
+package com.bzzrg.burgmod.utils.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;

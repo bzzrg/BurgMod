@@ -7,7 +7,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.utils.sim.SimUtils.*;
+import static com.bzzrg.burgmod.utils.simulation.SimUtils.*;
 
 public class TrajectoryHandler {
 

@@ -5,11 +5,13 @@ import com.bzzrg.burgmod.command.PosCheckersLimitBoxDrawer;
 import com.bzzrg.burgmod.config.ConfigHandler;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
+import com.bzzrg.burgmod.debug.EveryTickDebug;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
+import com.bzzrg.burgmod.features.perfect45offset.Perfect45OffsetLabel;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
 import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
+import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
@@ -35,7 +37,7 @@ public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.1.4";
+    public static final String VERSION = "1.2.0";
 
     public static Minecraft mc;
     public static Logger logger;
@@ -52,7 +54,6 @@ public class BurgMod {
         createDirectory(modConfigFolder);
 
         ConfigHandler.updateFields();
-
         PosCheckersConfig.updateFields();
 
     }
@@ -64,24 +65,20 @@ public class BurgMod {
         KeyBinding bind = new KeyBinding("Open Config Gui", Keyboard.KEY_B, "BurgMod");
         ClientRegistry.registerKeyBinding(bind);
         updateStrategyFields();
-        MinecraftForge.EVENT_BUS.register(new MainConfigGuiBind(bind));
-
-        MinecraftForge.EVENT_BUS.register(new NewVersionSender());
-
-        MinecraftForge.EVENT_BUS.register(new AutoStrategyLoad());
 
         MinecraftForge.EVENT_BUS.register(new ResetHandler());
+        MinecraftForge.EVENT_BUS.register(new MainConfigGuiBind(bind));
+        MinecraftForge.EVENT_BUS.register(new NewVersionSender());
+        MinecraftForge.EVENT_BUS.register(new AutoStrategyLoad());
         MinecraftForge.EVENT_BUS.register(new InputStatusLabel());
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
-
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());
         MinecraftForge.EVENT_BUS.register(new PosCheckersHandler());
-
         MinecraftForge.EVENT_BUS.register(new TeleportTracker());
         MinecraftForge.EVENT_BUS.register(new PosCheckersLimitBoxDrawer());
         MinecraftForge.EVENT_BUS.register(new StrategyPreviewer());
+        MinecraftForge.EVENT_BUS.register(new EveryTickDebug());
+        MinecraftForge.EVENT_BUS.register(new Perfect45OffsetLabel());
 
     }
-
-
 }

@@ -2,60 +2,125 @@ package com.bzzrg.burgmod.config;
 
 import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.utils.CustomButton;
+import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
+import com.bzzrg.burgmod.utils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Mouse;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
+
 public class EditPositionsGui extends GuiScreen {
 
-    private static final int buttonHeight = 23;
+    private static final int buttonHeight = 25;
     private static final int buttonGap = 5;
 
     private boolean dragging = false;
     private int dragOffsetX, dragOffsetY;
 
-    private final String labelText = GeneralConfig.color1 + "Input Status: " + GeneralConfig.color2 + "Relocating...";
+    private Label activeLabel = null;
+
+    private final List<Label> labels = new ArrayList<>();
 
     @Override
     public void initGui() {
+
         buttonList.add(new CustomButton(0, buttonGap, this.height - buttonGap - buttonHeight, buttonHeight, buttonHeight, "<"));
+
+        labels.clear();
+
+        labels.add(new Label(
+                () -> GeneralConfig.color1 + "Input Status: " + GeneralConfig.color2 + "Relocating...",
+                () -> InputStatusConfig.labelX,
+                () -> InputStatusConfig.labelY,
+                v -> InputStatusConfig.labelX = v,
+                v -> InputStatusConfig.labelY = v
+        ));
+
+        labels.add(new Label(
+                () -> GeneralConfig.color1 + "Perfect 45 Offset: " + GeneralConfig.color2 + "Relocating...",
+                () -> Perfect45OffsetConfig.autoLabelX,
+                () -> Perfect45OffsetConfig.autoLabelY,
+                v -> Perfect45OffsetConfig.autoLabelX = v,
+                v -> Perfect45OffsetConfig.autoLabelY = v
+        ));
+
+        labels.add(new Label(
+                () -> GeneralConfig.color1 + "Perfect 45 Offset (X): " + GeneralConfig.color2 + "Relocating...",
+                () -> Perfect45OffsetConfig.xLabelX,
+                () -> Perfect45OffsetConfig.xLabelY,
+                v -> Perfect45OffsetConfig.xLabelX = v,
+                v -> Perfect45OffsetConfig.xLabelY = v
+        ));
+
+        labels.add(new Label(
+                () -> GeneralConfig.color1 + "Perfect 45 Offset (Z): " + GeneralConfig.color2 + "Relocating...",
+                () -> Perfect45OffsetConfig.zLabelX,
+                () -> Perfect45OffsetConfig.zLabelY,
+                v -> Perfect45OffsetConfig.zLabelX = v,
+                v -> Perfect45OffsetConfig.zLabelY = v
+        ));
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+
         drawDefaultBackground();
 
-        int x = InputStatusConfig.labelX;
-        int y = InputStatusConfig.labelY;
+        for (Label label : labels) {
 
-        int width = fontRendererObj.getStringWidth(labelText);
-        int height = fontRendererObj.FONT_HEIGHT;
+            String text = label.text.get();
 
-        // Outline so you can see what you're dragging
-        drawRect(x - 2, y - 2, x + width + 2, y + height + 2, 0x40FFFFFF);
+            int x = label.getX.getAsInt();
+            int y = label.getY.getAsInt();
 
-        fontRendererObj.drawStringWithShadow(labelText, x, y, 0xFFFFFF);
+            int width = fontRendererObj.getStringWidth(text);
+            int height = fontRendererObj.FONT_HEIGHT;
 
-        // Mouse handling
+            drawRect(x - 2, y - 2, x + width + 2, y + height + 2, 0x40FFFFFF);
+            fontRendererObj.drawStringWithShadow(text, x, y, 0xFFFFFF);
+        }
+
         if (Mouse.isButtonDown(0)) {
-            if (!dragging &&
-                    mouseX >= x && mouseX <= x + width &&
-                    mouseY >= y && mouseY <= y + height) {
 
-                dragging = true;
-                dragOffsetX = mouseX - x;
-                dragOffsetY = mouseY - y;
+            if (!dragging) {
+                for (Label label : labels) {
+
+                    String text = label.text.get();
+
+                    int x = label.getX.getAsInt();
+                    int y = label.getY.getAsInt();
+
+                    int width = fontRendererObj.getStringWidth(text);
+                    int height = fontRendererObj.FONT_HEIGHT;
+
+                    if (mouseX >= x && mouseX <= x + width &&
+                            mouseY >= y && mouseY <= y + height) {
+
+                        activeLabel = label;
+                        dragging = true;
+
+                        dragOffsetX = mouseX - x;
+                        dragOffsetY = mouseY - y;
+
+                        break;
+                    }
+                }
             }
 
         } else {
             dragging = false;
+            activeLabel = null;
         }
 
-        if (dragging) {
-            InputStatusConfig.labelX = mouseX - dragOffsetX;
-            InputStatusConfig.labelY = mouseY - dragOffsetY;
+        if (dragging && activeLabel != null) {
+            activeLabel.setX.accept(mouseX - dragOffsetX);
+            activeLabel.setY.accept(mouseY - dragOffsetY);
         }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -74,4 +139,21 @@ public class EditPositionsGui extends GuiScreen {
         super.onGuiClosed();
     }
 
+    private static class Label {
+        public Supplier<String> text;
+
+        public IntSupplier getX;
+        public IntSupplier getY;
+
+        public IntConsumer setX;
+        public IntConsumer setY;
+
+        public Label(Supplier<String> text, IntSupplier getX, IntSupplier getY, IntConsumer setX, IntConsumer setY) {
+            this.text = text;
+            this.getX = getX;
+            this.getY = getY;
+            this.setX = setX;
+            this.setY = setY;
+        }
+    }
 }

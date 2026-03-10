@@ -8,7 +8,8 @@ import static com.bzzrg.burgmod.utils.GeneralUtils.chat;
 
 public class InputStatusConfigGui extends FeatureConfigGui {
     public InputStatusConfigGui() {
-        this.addStrategyButton = true;
+        this.addStrategyButton();
+
         this.addBooleanSetting("Show Fail Tick", () -> InputStatusConfig.showFailTick, b -> InputStatusConfig.showFailTick = b);
         this.addBooleanSetting("Show Fail Reason", () -> InputStatusConfig.showFailReason, b -> {
             InputStatusConfig.showFailReason = b;

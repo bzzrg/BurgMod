@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.features.strategy;
 
-import com.bzzrg.burgmod.utils.CustomButton;
-import com.bzzrg.burgmod.utils.CustomSlider;
+import com.bzzrg.burgmod.utils.gui.CustomButton;
+import com.bzzrg.burgmod.utils.gui.CustomSlider;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.client.gui.GuiButton;

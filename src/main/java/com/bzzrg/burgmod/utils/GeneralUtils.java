@@ -1,6 +1,7 @@
 package com.bzzrg.burgmod.utils;
 
 import com.bzzrg.burgmod.BurgMod;
+import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -38,7 +39,8 @@ public class GeneralUtils {
         }
     }
 
-    public static boolean isAirborne() { // can't use onGround because teleport causes a 1-tick false
+    // can't use onGround alone because teleport causes a 1-tick false, still using because of coyote ground tick when running off a block (where you are sort of standing on air for a tick)
+    public static boolean isAirborne() {
         EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
         if (player == null) return false;
         boolean hasNoGroundCollision = player.worldObj.getCollidingBoundingBoxes(player, player.getEntityBoundingBox().offset(0.0, -1.0E-4, 0.0)).isEmpty();
@@ -67,4 +69,9 @@ public class GeneralUtils {
 
         return inputs;
     }
+    public static String formatDp(String format, Object... args) { // Used like string.format except now new identifier, "%dp" that uses decimal precision from config for floats/doubles
+        format = format.replace("%dp", "%." + GeneralConfig.decimalPlaces + "f");
+        return String.format(format, args);
+    }
+
 }

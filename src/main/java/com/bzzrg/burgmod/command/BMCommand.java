@@ -8,7 +8,7 @@ import com.bzzrg.burgmod.features.poschecker.Axis;
 import com.bzzrg.burgmod.features.poschecker.PosChecker;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
-import com.bzzrg.burgmod.utils.sim.UpdateSimOptions;
+import com.bzzrg.burgmod.utils.simulation.UpdateSimOptions;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -27,14 +27,14 @@ import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig.posCheckers;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.utils.GeneralUtils.*;
-import static com.bzzrg.burgmod.utils.sim.SimUtils.createPlayerSim;
-import static com.bzzrg.burgmod.utils.sim.SimUtils.updateSim;
+import static com.bzzrg.burgmod.utils.simulation.SimUtils.createPlayerSim;
+import static com.bzzrg.burgmod.utils.simulation.SimUtils.updateSim;
 
 public class BMCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "burgmod";
+        return "bm";
     }
 
     @Override
@@ -44,7 +44,7 @@ public class BMCommand extends CommandBase {
 
     @Override
     public List<String> getCommandAliases() {
-        return Collections.singletonList("bm");
+        return Collections.singletonList("burgmod");
     }
 
     @Override
@@ -56,7 +56,7 @@ public class BMCommand extends CommandBase {
     public void processCommand(ICommandSender iCommandSender, String[] strings) {
 
         Runnable sendMainUsage = () -> {
-            bmChat("\u00A7bUsage:");
+            bmChat("\u00A7bUsage (/bm):");
             sendBulletWithInfo("pos", "Adds checkers that send your X/Z pos any amount of ticks (0-100) after jumping");
             sendBulletWithInfo("strat", "Save strategies under keys or smarter HPK OJ keys");
             sendBulletWithInfo("dp", "Sets # of decimal places to show globally for all features involving numbers");
@@ -69,12 +69,6 @@ public class BMCommand extends CommandBase {
             sendMainUsage.run();
             return;
         }
-
-
-
-
-
-
 
         List<EnumChatFormatting> colors = Arrays.stream(EnumChatFormatting.values()).filter(EnumChatFormatting::isColor).collect(Collectors.toList());
 
@@ -201,10 +195,10 @@ public class BMCommand extends CommandBase {
                         }
 
                         Runnable sendUpdatedCheckers = () -> {
-                            bmChat(String.format("\u00A7aSet minimum x coordinate for position checkers to %.5f!", PosCheckersConfig.xMin));
-                            bmChat(String.format("\u00A7aSet maximum x coordinate for position checkers to %.5f!", PosCheckersConfig.xMax));
-                            bmChat(String.format("\u00A7aSet minimum z coordinate for position checkers to %.5f!", PosCheckersConfig.zMin));
-                            bmChat(String.format("\u00A7aSet maximum z coordinate for position checkers to %.5f!", PosCheckersConfig.zMax));
+                            bmChat(formatDp("\u00A7aSet minimum x coordinate for position checkers to %dp!", PosCheckersConfig.xMin));
+                            bmChat(formatDp("\u00A7aSet maximum x coordinate for position checkers to %dp!", PosCheckersConfig.xMax));
+                            bmChat(formatDp("\u00A7aSet minimum z coordinate for position checkers to %dp!", PosCheckersConfig.zMin));
+                            bmChat(formatDp("\u00A7aSet maximum z coordinate for position checkers to %dp!", PosCheckersConfig.zMax));
                         };
 
                         switch (limitAction) {
@@ -316,23 +310,7 @@ public class BMCommand extends CommandBase {
                                     break;
                                 }
 
-                                List<StrategyTick> reversedTicks = new ArrayList<>(strategyTicks);
-                                Collections.reverse(reversedTicks);
-
-                                StrategyTick finalJumpTick = null;
-                                boolean foundAir = false;
-
-                                for (StrategyTick tick : reversedTicks) {
-                                    if (tick.correctInputs.contains(InputType.AIR)) {
-                                        foundAir = true;
-                                    }
-
-                                    if (foundAir && !tick.correctInputs.contains(InputType.AIR)) {
-                                        finalJumpTick = strategyTicks.get(tick.getTickNum()+1);
-                                        break;
-                                    }
-
-                                }
+                                StrategyTick finalJumpTick = StrategyTick.getJumpTick(0);
 
                                 if (finalJumpTick == null) {
                                     bmChat("\u00A7cYour strategy doesn't contain any jumps! (Read this command's info for more explanation)");
@@ -364,8 +342,6 @@ public class BMCommand extends CommandBase {
                                 PosCheckersConfig.zMin = sim.posZ - blockRange;
                                 PosCheckersConfig.zMax = sim.posZ + blockRange;
                                 sendUpdatedCheckers.run();
-
-                                bmChat("\u00A77Note: Strategy simulation is SLIGHTLY inaccurate in its current state, but is currently being worked on right now. If fromstrat limits didn't work, increase block range slightly until it does or set from position manually.");
 
                                 PosCheckersLimitBoxDrawer.drawFor4Seconds();
                                 break;
