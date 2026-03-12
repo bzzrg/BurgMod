@@ -10,9 +10,9 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 public class TeleportTracker {
 
-    private static final String HANDLER_NAME = "burgmod_tp_hook";
+    private static final String handlerName = "burgmod_tp_hook";
 
-    public static volatile boolean tpedLastTick = false;
+    public static volatile boolean tpedThisTick = false;
 
     private static volatile boolean installed = false;
     private static volatile Channel installedOn = null;
@@ -20,7 +20,7 @@ public class TeleportTracker {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            tpedLastTick = false;
+            tpedThisTick = false;
             tryInstall();
         }
     }
@@ -41,7 +41,7 @@ public class TeleportTracker {
         ch.eventLoop().execute(() -> {
             try {
                 ChannelPipeline p = ch.pipeline();
-                if (p.get(HANDLER_NAME) != null) p.remove(HANDLER_NAME);
+                if (p.get(handlerName) != null) p.remove(handlerName);
             } catch (Throwable ignored) {
             }
         });
@@ -66,7 +66,7 @@ public class TeleportTracker {
         ch.eventLoop().execute(() -> {
             ChannelPipeline p = ch.pipeline();
 
-            if (p.get(HANDLER_NAME) != null) {
+            if (p.get(handlerName) != null) {
                 installed = true;
                 installedOn = ch;
                 return;
@@ -75,12 +75,11 @@ public class TeleportTracker {
             // Some servers/pipelines might not have "packet_handler" yet; guard it.
             if (p.get("packet_handler") == null) return;
 
-            p.addBefore("packet_handler", HANDLER_NAME, new ChannelDuplexHandler() {
+            p.addBefore("packet_handler", handlerName, new ChannelDuplexHandler() {
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                     if (msg instanceof S08PacketPlayerPosLook) {
-                        tpedLastTick = true;
-                        System.out.println("got tp packet");
+                        tpedThisTick = true;
                     }
                     super.channelRead(ctx, msg);
                 }

@@ -19,7 +19,8 @@ public class Perfect45OffsetConfig {
     public static boolean stopOnInputFail = false;
 
     public static boolean eNotation = false;
-    public static int eNotationMax = 3;
+    public static int eNotationMaxPower = -3;
+    public static int eNotationPrecision = 2;
 
     public static int autoLabelX = 0;
     public static int autoLabelY = 0;
@@ -42,7 +43,8 @@ public class Perfect45OffsetConfig {
         config.get("perfect45Offset", "stopOnInputFail", stopOnInputFail).setValue(stopOnInputFail);
 
         config.get("perfect45Offset", "eNotation", eNotation).setValue(eNotation);
-        config.get("perfect45Offset", "eNotationMax", eNotationMax).setValue(eNotationMax);
+        config.get("perfect45Offset", "eNotationMaxPower", eNotationMaxPower).setValue(eNotationMaxPower);
+        config.get("perfect45Offset", "eNotationPrecision", eNotationPrecision).setValue(eNotationPrecision);
 
         config.get("perfect45Offset", "autoLabelX", autoLabelX).setValue(autoLabelX);
         config.get("perfect45Offset", "autoLabelY", autoLabelY).setValue(autoLabelY);
@@ -66,7 +68,8 @@ public class Perfect45OffsetConfig {
         stopOnInputFail = config.get("perfect45Offset", "stopOnInputFail", stopOnInputFail).getBoolean();
 
         eNotation = config.get("perfect45Offset", "eNotation", eNotation).getBoolean();
-        eNotationMax = config.get("perfect45Offset", "eNotationMax", eNotationMax).getInt();
+        eNotationMaxPower = config.get("perfect45Offset", "eNotationMaxPower", eNotationMaxPower).getInt();
+        eNotationPrecision = config.get("perfect45Offset", "eNotationPrecision", eNotationPrecision).getInt();
 
         autoLabelX = config.get("perfect45Offset", "autoLabelX", autoLabelX).getInt();
         autoLabelY = config.get("perfect45Offset", "autoLabelY", autoLabelY).getInt();

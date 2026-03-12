@@ -10,10 +10,7 @@ import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -29,7 +26,7 @@ public class StrategyConfigGui extends GuiScreen {
     public static StrategyConfigGui gui = null;
     public List<GuiButton> displayedButtons;
 
-    public static int nextButtonId = 8; // Should be the last initiated button's button ID in initGui + 1
+    public static int nextButtonId = 9; // Should be the last initiated button's button ID in initGui + 1
 
     public static final int buttonGap = 5;
     public static final int buttonHeight = 25;
@@ -71,13 +68,14 @@ public class StrategyConfigGui extends GuiScreen {
         final int rightButtonX = listRight.get() + borderThickness + buttonGap;
 
         displayedButtons.add(new CustomButton(3, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Clear Strategy"));
-        displayedButtons.add(new CustomButton(4, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Mirror Strategy"));
-        displayedButtons.add(new CustomButton(5, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy"));
-        displayedButtons.add(new CustomButton(6, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Preview Strategy"));
+        displayedButtons.add(new CustomButton(4, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Trim Strategy"));
+        displayedButtons.add(new CustomButton(5, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Mirror Strategy"));
+        displayedButtons.add(new CustomButton(6, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy"));
+        displayedButtons.add(new CustomButton(7, rightButtonX, buttonY.getAndAdd(buttonYDif), sideButtonWidth, buttonHeight, "Preview Strategy"));
 
         // Add back button at bottom left
         final int realHeight = height - 1;
-        displayedButtons.add(new CustomButton(7, buttonGap, realHeight - buttonGap - buttonHeight, buttonHeight, buttonHeight, "<"));
+        displayedButtons.add(new CustomButton(8, buttonGap, realHeight - buttonGap - buttonHeight, buttonHeight, buttonHeight, "<"));
 
         // IF YOU CHANGE THESE BUTTON IDS ABOVE, CHANGE nextButtonID FIELD AT TOP OF CLASS
 
@@ -112,84 +110,6 @@ public class StrategyConfigGui extends GuiScreen {
 
         super.onGuiClosed();
 
-    }
-
-    public void updateListY() {
-        final int smoothScrollIncrement = 4;
-        boolean finished = true;
-
-        // Update logic for jump slots
-        for (StrategyJump j : strategyJumps) {
-
-            // Needed info
-            List<GuiButton> jumpButtons = j.getButtons();
-            int jumpYDest = dynamicListY + (buttonHeight + buttonGap) * j.getListSlot();
-
-            // Tick scroll logic
-            if (smoothListScroll) {
-                int distance = jumpYDest - j.removeButton.yPosition;
-                if (distance != 0) {
-
-                    if (Math.abs(distance) > smoothScrollIncrement) {
-                        jumpButtons.forEach(b -> b.yPosition += (int) Math.signum(distance) * smoothScrollIncrement);
-                        finished = false;
-                    } else {
-                        jumpButtons.forEach(b -> b.yPosition = jumpYDest);
-                    }
-
-                }
-
-            } else {
-                jumpButtons.forEach(b -> b.yPosition = jumpYDest);
-            }
-
-            // Make buttons outside of list zone invisible
-            jumpButtons.forEach(button -> button.visible = button.yPosition >= listTop && button.yPosition + button.height <= listBottom.get());
-        }
-
-        // Update logic for ticks
-        for (StrategyTick t : strategyTicks) {
-
-            // Needed info
-            Integer listSlot = t.getListSlot();
-            if (listSlot == null) continue;
-            int tickYDest = dynamicListY + (buttonHeight + buttonGap) * listSlot;
-            List<GuiButton> tickButtons = t.getButtons();
-
-            // Tick scroll logic
-            if (smoothListScroll) {
-                int distance = tickYDest - t.inputButtons.get(W).yPosition;
-                if (distance != 0) {
-
-                    if (Math.abs(distance) > smoothScrollIncrement) {
-                        tickButtons.forEach(b -> b.yPosition += (int) Math.signum(distance) * smoothScrollIncrement);
-                        finished = false;
-                    } else {
-                        tickButtons.forEach(b -> b.yPosition = tickYDest);
-                    }
-
-                }
-
-            } else {
-                tickButtons.forEach(b -> b.yPosition = tickYDest);
-            }
-
-            // Make buttons outside of list zone invisible
-            tickButtons.forEach(button -> button.visible = button.yPosition >= listTop && button.yPosition + button.height <= listBottom.get());
-        }
-
-        if (finished) smoothListScroll = false;
-    }
-
-    private void clampListY() {
-        int maxTickSlot = strategyTicks.stream().filter(t -> t.getListSlot() != null).mapToInt(StrategyTick::getListSlot).max().orElse(-1);
-        int maxJumpSlot = strategyJumps.stream().mapToInt(StrategyJump::getListSlot).max().orElse(-1);
-        int totalHeight = (buttonHeight + buttonGap) * (Math.max(maxTickSlot, maxJumpSlot) + 1);
-
-        int maxListY = listTop + buttonGap; // Biggest possible Y coordinate
-        int minListY = listBottom.get() - totalHeight; // Smallest possible Y coordinate
-
-        dynamicListY = Math.min(maxListY, Math.max(minListY, dynamicListY));
     }
 
     @Override
@@ -231,8 +151,6 @@ public class StrategyConfigGui extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
     }
-
-
 
     @Override
     public void handleMouseInput() throws IOException {
@@ -295,7 +213,29 @@ public class StrategyConfigGui extends GuiScreen {
                 new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
                 break;
             }
-            case 4: { // Mirror Strategy
+            case 4: { // Trim Strategy
+                List<StrategyTick> reversed = new ArrayList<>(strategyTicks);
+                Collections.reverse(reversed);
+
+                StrategyTick last = null;
+
+                for (StrategyTick tick : reversed) {
+                    if (last != null) {
+
+                        if (last.correctInputs.equals(tick.correctInputs)) {
+                            last.remove();
+                        } else {
+                            break;
+                        }
+
+                    }
+
+                    last = tick;
+                }
+
+                break;
+            }
+            case 5: { // Mirror Strategy
                 for (StrategyTick t : strategyTicks) {
                     List<InputType> correctInputs = new ArrayList<>(t.correctInputs);
 
@@ -339,7 +279,7 @@ public class StrategyConfigGui extends GuiScreen {
                 break;
 
             }
-            case 5: { // Record Strategy
+            case 6: { // Record Strategy
 
                 StrategyRecorder.recording = !StrategyRecorder.recording;
                 button.displayString = StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy";
@@ -374,13 +314,13 @@ public class StrategyConfigGui extends GuiScreen {
 
                 break;
             }
-            case 6: // Preview Strategy
+            case 7: // Preview Strategy
                 mc.thePlayer.closeScreen();
                 if (strategyTicks.stream().noneMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
                     StrategyPreviewer.draw();
                 }
                 break;
-            case 7: { // Back Button
+            case 8: { // Back Button
                 Minecraft.getMinecraft().displayGuiScreen(new MainConfigGui());
                 break;
             }
@@ -393,8 +333,12 @@ public class StrategyConfigGui extends GuiScreen {
                     int tickNum = tick.getTickNum();
 
                     if (button == tick.duplicateButton) { // Duplicate Tick
-                        StrategyTick.addLoneTick(tickNum + 1, new HashSet<>(tick.correctInputs));
 
+                        if (tick.jump == null) {
+                            StrategyTick.addLoneTick(tickNum, new HashSet<>(tick.correctInputs));
+                        } else {
+                            StrategyTick.addJumpTick(tickNum, new HashSet<>(tick.correctInputs), tick.jump);
+                        }
                     } else if (button == tick.removeButton) { // Remove Tick
                         tick.remove();
 
@@ -425,21 +369,6 @@ public class StrategyConfigGui extends GuiScreen {
                     } else if (button == jump.run1TButton) { // Run 1t button for jumps
                         jump.run1T = !jump.run1T;
                         jump.run1TButton.displayString = jump.run1T ? "\u00A7aRun 1t" : "\u00A7cRun 1t";
-
-                        if (jump.run1T) {
-                            jump.cut = false;
-                            jump.cutButton.displayString = "\u00A7cCut";
-                        }
-
-                        jump.updateTicks();
-                    } else if (button == jump.cutButton) { // Cut button for jumps
-                        jump.cut = !jump.cut;
-                        jump.cutButton.displayString = jump.cut ? "\u00A7aCut" : "\u00A7cCut";
-
-                        if (jump.cut) {
-                            jump.run1T = false;
-                            jump.run1TButton.displayString = "\u00A7cRun 1t";
-                        }
 
                         jump.updateTicks();
                     } else if (jump.directionButtons != null && jump.directionButtons.containsValue(button)) { // Direction buttons for jumps
@@ -480,6 +409,83 @@ public class StrategyConfigGui extends GuiScreen {
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
         jumpTextField.keyTyped(typedChar, keyCode);
+    }
+
+    public void updateListY() {
+        final int smoothScrollIncrement = 4;
+        boolean finished = true;
+
+        // Update logic for jump slots
+        for (StrategyJump j : strategyJumps) {
+
+            // Needed info
+            List<GuiButton> jumpButtons = j.getButtons();
+            int jumpYDest = dynamicListY + (buttonHeight + buttonGap) * j.getListSlot();
+
+            // Tick scroll logic
+            if (smoothListScroll) {
+                int distance = jumpYDest - j.removeButton.yPosition;
+                if (distance != 0) {
+
+                    if (Math.abs(distance) > smoothScrollIncrement) {
+                        jumpButtons.forEach(b -> b.yPosition += (int) Math.signum(distance) * smoothScrollIncrement);
+                        finished = false;
+                    } else {
+                        jumpButtons.forEach(b -> b.yPosition = jumpYDest);
+                    }
+
+                }
+
+            } else {
+                jumpButtons.forEach(b -> b.yPosition = jumpYDest);
+            }
+
+            // Make buttons outside of list zone invisible
+            jumpButtons.forEach(button -> button.visible = button.yPosition >= listTop && button.yPosition + button.height <= listBottom.get());
+        }
+
+        // Update logic for ticks
+        for (StrategyTick t : strategyTicks) {
+
+            // Needed info
+            Integer listSlot = t.getListSlot();
+            if (listSlot == null) continue;
+            int tickYDest = dynamicListY + (buttonHeight + buttonGap) * listSlot;
+            List<GuiButton> tickButtons = t.getButtons();
+
+            // Tick scroll logic
+            if (smoothListScroll) {
+                int distance = tickYDest - t.inputButtons.get(W).yPosition;
+                if (distance != 0) {
+
+                    if (Math.abs(distance) > smoothScrollIncrement) {
+                        tickButtons.forEach(b -> b.yPosition += (int) Math.signum(distance) * smoothScrollIncrement);
+                        finished = false;
+                    } else {
+                        tickButtons.forEach(b -> b.yPosition = tickYDest);
+                    }
+                }
+
+            } else {
+                tickButtons.forEach(b -> b.yPosition = tickYDest);
+            }
+
+            // Make buttons outside of list zone invisible
+            tickButtons.forEach(b -> b.visible = b.yPosition >= listTop && b.yPosition + b.height <= listBottom.get());
+        }
+
+        if (finished) smoothListScroll = false;
+    }
+
+    public void clampListY() {
+        int maxTickSlot = strategyTicks.stream().filter(t -> t.getListSlot() != null).mapToInt(StrategyTick::getListSlot).max().orElse(-1);
+        int maxJumpSlot = strategyJumps.stream().mapToInt(StrategyJump::getListSlot).max().orElse(-1);
+        int totalHeight = (buttonHeight + buttonGap) * (Math.max(maxTickSlot, maxJumpSlot) + 1);
+
+        int maxListY = listTop + buttonGap; // Biggest possible Y coordinate
+        int minListY = listBottom.get() - totalHeight; // Smallest possible Y coordinate
+
+        dynamicListY = Math.min(maxListY, Math.max(minListY, dynamicListY));
     }
 
 }

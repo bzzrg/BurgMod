@@ -10,23 +10,19 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig.*;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.features.strategy.StrategyPreviewer.lineLocPairs;
-import static com.bzzrg.burgmod.features.strategy.StrategyPreviewer.scheduledExecutor;
 import static com.bzzrg.burgmod.utils.GeneralUtils.formatDp;
 import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
-import static com.bzzrg.burgmod.utils.simulation.SimUtils.createPlayerSim;
+import static com.bzzrg.burgmod.utils.simulation.SimUtils.createSim;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.updateSim;
 
 public class Perfect45OffsetLabel {
@@ -93,7 +89,7 @@ public class Perfect45OffsetLabel {
         }
 
         Set<InputType> lastInputs = strategyTicks.get(strategyTicks.size()-1).correctInputs;
-        EntityPlayerSP sim = createPlayerSim(mc.thePlayer);
+        EntityPlayerSP sim = createSim(mc.thePlayer);
 
         for (int i = 0; i < 200; i++) {
 
@@ -117,8 +113,6 @@ public class Perfect45OffsetLabel {
 
             AxisAlignedBB oldBox = sim.getEntityBoundingBox();
 
-            Vec3 oldPos = sim.getPositionVector();
-
             UpdateSimOptions options = new UpdateSimOptions(
                     inputs.contains(InputType.W),
                     inputs.contains(InputType.A),
@@ -130,19 +124,6 @@ public class Perfect45OffsetLabel {
                     yaw);
 
             updateSim(sim, options);
-            System.out.printf(
-                    "tick=%d, W=%s, A=%s, S=%s, D=%s, JUMP=%s, SPR=%s, SNK=%s, rotationYaw=%s%n",
-                    i,
-                    options.W,
-                    options.A,
-                    options.S,
-                    options.D,
-                    options.JUMP,
-                    options.SPR,
-                    options.SNK,
-                    options.rotationYaw
-            );
-            lineLocPairs.put(oldPos, sim.getPositionVector());
 
             if (sim.onGround && i > jumpTick45Indices.get(jumpTick45Indices.size()-1)) {
                 landingPos = getBlockPosStandingOn(sim);
@@ -155,9 +136,6 @@ public class Perfect45OffsetLabel {
             extendedTicks.add(options);
 
         }
-
-        scheduledExecutor.schedule(() -> mc.addScheduledTask(lineLocPairs::clear), 4, TimeUnit.SECONDS);
-
     }
 
     private static void setAllLabels(String msg) {
@@ -169,8 +147,6 @@ public class Perfect45OffsetLabel {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-
-        lineLocPairs.clear();
 
         if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || !ResetHandler.movedSinceReset || finished || Perfect45OffsetConfig.isConfigInvalid() || StrategyRecorder.recording || landingPos == null) {
             if (StrategyRecorder.recording) setAllLabels("\u00A7bRecording Strategy...");
@@ -196,15 +172,12 @@ public class Perfect45OffsetLabel {
             }
         }
 
-        EntityPlayerSP sim = createPlayerSim(mc.thePlayer);
-        System.out.printf("tick: %d, sim.onground: %s, real.onground: %s%n", tickNum, sim.onGround, mc.thePlayer.onGround);
+        EntityPlayerSP sim = createSim(mc.thePlayer);
 
         // Index for extendedTicks represents the updateOptions needed to update the sim TO THAT tickNum
         // so start one above the tickNum or else you will try to update to the position you are already at
         for (int i = tickNum + 1; i < extendedTicks.size(); i++) {
-            Vec3 oldPos = sim.getPositionVector();
             updateSim(sim, extendedTicks.get(i));
-            lineLocPairs.put(oldPos, sim.getPositionVector());
         }
 
         updateLabelsFromPos(sim.getEntityBoundingBox());
@@ -218,7 +191,7 @@ public class Perfect45OffsetLabel {
 
     }
 
-    private static void updateLabelsFromPos(AxisAlignedBB playerBB) {
+    private static void updateLabelsFromPos(AxisAlignedBB playerBB) { // takes an entity's "getEntityBoundingBox()"
         AxisAlignedBB bb = mc.theWorld.getBlockState(landingPos).getBlock().getCollisionBoundingBox(mc.theWorld, landingPos, mc.theWorld.getBlockState(landingPos));
         if (bb == null) return;
 
@@ -230,11 +203,31 @@ public class Perfect45OffsetLabel {
         double xOffset = xLabel.contains("+)") ? playerBB.maxX - minX : maxX - playerBB.minX;
         double zOffset = zLabel.contains("+)") ? playerBB.maxZ - minZ : maxZ - playerBB.minZ;
 
-        xLabel = formatDp(xLabel.substring(0, xLabel.lastIndexOf(')') + 3) + "%s%dp", xOffset >= 0 ? "\u00A7a+" : "\u00A7c", xOffset);
-        zLabel = formatDp(zLabel.substring(0, zLabel.lastIndexOf(')') + 3) + "%s%dp", zOffset >= 0 ? "\u00A7a+" : "\u00A7c", zOffset);
+        xLabel = xLabel.substring(0, xLabel.lastIndexOf(')') + 3) + formatOffset(xOffset);
+        zLabel = zLabel.substring(0, zLabel.lastIndexOf(')') + 3) + formatOffset(zOffset);
 
         EnumFacing facing = EnumFacing.fromAngle(f3JumpAngle);
         autoLabel = (facing == EnumFacing.EAST || facing == EnumFacing.WEST) ? xLabel : zLabel;
     }
 
+    private static String formatOffset(double offset) {
+
+        String color = offset >= 0 ? "\u00A7a+" : "\u00A7c";
+        double abs = Math.abs(offset);
+
+        if (Perfect45OffsetConfig.eNotation && abs > 0) {
+
+            int exponent = (int) Math.floor(Math.log10(abs));
+
+            if (exponent <= Perfect45OffsetConfig.eNotationMaxPower) {
+                double leadingNum = abs / Math.pow(10, exponent);
+                if (offset < 0) leadingNum = -leadingNum;
+
+                String leadingNumStr = String.format("%." + Perfect45OffsetConfig.eNotationPrecision + "f", leadingNum);
+                return color + leadingNumStr + "e" + exponent;
+            }
+        }
+
+        return formatDp("%s%dp", color, offset);
+    }
 }

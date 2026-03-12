@@ -21,7 +21,8 @@ public class Perfect45OffsetConfigGui extends FeatureConfigGui {
         this.addBooleanSetting("Stop On Input Fail", () -> stopOnInputFail, b -> stopOnInputFail = b);
 
         this.addBooleanSetting("E Notation", () -> eNotation, b -> eNotation = b);
-        this.addIntSetting("E Notation Max", () -> eNotationMax, i -> eNotationMax = i, 1, 10);
+        this.addIntSetting("E Notation Max Power", () -> eNotationMaxPower, i -> eNotationMaxPower = i, -10, -1);
+        this.addIntSetting("E Notation Precision", () -> eNotationPrecision, i -> eNotationPrecision = i, 0, 10);
 
     }
 
