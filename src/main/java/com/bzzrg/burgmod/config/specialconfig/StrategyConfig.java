@@ -49,7 +49,6 @@ public class StrategyConfig {
 
                 jumpJson.add("type", new JsonPrimitive(tick.jump.type.name()));
                 jumpJson.add("run1T", new JsonPrimitive(tick.jump.run1T));
-                jumpJson.add("cut", new JsonPrimitive(tick.jump.cut));
 
                 if (tick.jump.directions != null) {
                     JsonArray directionsArray = new JsonArray();
@@ -135,8 +134,6 @@ public class StrategyConfig {
 
                     jump.run1T = jumpJson.get("run1T").getAsBoolean();
                     if (jump.run1T) jump.run1TButton.displayString = "\u00A7aRun 1t";
-                    jump.cut = jumpJson.get("cut").getAsBoolean();
-                    if (jump.cut) jump.cutButton.displayString = "\u00A7aCut";
 
                     if (jumpJson.has("directions")) {
 
@@ -173,7 +170,7 @@ public class StrategyConfig {
                         Set<InputType> correctInputs = new HashSet<>();
                         jumpTick.getAsJsonArray().forEach(elem -> correctInputs.add(InputType.valueOf(elem.getAsString())));
 
-                        StrategyTick.addJumpTick(jump, correctInputs, strategyTicks.size());
+                        StrategyTick.addJumpTick(strategyTicks.size(), correctInputs, jump);
                     }
 
                 }

@@ -17,7 +17,7 @@ public class TrajectoryHandler {
 
         if (!TrajectoryConfig.enabled || real == null) return;
 
-        EntityPlayerSP sim = createPlayerSim(real);
+        EntityPlayerSP sim = createSim(real);
 
         for (int i = 0; i < TrajectoryConfig.tickLength; i++) {
             Vec3 oldPos = new Vec3(sim.posX, sim.posY, sim.posZ);

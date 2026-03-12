@@ -27,7 +27,7 @@ public class StrategyPreviewer {
 
         bmChat("\u00A7aPreviewing Strategy! \u00A7e(Note: Must be at reset location when clicking preview button so it's accurate)");
 
-        EntityPlayerSP sim = createPlayerSim(mc.thePlayer);
+        EntityPlayerSP sim = createSim(mc.thePlayer);
         boolean lastAir = false;
 
         for (StrategyTick tick : strategyTicks) {

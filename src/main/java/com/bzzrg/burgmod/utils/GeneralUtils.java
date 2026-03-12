@@ -70,8 +70,11 @@ public class GeneralUtils {
         return inputs;
     }
     public static String formatDp(String format, Object... args) { // Used like string.format except now new identifier, "%dp" that uses decimal precision from config for floats/doubles
-        format = format.replace("%dp", "%." + GeneralConfig.decimalPlaces + "f");
+        format = format.replace("%dp", "%." + GeneralConfig.decimalPrecision + "f");
         return String.format(format, args);
     }
+
+
+
 
 }

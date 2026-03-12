@@ -88,7 +88,7 @@ public class SimUtils {
 
     }
 
-    public static EntityPlayerSP createPlayerSim(EntityPlayerSP real) {
+    public static EntityPlayerSP createSim(EntityPlayerSP real) {
         EntityPlayerSP sim = new EntityPlayerSP(mc, real.worldObj, new AntiPacketNetHandler(mc, mc.getNetHandler().getNetworkManager(), mc.getNetHandler().getGameProfile()), real.getStatFileWriter()) {
             @Override
             public void playSound(String name, float volume, float pitch) {}
@@ -129,7 +129,7 @@ public class SimUtils {
         sim.isCollidedHorizontally = real.isCollidedHorizontally;
         sim.isCollidedVertically = real.isCollidedVertically;
         sim.isCollided = real.isCollided;
-        sim.isAirBorne = real.isAirBorne;
+        sim.isAirBorne = isAirborne();
 
         sim.fallDistance = real.fallDistance;
         sim.stepHeight = real.stepHeight;

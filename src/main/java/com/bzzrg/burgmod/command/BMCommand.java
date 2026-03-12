@@ -20,14 +20,18 @@ import net.minecraft.util.IChatComponent;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig.posCheckers;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.utils.GeneralUtils.*;
-import static com.bzzrg.burgmod.utils.simulation.SimUtils.createPlayerSim;
+import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.utils.simulation.SimUtils.createSim;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.updateSim;
 
 public class BMCommand extends CommandBase {
@@ -57,11 +61,11 @@ public class BMCommand extends CommandBase {
 
         Runnable sendMainUsage = () -> {
             bmChat("\u00A7bUsage (/bm):");
-            sendBulletWithInfo("pos", "Adds checkers that send your X/Z pos any amount of ticks (0-100) after jumping");
-            sendBulletWithInfo("strat", "Save strategies under keys or smarter HPK OJ keys");
-            sendBulletWithInfo("dp", "Sets # of decimal places to show globally for all features involving numbers");
-            sendBulletWithInfo("c1", "Color 1 for labels");
-            sendBulletWithInfo("c2", "Color 2 for labels");
+            sendBMBullet("pos", "Adds checkers that send your X/Z pos any amount of ticks (0-100) after jumping");
+            sendBMBullet("strat", "Save strategies under keys or smarter HPK OJ keys");
+            sendBMBullet("dp", "Sets # of decimal places to show globally for all features involving numbers");
+            sendBMBullet("c1", "Color 1 for labels");
+            sendBMBullet("c2", "Color 2 for labels");
             chat("\u00A78(Check MC controls to access more BurgMod config)");
         };
 
@@ -78,12 +82,12 @@ public class BMCommand extends CommandBase {
 
                 Runnable sendPosUsage = () -> {
                     bmChat("\u00A7bUsage (/bm pos):");
-                    sendBulletWithInfo("pos toggle", "Toggles all pos checkers on/off without deleting them");
-                    sendBulletWithInfo("pos add <x/z/both> <airtime>", "Adds new pos checker for either X or Z axis for a specific airtick");
-                    sendBulletWithInfo("pos remove <checker_num>", "Removes an added pos checker, use /bm pos list for checker numbers");
-                    sendBulletWithInfo("pos clear", "Removes all pos checkers");
-                    sendBulletWithInfo("pos list", "Lists all added pos checkers and their number");
-                    sendBulletWithInfo("pos limit", "Adds limits so that pos checkers for a jump will only send if first air tick was within limits");
+                    sendBMBullet("pos toggle", "Toggles all pos checkers on/off without deleting them");
+                    sendBMBullet("pos add <x/z/both> <airtime>", "Adds new pos checker for either X or Z axis for a specific airtick");
+                    sendBMBullet("pos remove <checker_num>", "Removes an added pos checker, use /bm pos list for checker numbers");
+                    sendBMBullet("pos clear", "Removes all pos checkers");
+                    sendBMBullet("pos list", "Lists all added pos checkers and their number");
+                    sendBMBullet("pos limit", "Adds limits so that pos checkers for a jump will only send if first air tick was within limits");
                 };
 
                 String action;
@@ -170,13 +174,13 @@ public class BMCommand extends CommandBase {
 
                         Runnable sendLimitUsage = () -> {
                             bmChat("\u00A7bUsage (/bm pos limit):");
-                            sendBulletWithInfo("pos limit xmin <coordinate>", "Sets minumum player X coordinate required for position checkers to work");
-                            sendBulletWithInfo("pos limit xmax <coordinate>", "Sets maximum player X coordinate required for position checkers to work");
-                            sendBulletWithInfo("pos limit zmin <coordinate>", "Sets minumum player Z coordinate required for position checkers to work");
-                            sendBulletWithInfo("pos limit zmax <coordinate>", "Sets maximum player Z coordinate required for position checkers to work");
-                            sendBulletWithInfo("pos limit frompos <x> <z> <block_range>", "Set coordinate limits so that only jumps from a certain block range around this position can set off position checkers");
-                            sendBulletWithInfo("pos limit fromcurrent <block_range>", "Same as /bm pos limit pos, but uses your position's X and Z");
-                            sendBulletWithInfo("pos limit fromstrat <block_range> \u00A7c(IMPORTANT: Only works if momentum is noturn and command is run at reset location)", "Same as /bm pos limit pos, but uses the X and Z of final jump from strategy");
+                            sendBMBullet("pos limit xmin <coordinate>", "Sets minumum player X coordinate required for position checkers to work");
+                            sendBMBullet("pos limit xmax <coordinate>", "Sets maximum player X coordinate required for position checkers to work");
+                            sendBMBullet("pos limit zmin <coordinate>", "Sets minumum player Z coordinate required for position checkers to work");
+                            sendBMBullet("pos limit zmax <coordinate>", "Sets maximum player Z coordinate required for position checkers to work");
+                            sendBMBullet("pos limit frompos <x> <z> <block_range>", "Set coordinate limits so that only jumps from a certain block range around this position can set off position checkers");
+                            sendBMBullet("pos limit fromcurrent <block_range>", "Same as /bm pos limit pos, but uses your position's X and Z");
+                            sendBMBullet("pos limit fromstrat <block_range> \u00A7c(IMPORTANT: Only works if momentum is noturn and command is run at reset location)", "Same as /bm pos limit pos, but uses the X and Z of final jump from strategy");
                         };
 
                         String limitAction;
@@ -317,7 +321,7 @@ public class BMCommand extends CommandBase {
                                     break;
                                 }
 
-                                EntityPlayerSP sim = createPlayerSim(real);
+                                EntityPlayerSP sim = createSim(real);
                                 boolean lastAir = false;
 
                                 for (StrategyTick tick : strategyTicks) {
@@ -369,12 +373,12 @@ public class BMCommand extends CommandBase {
 
                 Runnable sendStratUsage = () -> {
                     bmChat("\u00A7bUsage (/bm strat):");
-                    sendBulletWithInfo("strat save <key>", "Saves strategy under key");
-                    sendBulletWithInfo("strat load <key>", "Loads strategy saved under key");
-                    sendBulletWithInfo("strat delete <key>", "Deletes strategy saved under key");
-                    sendBulletWithInfo("strat savehpk <jump #>", "Saves strategy to OJ Jump #, HPK only");
-                    sendBulletWithInfo("strat autoloadhpk", "Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only");
-                    sendBulletWithInfo("strat list", "Lists all keys of saved strategies");
+                    sendBMBullet("strat save <key>", "Saves strategy under key");
+                    sendBMBullet("strat load <key>", "Loads strategy saved under key");
+                    sendBMBullet("strat delete <key>", "Deletes strategy saved under key");
+                    sendBMBullet("strat savehpk <jump #>", "Saves strategy to OJ Jump #, HPK only");
+                    sendBMBullet("strat autoloadhpk", "Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only");
+                    sendBMBullet("strat list", "Lists all keys of saved strategies");
                 };
 
                 String action;
@@ -520,19 +524,19 @@ public class BMCommand extends CommandBase {
             case "dp": {
 
                 try {
-                    int decimalPlaces = Integer.parseInt(strings[1]);
+                    int decimalPrecision = Integer.parseInt(strings[1]);
 
-                    if (decimalPlaces < 0 || decimalPlaces > 100) {
+                    if (decimalPrecision < 0 || decimalPrecision > 100) {
                         bmChat("\u00A7cYour integer must be between 0 and 100! (2nd argument)");
                         break;
                     }
 
-                    GeneralConfig.decimalPlaces = decimalPlaces;
-                    bmChat("\u00A7aChanged # of decimal places to " + decimalPlaces + "!");
+                    GeneralConfig.decimalPrecision = decimalPrecision;
+                    bmChat("\u00A7aChanged decimal precision to " + decimalPrecision + " decimal places!");
 
                 } catch (Exception e) {
                     bmChat("\u00A7bUsage (/bm dp):");
-                    chat("\u00A77- \u00A7e/bm dp <integer> \u00A77(Sets # of decimal places to show globally for all features involving numbers)");
+                    chat("\u00A77- \u00A7e/bm dp <integer> \u00A77(Sets decimal precision globally for all features involving numbers)");
                     break;
                 }
                 break;
@@ -567,14 +571,14 @@ public class BMCommand extends CommandBase {
 
     }
 
-    private void sendBulletWithInfo(String args, String infoMsg) {
+    private static void sendBMBullet(String args, String info) {
 
         EntityPlayerSP player = mc.thePlayer;
         if (player == null) return;
 
         IChatComponent nonInfoComp = new ChatComponentText("\u00A77- \u00A7e/bm " + args + " ");
-        IChatComponent infoComp = new ChatComponentText("\u00A77\u00A7l[INFO]");
-        infoComp.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("\u00A77" + infoMsg)));
+        IChatComponent infoComp = new ChatComponentText("\u00A76\u00A7l[INFO]");
+        infoComp.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("\u00A76" + info)));
         player.addChatMessage(nonInfoComp.appendSibling(infoComp));
 
     }
