@@ -1,6 +1,7 @@
 package com.bzzrg.burgmod.features.trajectory;
 
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.utils.simulation.PlayerSim;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -17,7 +18,7 @@ public class TrajectoryHandler {
 
         if (!TrajectoryConfig.enabled || real == null) return;
 
-        EntityPlayerSP sim = createSim(real);
+        PlayerSim sim = createSim();
 
         for (int i = 0; i < TrajectoryConfig.tickLength; i++) {
             Vec3 oldPos = new Vec3(sim.posX, sim.posY, sim.posZ);

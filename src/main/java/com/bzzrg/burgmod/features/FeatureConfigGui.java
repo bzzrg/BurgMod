@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod.features;
 
-import com.bzzrg.burgmod.config.ConfigHandler;
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.MainConfigGui;
 import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
 import com.bzzrg.burgmod.utils.gui.CustomButton;
@@ -23,8 +23,11 @@ public class FeatureConfigGui extends GuiScreen {
     private final List<Setting<?>> settings = new ArrayList<>();
     private boolean addStrategyButton = false;
 
-    private static final int borderThickness = 3;
-    private static final int borderInline = 20;
+    protected static final int borderThickness = 3;
+    protected static final int borderInline = 20;
+    protected static final int buttonHeight = 25;
+    protected static final int buttonWidth = 160;
+    protected static final int buttonGap = 5;
 
     public void addBooleanSetting(String name, Supplier<Boolean> valueGetter, Consumer<Boolean> valueSetter) {
         settings.add(new Setting<>(name, valueGetter, valueSetter, null, null, null));
@@ -48,6 +51,12 @@ public class FeatureConfigGui extends GuiScreen {
         settings.add(new Setting<>(name, valueGetter, valueSetter, null, null, null));
     }
 
+    private final List<Integer> sizesToAdvanceColumn = new ArrayList<>();
+
+    public void nextColumn() {
+        sizesToAdvanceColumn.add(settings.size());
+    }
+
     public void addStrategyButton() {
         addStrategyButton = true;
     }
@@ -56,16 +65,18 @@ public class FeatureConfigGui extends GuiScreen {
     @SuppressWarnings("unchecked")
     public void initGui() {
 
-        int buttonHeight = 25;
-        int buttonWidth = 160;
-        int buttonGap = 5;
-
         int latestButtonId = 0;
+
+        int buttonX = borderInline + borderThickness + buttonGap;
+        int buttonY = borderInline + borderThickness + buttonGap;
 
         for (int i = 0; i < settings.size(); i++) {
             Setting<?> setting = settings.get(i);
-            int buttonX = borderInline + borderThickness + buttonGap + (buttonWidth + buttonGap) * (i / 10); // <--- max # of elements per column = 10
-            int buttonY = borderInline + borderThickness + buttonGap + (buttonHeight + buttonGap) * (i % 10);
+
+            if (sizesToAdvanceColumn.contains(i)) {
+                buttonY = borderInline + borderThickness + buttonGap;
+                buttonX += buttonWidth + buttonGap;
+            }
 
             Object value = setting.valueGetter.get();
             if (value instanceof Boolean) {
@@ -127,6 +138,8 @@ public class FeatureConfigGui extends GuiScreen {
                 setting.button.displayString = setting.name + ": " + value;
             }
             if (setting.button != null) buttonList.add(setting.button);
+
+            buttonY += buttonHeight + buttonGap;
 
         }
 
@@ -229,7 +242,7 @@ public class FeatureConfigGui extends GuiScreen {
     }
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFile();
+        BasicConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 

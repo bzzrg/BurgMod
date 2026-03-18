@@ -75,7 +75,7 @@ public class CustomSlider extends GuiSlider {
         // Text
         if (this.displayString != null && !this.displayString.isEmpty()) {
             drawCenteredString(mc.fontRendererObj, this.displayString,
-                    xPosition + width / 2, yPosition + (height - 8) / 2, 0xFF00FF00);
+                    xPosition + width / 2, yPosition + (height - 8) / 2, -1);
         }
     }
 }

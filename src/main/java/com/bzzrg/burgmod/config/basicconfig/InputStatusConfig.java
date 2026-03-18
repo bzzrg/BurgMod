@@ -1,38 +1,39 @@
 package com.bzzrg.burgmod.config.basicconfig;
 
-import static com.bzzrg.burgmod.config.ConfigHandler.config;
+import static com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler.*;
 
 public class InputStatusConfig {
 
+    private static final String CAT = "inputStatus";
+
     public static boolean enabled = false;
 
-    public static boolean showFailTick = false;
-    public static boolean showFailReason = false;
+    public static boolean showFailTick = true;
+    public static boolean showFailReason = true;
     public static boolean shortenLabel = false;
 
     public static int labelX = 0;
     public static int labelY = 0;
 
     public static void updateConfigFile() {
-        config.get("inputStatus", "enabled", enabled).setValue(enabled);
+        setBool(CAT, "enabled", enabled);
 
-        config.get("inputStatus", "showFailTick", showFailTick).setValue(showFailTick);
-        config.get("inputStatus", "showFailReason", showFailReason).setValue(showFailReason);
-        config.get("inputStatus", "shortenLabel", shortenLabel).setValue(shortenLabel);
+        setBool(CAT, "showFailTick", showFailTick);
+        setBool(CAT, "showFailReason", showFailReason);
+        setBool(CAT, "shortenLabel", shortenLabel);
 
-        config.get("inputStatus", "labelX", labelX).setValue(labelX);
-        config.get("inputStatus", "labelY", labelY).setValue(labelY);
+        setInt(CAT, "labelX", labelX);
+        setInt(CAT, "labelY", labelY);
     }
 
     public static void updateFields() {
-        enabled = config.get("inputStatus", "enabled", enabled).getBoolean();
+        enabled = getBool(CAT, "enabled", enabled);
 
-        showFailTick = config.get("inputStatus", "showFailTick", showFailTick).getBoolean();
-        showFailReason = config.get("inputStatus", "showFailReason", showFailReason).getBoolean();
-        shortenLabel = config.get("inputStatus", "shortenLabel", shortenLabel).getBoolean();
+        showFailTick = getBool(CAT, "showFailTick", showFailTick);
+        showFailReason = getBool(CAT, "showFailReason", showFailReason);
+        shortenLabel = getBool(CAT, "shortenLabel", shortenLabel);
 
-        labelX = config.get("inputStatus", "labelX", labelX).getInt();
-        labelY = config.get("inputStatus", "labelY", labelY).getInt();
+        labelX = getInt(CAT, "labelX", labelX);
+        labelY = getInt(CAT, "labelY", labelY);
     }
-
 }

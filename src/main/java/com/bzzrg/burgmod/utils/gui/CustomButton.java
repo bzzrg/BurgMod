@@ -37,6 +37,6 @@ public class CustomButton extends GuiButton {
         drawRect(xPosition + width - borderThickness, yPosition, xPosition + width, yPosition + height, borderColor); // right
 
         // === Draw text ===
-        drawCenteredString(mc.fontRendererObj, displayString, xPosition + width / 2, yPosition + (height - 8) / 2, 0xFFFFFFFF);
+        drawCenteredString(mc.fontRendererObj, displayString, xPosition + width / 2, yPosition + (height - 8) / 2, -1);
     }
 }

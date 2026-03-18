@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.utils.resetting;
 
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.perfect45offset.Perfect45OffsetLabel;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetLabel;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -16,7 +16,13 @@ public class ResetHandler {
     public static boolean movedSinceReset = true;
     private static double lastX = 0, lastY = 0, lastZ = 0;
 
-    private static boolean initCall = true;
+    public static void globalReset() {
+        movedSinceReset = false;
+        InputStatusLabel.onReset();
+        StrategyRecorder.onReset();
+        PosCheckersHandler.onReset();
+        P45OffsetLabel.onReset();
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -26,15 +32,8 @@ public class ResetHandler {
             return;
         }
 
-        if (TeleportTracker.tpedThisTick || initCall) {
-
-            movedSinceReset = false;
-            InputStatusLabel.onReset();
-            StrategyRecorder.onReset();
-            PosCheckersHandler.onReset();
-            Perfect45OffsetLabel.onReset();
-
-            initCall = false;
+        if (TeleportTracker.tpedThisTick) {
+            globalReset();
         } else if (player.posX - lastX != 0 || player.posY - lastY != 0 || player.posZ - lastZ != 0) {
             movedSinceReset = true;
         }

@@ -1,9 +1,10 @@
 package com.bzzrg.burgmod.features.strategy;
 
 import com.bzzrg.burgmod.config.MainConfigGui;
-import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
+import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
 import com.bzzrg.burgmod.utils.gui.CustomButton;
 import com.bzzrg.burgmod.utils.gui.CustomTextField;
+import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig.numOf45s;
+import static com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig.numOf45s;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
@@ -87,6 +88,7 @@ public class StrategyConfigGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
+        super.onGuiClosed();
 
         updateStrategyJson();
         gui = null;
@@ -94,10 +96,9 @@ public class StrategyConfigGui extends GuiScreen {
         if (strategyTicks.stream().anyMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
             bmChat("\u00A7cWARN: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
             mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
-
         }
 
-        if (Perfect45OffsetConfig.enabled) {
+        if (P45OffsetConfig.enabled) {
             if (StrategyTick.getJumpTick(numOf45s - 1) == null) {
                 bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
                 mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
@@ -108,7 +109,6 @@ public class StrategyConfigGui extends GuiScreen {
             }
         }
 
-        super.onGuiClosed();
 
     }
 
@@ -284,6 +284,8 @@ public class StrategyConfigGui extends GuiScreen {
                 StrategyRecorder.recording = !StrategyRecorder.recording;
                 button.displayString = StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy";
 
+                ResetHandler.globalReset();
+
                 if (!StrategyRecorder.recording) {
 
                     while (true) {
@@ -310,6 +312,7 @@ public class StrategyConfigGui extends GuiScreen {
                     }
 
                     recordedStrategy.clear();
+
                 }
 
                 break;

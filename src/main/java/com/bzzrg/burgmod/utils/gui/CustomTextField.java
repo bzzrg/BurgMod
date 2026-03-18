@@ -80,18 +80,13 @@ public class CustomTextField {
         Gui.drawRect(x + width - borderThickness, y, x + width, y + height, borderColor);
 
         if (label != null) {
-            mc.fontRendererObj.drawStringWithShadow(label, x + 4, y + 3, 0xFFFFFF);
+            mc.fontRendererObj.drawStringWithShadow(label, x + 4, y + 3, -1);
         }
 
         field.drawTextBox();
 
         if (field.getText().isEmpty() && !field.isFocused()) {
-            mc.fontRendererObj.drawStringWithShadow(
-                    "\u00A77" + emptyMessage,
-                    field.xPosition,
-                    field.yPosition,
-                    0xFFFFFF
-            );
+            mc.fontRendererObj.drawStringWithShadow("\u00A77" + emptyMessage, field.xPosition, field.yPosition, -1);
         }
     }
 

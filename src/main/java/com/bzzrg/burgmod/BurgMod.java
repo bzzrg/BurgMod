@@ -2,17 +2,19 @@ package com.bzzrg.burgmod;
 
 import com.bzzrg.burgmod.command.BMCommand;
 import com.bzzrg.burgmod.command.PosCheckersLimitBoxDrawer;
-import com.bzzrg.burgmod.config.ConfigHandler;
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
 import com.bzzrg.burgmod.debug.EveryTickDebug;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.perfect45offset.Perfect45OffsetLabel;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetDrawer;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetLabel;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
 import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
+import com.bzzrg.burgmod.utils.TaskScheduler;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
 import net.minecraft.client.Minecraft;
@@ -53,7 +55,7 @@ public class BurgMod {
         modConfigFolder = new File(event.getModConfigurationDirectory(), "BurgMod");
         createDirectory(modConfigFolder);
 
-        ConfigHandler.updateFields();
+        BasicConfigHandler.updateFields();
         PosCheckersConfig.updateFields();
 
     }
@@ -78,7 +80,9 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new PosCheckersLimitBoxDrawer());
         MinecraftForge.EVENT_BUS.register(new StrategyPreviewer());
         MinecraftForge.EVENT_BUS.register(new EveryTickDebug());
-        MinecraftForge.EVENT_BUS.register(new Perfect45OffsetLabel());
+        MinecraftForge.EVENT_BUS.register(new P45OffsetLabel());
+        MinecraftForge.EVENT_BUS.register(new TaskScheduler());
+        MinecraftForge.EVENT_BUS.register(new P45OffsetDrawer());
 
     }
 }

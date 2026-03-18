@@ -1,8 +1,9 @@
 package com.bzzrg.burgmod.config;
 
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
+import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
 import com.bzzrg.burgmod.utils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -44,26 +45,26 @@ public class EditPositionsGui extends GuiScreen {
 
         labels.add(new Label(
                 () -> GeneralConfig.color1 + "Perfect 45 Offset: " + GeneralConfig.color2 + "Relocating...",
-                () -> Perfect45OffsetConfig.autoLabelX,
-                () -> Perfect45OffsetConfig.autoLabelY,
-                v -> Perfect45OffsetConfig.autoLabelX = v,
-                v -> Perfect45OffsetConfig.autoLabelY = v
+                () -> P45OffsetConfig.autoLabelX,
+                () -> P45OffsetConfig.autoLabelY,
+                v -> P45OffsetConfig.autoLabelX = v,
+                v -> P45OffsetConfig.autoLabelY = v
         ));
 
         labels.add(new Label(
                 () -> GeneralConfig.color1 + "Perfect 45 Offset (X): " + GeneralConfig.color2 + "Relocating...",
-                () -> Perfect45OffsetConfig.xLabelX,
-                () -> Perfect45OffsetConfig.xLabelY,
-                v -> Perfect45OffsetConfig.xLabelX = v,
-                v -> Perfect45OffsetConfig.xLabelY = v
+                () -> P45OffsetConfig.xLabelX,
+                () -> P45OffsetConfig.xLabelY,
+                v -> P45OffsetConfig.xLabelX = v,
+                v -> P45OffsetConfig.xLabelY = v
         ));
 
         labels.add(new Label(
                 () -> GeneralConfig.color1 + "Perfect 45 Offset (Z): " + GeneralConfig.color2 + "Relocating...",
-                () -> Perfect45OffsetConfig.zLabelX,
-                () -> Perfect45OffsetConfig.zLabelY,
-                v -> Perfect45OffsetConfig.zLabelX = v,
-                v -> Perfect45OffsetConfig.zLabelY = v
+                () -> P45OffsetConfig.zLabelX,
+                () -> P45OffsetConfig.zLabelY,
+                v -> P45OffsetConfig.zLabelX = v,
+                v -> P45OffsetConfig.zLabelY = v
         ));
     }
 
@@ -135,7 +136,7 @@ public class EditPositionsGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFile();
+        BasicConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 

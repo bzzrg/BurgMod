@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.input.Keyboard;
 
 public class EveryTickDebug {
 
@@ -46,7 +47,7 @@ public class EveryTickDebug {
             return;
         }
 
-        //if (Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.printf("moveForward: %.5f, moveStrafing: %.5f%n", player.moveForward, player.moveStrafing);
+        if (Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.printf("Real is sprinting: %s%n", player.isSprinting());
 
     }
 }

@@ -1,10 +1,11 @@
 package com.bzzrg.burgmod.config;
 
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.basicconfig.Perfect45OffsetConfig;
+import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusConfigGui;
-import com.bzzrg.burgmod.features.perfect45offset.Perfect45OffsetConfigGui;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetConfigGui;
 import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryConfigGui;
 import com.bzzrg.burgmod.utils.gui.CustomButton;
@@ -45,7 +46,7 @@ public class MainConfigGui extends GuiScreen {
 
             switch (i) {
                 case 0: buttonName = InputStatusConfig.enabled ? "\u00A7aInput Status: ON" : "\u00A7cInput Status: OFF"; break;
-                case 1: buttonName = Perfect45OffsetConfig.enabled ? "\u00A7aPerfect 45 Offset: ON" : "\u00A7cPerfect 45 Offset: OFF"; break;
+                case 1: buttonName = P45OffsetConfig.enabled ? "\u00A7aPerfect 45 Offset: ON" : "\u00A7cPerfect 45 Offset: OFF"; break;
                 case 2: buttonName = TrajectoryConfig.enabled ? "\u00A7aTrajectory: ON" : "\u00A7cTrajectory: OFF"; break;
             }
 
@@ -144,11 +145,11 @@ public class MainConfigGui extends GuiScreen {
 
                 break;
             case 3:
-                Perfect45OffsetConfig.enabled = !Perfect45OffsetConfig.enabled;
-                button.displayString = Perfect45OffsetConfig.enabled ? "\u00A7aPerfect 45 Offset: ON" : "\u00A7cPerfect 45 Offset: OFF";
+                P45OffsetConfig.enabled = !P45OffsetConfig.enabled;
+                button.displayString = P45OffsetConfig.enabled ? "\u00A7aPerfect 45 Offset: ON" : "\u00A7cPerfect 45 Offset: OFF";
                 break;
             case 4:
-                Minecraft.getMinecraft().displayGuiScreen(new Perfect45OffsetConfigGui());
+                Minecraft.getMinecraft().displayGuiScreen(new P45OffsetConfigGui());
                 break;
             case 5:
                 Minecraft.getMinecraft().displayGuiScreen(null);
@@ -156,10 +157,12 @@ public class MainConfigGui extends GuiScreen {
                 sendInfoBullet("What Does It Do?", "Perfect 45 Offset calculates the best landing offset you can still achieve for a 45 jump if the rest of your timings and angles are absolutely perfect. " +
                         "For example, in a quad 45, the label would be displaying the best possible offset for the quad 45 right after you reset. " +
                         "But after let's say 2 45s, now the best possible offset you can get is lower because of human error in the 45s you have done. " +
-                        "If the calculated offset becomes negative, that would indicate that landing the jump is no longer possible. ");
-                sendInfoBullet("Label(s) Shown",
-                        "\u00A77- \u00A7aAuto: \u00A76Shows just one label that automatically determines if offset should be X or Z. Useful for non-diagonal 45 strafe jumps.\n" +
-                                "\u00A77- \u00A7aX & Z: \u00A76Shows 2 labels. One is for X offset, and one is for Z offset. Useful for diagonal 45 strafe jumps.");
+                        "If the calculated offset becomes negative, landing the jump is no longer possible.");
+                sendInfoBullet("Show Auto Offset", "Shows offset label that automatically determines if offset should be X or Z. " +
+                        "It works by taking your yaw when you reset and determining whether you are facing X or facing Z. " +
+                        "Therefore, it might determine the wrong direction, which in that case you can just use the specific X/Z offset labels.");
+                sendInfoBullet("Show X Offset", "Shows offset label that is always for the X direction.");
+                sendInfoBullet("Show Z Offset", "Shows offset label that is always for the Z direction.");
                 sendInfoBullet("Shorten Label", "Changes \"Perfect 45 Offset\" to \"P45 Offset\"");
                 sendInfoBullet("# of 45s", "The amount of 45 strafes your jump contains. " +
                         "For example, if you are doing a triple 45, set # of 45s to 3. Your # of 45s must be equal to or less than the number of jumps in your strategy.");
@@ -169,16 +172,33 @@ public class MainConfigGui extends GuiScreen {
                 sendInfoBullet("45 Key", "The strafe key you use to 45. Either A or D. Needed for offset calculation.");
                 sendInfoBullet("Stop On Input Fail", "Shows fail message on label and stops tracking offset when you fail your strategy's inputs. Resets after teleporting back to checkpoint.");
                 sendInfoBullet("E Notation", "Uses E Notation for displayed offsets on the label. For example, \"-0.0000546\" -> \"-5.46e-5\"");
-                sendInfoBullet("E Notation Max Power", "Sets a maximum power that E Notation can be for it to display as E Notation. " +
+                sendInfoBullet("E Notation Max Exp.", "Sets a maximum exponent that E Notation can have for it to display as E Notation. " +
                         "For example, let's say this setting is set to -5. " +
-                        "\"-0.000000546\" would be \"-5.46e-7\", but \"-0.00546\" would still be  \"-0.00546\" because if that offset was in E Notation, it would be a power of -3 which would exceed the maximum power of -5.");
+                        "\"-0.000000546\" would be \"-5.46e-7\", but \"-0.00546\" would still be \"-0.00546\" because if that offset was in E Notation, it would be a power of -3 which would exceed the maximum power of -5.");
                 sendInfoBullet("E Notation Precision", "Sets # of decimal places for the number part of the E Notation. " +
                         "For example, let's say this setting is set to 1. Then \"-0.000054689\" would be \"-5.5e-5\". This is independent from the decimal precision set in /bm dp.");
+                sendInfoBullet("Fix Strafing", "For Perfect 45 Offset to work, your strategy must include the strafing and the A/D tapping you do while 45ing. " +
+                        "You would usually need to add the strafing manually but this button serves as a shortcut to fix your strategy's strafing based on your # of 45s set in config. " +
+                        "This may not work in some rare cases for some strategies, like for example 1bm 5-1. " +
+                        "This is because for that jump, you jump with W+strafe instead of just W for your first 45, so it is abnormal. " +
+                        "In those cases, just set the strafing yourself inside the strategy editor.");
+                sendInfoBullet("What Does Invalid Config Mean?", "If your label says Invalid Config, it means one of the following 3:\n" +
+                        "\u00A77- \u00A7eThe jump angle you have set is invalid (must be any valid number, decimals are allowed)\n" +
+                        "\u00A77- \u00A7eThe # of 45s you have set is greater than the number of jumps in your strategy\n" +
+                        "\u00A77- \u00A7eThe last tick of your strategy does not have AIR selected");
+                sendInfoBullet("What Does Can't Find LB Mean?",
+                        "If your label says Can't Find LB, it means that your strategy was simulated with perfect 45s, but no landing block within 200 ticks of the start of your strategy (Simulation starts at reset location). " +
+                                "Note that only landing blocks that you actually land ON TOP OF are allowed/detected. " +
+                                "For example, landing on top of a ladder is detected but grabbing the side of the ladder is not detected, and neither is water, lava, etc.");
                 sendInfoBullet("Important Things To Know",
-                        "\u00A77- \u00A76Strategy is required for offset calculations.\n" +
-                                "\u00A77- \u00A76The last tick of your strategy must be an air tick.\n" +
-                                "\u00A77- \u00A76Your # of 45s must be equal to or less than the number of jumps in your strategy.\n" +
-                                "\u00A77- \u00A76Using Trim Strategy works for Perfect 45 Offset. The mod just extends the strategy internally using the last tick's inputs.");
+                        "\u00A77- \u00A7eStrategy is required for offset calculations.\n" +
+                                "\u00A77- \u00A7eThe last tick of your strategy must be an air tick.\n" +
+                                "\u00A77- \u00A7eYour # of 45s must be equal to or less than the number of jumps in your strategy.\n" +
+                                "\u00A77- \u00A7eUsing Trim Strategy works for Perfect 45 Offset. The mod just extends the strategy internally using the last tick's inputs.\n" +
+                                "\u00A77- \u00A7eOnly landing blocks that you actually land ON TOP OF are allowed/detected. " +
+                                "For example, landing on top of a ladder is detected but grabbing the side of the ladder is not detected, and neither is water, lava, etc.\n" +
+                                "\u00A77- \u00A7eYour strategy must include the strafing and the A/D tapping you do while 45ing. " +
+                                "You can do this manually in the strategy editor or automatically with the Fix Strafing button (more info about this button inside its info block).");
                 break;
             case 6:
                 TrajectoryConfig.enabled = !TrajectoryConfig.enabled;
@@ -203,9 +223,36 @@ public class MainConfigGui extends GuiScreen {
                 Minecraft.getMinecraft().displayGuiScreen(new StrategyConfigGui());
                 break;
             case 11:
-
-
-                // add strategy info here 
+                Minecraft.getMinecraft().displayGuiScreen(null);
+                bmChat("\u00A7bStrategy Editor Info:");
+                sendInfoBullet("What Is It For?", "The strategy editor is used to define the inputs of a strategy for a jump tick by tick. " +
+                        "Features like Input Status and Perfect 45 Offset require you to have your strategy set for the jump you are currently doing.");
+                sendInfoBullet("Add Tick", "Adds an individual tick to the strategy.");
+                sendInfoBullet("Add Jump", "The add jump button just allows to add preset sequences of ticks that are common (like Jam or HH) instead of needing to do it manually through adding individual ticks. " +
+                        "You use the Add Jump button by typing a jump type in the field below the button and then clicking the button (all jump types are listed if you try to add an invalid jump type).");
+                sendInfoBullet("Jump Config Buttons",
+                        "\u00A77- \u00A7bExtend Button: \u00A7eShows the ticks that actually make up the jump. " +
+                                "These ticks can be modified manually, but changing the config of the jump using its config buttons will override any changes you have made to the jump's ticks manually.\n" +
+                                "\u00A77- \u00A7bW/A/S/D: \u00A7eDefines the movement keys that are used for the jump.\n" +
+                                "\u00A77- \u00A7bA/D: \u00A7eDefines the strafe key that is used for the jump.\n" +
+                                "\u00A77- \u00A7bRun 1t: \u00A7eAdds one tick of running after the jump using whatever config is already set for the jump. " +
+                                "For example, Run 1t would add one tick of W+A+SPR if the jump was a Jam with W+A+SPR.\n" +
+                                "\u00A77- \u00A7b1-11t Slider: \u00A7eFor example, if set to 2t, then for HH it would be a 2t HH, for Mark it would be a 2t Mark, etc.");
+                sendInfoBullet("Trim Strategy", "Cuts off all duplicate ticks at the end of your strategy except for one of them. " +
+                        "This is because more than one of the same tick at the end of your strategy is redundant for all strategy related features.");
+                sendInfoBullet("Mirror Strategy", "Switches all ticks/jumps with A selected to have D selected instead and vice versa. " +
+                        "If the tick/jump has both A and D selected or has neither selected, it is unaffected.");
+                sendInfoBullet("Record Strategy", "Records the player's movement so that the user can perform the strategy in game instead of setting ticks manually. " +
+                        "To record properly, know that recording starts when you start moving after you have reset. " +
+                        "Note that all recorded ticks are cleared when you reset, that way you don't have to re-record everytime you fail your inputs while trying to record the strategy. " +
+                        "All empty ticks (ticks with no WASD, SPR, SNK, or AIR) are cut off when you stop recording.");
+                sendInfoBullet("Preview Strategy", "Draws a line that shows the trajectory your player would follow from your current position if your strategy was performed perfectly tick by tick.");
+                sendInfoBullet("Important Things To Know",
+                        "\u00A77- \u00A7eHaving SPR selected for a tick means you are sprinting during that tick, not that you are holding down the sprint key during that tick.\n" +
+                                "\u00A77- \u00A7eHaving SNK selected for a tick means you are sneaking during that tick, not that you are holding down the sneak key during that tick.\n" +
+                                "\u00A77- \u00A7eHaving AIR selected for a tick means you are in the air during that tick, not that you are holding down the jump key during that tick.\n" +
+                                "\u00A77- \u00A7eFeatures that use strategy might break or warn you if you have a tick with both SPR and SNK selected. " +
+                                        "This is because it is impossible to be sprinting and sneaking at the same time.");
 
                 break;
             case 12:
@@ -217,7 +264,7 @@ public class MainConfigGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        ConfigHandler.updateConfigFile();
+        BasicConfigHandler.updateConfigFile();
         super.onGuiClosed();
     }
 

@@ -1,6 +1,5 @@
 package com.bzzrg.burgmod.debug.fieldwatching;
 
-import com.bzzrg.burgmod.debug.FieldWatchConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
@@ -12,7 +11,16 @@ public final class FieldWatcher {
 
     private FieldWatcher() {}
 
-    public static void write(Object obj, int fieldId, float newVal) {
+    public static void write(Object obj, int fieldId, boolean newVal) { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, byte newVal)    { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, char newVal)    { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, short newVal)   { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, int newVal)     { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, float newVal)   { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, long newVal)    { writeBoxed(obj, fieldId, newVal); }
+    public static void write(Object obj, int fieldId, double newVal)  { writeBoxed(obj, fieldId, newVal); }
+
+    private static void writeBoxed(Object obj, int fieldId, Object newVal) {
 
         if (!FieldWatchConfig.ENABLED) {
             BYPASS = true;
@@ -24,9 +32,9 @@ public final class FieldWatcher {
             return;
         }
 
-        float oldVal = FieldWatchConfig.get(obj, fieldId);
+        Object oldVal = FieldWatchConfig.get(obj, fieldId);
 
-        if (FieldWatchConfig.shouldLog(obj) && oldVal != newVal) {
+        if (FieldWatchConfig.shouldLog(obj) && valuesDifferent(oldVal, newVal)) {
             log(fieldId, oldVal, newVal);
         }
 
@@ -38,7 +46,12 @@ public final class FieldWatcher {
         }
     }
 
-    private static void log(int fieldId, float oldVal, float newVal) {
+    private static boolean valuesDifferent(Object oldVal, Object newVal) {
+        if (oldVal == null) return newVal != null;
+        return !oldVal.equals(newVal);
+    }
+
+    private static void log(int fieldId, Object oldVal, Object newVal) {
 
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 
@@ -52,15 +65,16 @@ public final class FieldWatcher {
             break;
         }
 
-        String shortTrace = (caller == null)
+        String shortTrace = caller == null
                 ? "unknown"
                 : caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
 
         String name = FieldWatchConfig.fieldName(fieldId);
 
         StringBuilder full = new StringBuilder();
-        for (StackTraceElement s : trace)
+        for (StackTraceElement s : trace) {
             full.append(s).append('\n');
+        }
 
         String traceString = full.toString();
 

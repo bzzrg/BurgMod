@@ -1,9 +1,6 @@
 package com.bzzrg.burgmod.utils.simulation;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.GlStateManager;
@@ -11,12 +8,11 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.Vec3;
@@ -25,7 +21,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.lwjgl.opengl.GL11;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.utils.GeneralUtils.isAirborne;
+import static com.bzzrg.burgmod.utils.GeneralUtils.onGround;
 
 public class SimUtils {
 
@@ -37,19 +33,11 @@ public class SimUtils {
         public void addEffect(EntityFX effect) {}
     }
 
-    private static class AntiPacketNetHandler extends NetHandlerPlayClient {
-        public AntiPacketNetHandler(Minecraft mcIn, NetworkManager nm, GameProfile gp) {
-            super(mcIn, mcIn.currentScreen, nm, gp);
-        }
+    public static void updateSim(PlayerSim sim, UpdateSimOptions options) { // options can be null, which means method just uses real player's "options"
 
-        @Override
-        public void addToSendQueue(Packet packetIn) {
-        }
-    }
-
-    public static void updateSim(EntityPlayerSP sim, UpdateSimOptions options) { // options can be null, which means method just uses real player's "options"
-        EntityPlayerSP real = mc.thePlayer;
-        if (real == null) return;
+        final String MCP = "pressed";
+        final String OBF = "field_74513_e";
+        boolean oldSprinting = ReflectionHelper.getPrivateValue(KeyBinding.class, mc.gameSettings.keyBindSprint, MCP, OBF);
 
         if (options != null) {
             if (options.W != null || options.S != null) {
@@ -66,7 +54,10 @@ public class SimUtils {
                 if (Boolean.TRUE.equals(options.SNK)) sim.movementInput.moveStrafe *= 0.3;
             }
 
-            if (options.SPR != null) sim.setSprinting(options.SPR);
+            if (options.SPR != null) {
+                sim.setSprinting(options.SPR);
+                ReflectionHelper.setPrivateValue(KeyBinding.class, mc.gameSettings.keyBindSprint, options.SPR, MCP, OBF);
+            }
             if (options.SNK != null) {
                 sim.movementInput.sneak = options.SNK;
                 sim.setSneaking(options.SNK);
@@ -84,29 +75,15 @@ public class SimUtils {
 
         sim.onUpdate();
 
+        ReflectionHelper.setPrivateValue(KeyBinding.class, mc.gameSettings.keyBindSprint, oldSprinting, MCP, OBF);
         mc.effectRenderer = old;
 
     }
 
-    public static EntityPlayerSP createSim(EntityPlayerSP real) {
-        EntityPlayerSP sim = new EntityPlayerSP(mc, real.worldObj, new AntiPacketNetHandler(mc, mc.getNetHandler().getNetworkManager(), mc.getNetHandler().getGameProfile()), real.getStatFileWriter()) {
-            @Override
-            public void playSound(String name, float volume, float pitch) {}
+    public static PlayerSim createSim() {
+        EntityPlayerSP real = mc.thePlayer;
 
-            @Override
-            public void updateEntityActionState() {
-                if (!this.isCurrentViewEntity()) {
-                    this.moveStrafing = this.movementInput.moveStrafe;
-                    this.moveForward = this.movementInput.moveForward;
-                    this.isJumping = this.movementInput.jump;
-                    this.prevRenderArmYaw = this.renderArmYaw;
-                    this.prevRenderArmPitch = this.renderArmPitch;
-                    this.renderArmPitch = (float)((double)this.renderArmPitch + (double)(this.rotationPitch - this.renderArmPitch) * 0.5D);
-                    this.renderArmYaw = (float)((double)this.renderArmYaw + (double)(this.rotationYaw - this.renderArmYaw) * 0.5D);
-                }
-                super.updateEntityActionState();
-            }
-        };
+        PlayerSim sim = new PlayerSim();
 
         sim.copyLocationAndAnglesFrom(real);
         sim.prevPosX = real.prevPosX;
@@ -121,15 +98,17 @@ public class SimUtils {
         sim.posY = real.posY;
         sim.posZ = real.posZ;
 
+        sim.setEntityBoundingBox(real.getEntityBoundingBox());
+
         sim.motionX = real.motionX;
         sim.motionY = real.motionY;
         sim.motionZ = real.motionZ;
 
-        sim.onGround = !isAirborne();
+        sim.onGround = onGround();
         sim.isCollidedHorizontally = real.isCollidedHorizontally;
         sim.isCollidedVertically = real.isCollidedVertically;
         sim.isCollided = real.isCollided;
-        sim.isAirBorne = isAirborne();
+        sim.isAirBorne = !onGround();
 
         sim.fallDistance = real.fallDistance;
         sim.stepHeight = real.stepHeight;

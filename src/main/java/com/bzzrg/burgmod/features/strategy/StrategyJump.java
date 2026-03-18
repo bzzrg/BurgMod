@@ -22,13 +22,8 @@ public class StrategyJump {
     public final JumpType type;
     public final List<StrategyTick> ticks = new ArrayList<>();
 
-    public final GuiButton removeButton;
-
     public final GuiButton extendButton;
     public boolean extended = false;
-
-    public final GuiButton run1TButton;
-    public boolean run1T = false;
 
     public BiMap<InputType, GuiButton> directionButtons = null;
     public Set<InputType> directions = null;
@@ -36,8 +31,13 @@ public class StrategyJump {
     public GuiButton directionButton = null;
     public InputType direction = null;
 
+    public final GuiButton run1TButton;
+    public boolean run1T = false;
+
     public GuiSlider lengthSlider = null;
     public Integer length = null;
+
+    public final GuiButton removeButton;
 
     public StrategyJump(JumpType type) {
         this.type = type;
@@ -52,7 +52,6 @@ public class StrategyJump {
 
         // === Base Buttons ===
         extendButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(buttonHeight + buttonGap), 0, buttonHeight, buttonHeight, "\u2227");
-        run1TButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(run1TButLength + buttonGap), 0, run1TButLength, buttonHeight, "\u00A7cRun 1t");
 
         if (type == JumpType.JAM || type == JumpType.HH || type == JumpType.PESSI || type == JumpType.FMM) {
             directionButtons = HashBiMap.create();
@@ -67,6 +66,8 @@ public class StrategyJump {
             directionButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(buttonHeight + buttonGap), 0, buttonHeight, buttonHeight, "A");
             direction = A;
         }
+
+        run1TButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(run1TButLength + buttonGap), 0, run1TButLength, buttonHeight, "\u00A7cRun 1t");
 
         // Length slider
         if (type != JumpType.JAM && type != JumpType.WDWA && type != JumpType.BWMM) {

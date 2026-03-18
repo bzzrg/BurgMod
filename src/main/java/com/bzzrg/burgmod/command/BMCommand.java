@@ -1,13 +1,14 @@
 package com.bzzrg.burgmod.command;
 
 import com.bzzrg.burgmod.BurgMod;
-import com.bzzrg.burgmod.config.ConfigHandler;
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
 import com.bzzrg.burgmod.features.poschecker.Axis;
 import com.bzzrg.burgmod.features.poschecker.PosChecker;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
+import com.bzzrg.burgmod.utils.simulation.PlayerSim;
 import com.bzzrg.burgmod.utils.simulation.UpdateSimOptions;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.command.CommandBase;
@@ -30,7 +31,6 @@ import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig.posCheckers;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.utils.GeneralUtils.*;
-import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.createSim;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.updateSim;
 
@@ -321,7 +321,7 @@ public class BMCommand extends CommandBase {
                                     break;
                                 }
 
-                                EntityPlayerSP sim = createSim(real);
+                                PlayerSim sim = createSim();
                                 boolean lastAir = false;
 
                                 for (StrategyTick tick : strategyTicks) {
@@ -567,7 +567,7 @@ public class BMCommand extends CommandBase {
             }
         }
 
-        ConfigHandler.updateConfigFile();
+        BasicConfigHandler.updateConfigFile();
 
     }
 

@@ -1,8 +1,10 @@
 package com.bzzrg.burgmod.config.basicconfig;
 
-import static com.bzzrg.burgmod.config.ConfigHandler.config;
+import static com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler.*;
 
 public class TrajectoryConfig {
+
+    private static final String CAT = "trajectory";
 
     public static boolean enabled = false;
 
@@ -14,26 +16,24 @@ public class TrajectoryConfig {
     public static int tickLength = 50;
 
     public static void updateConfigFile() {
-        config.get("trajectory", "enabled", enabled).setValue(enabled);
+        setBool(CAT, "enabled", enabled);
 
-        config.get("trajectory", "colorRed", colorRed).setValue(colorRed);
-        config.get("trajectory", "colorGreen", colorGreen).setValue(colorGreen);
-        config.get("trajectory", "colorBlue", colorBlue).setValue(colorBlue);
-        config.get("trajectory", "alpha", alpha).setValue(alpha);
-        config.get("trajectory", "thickness", thickness).setValue(thickness);
-        config.get("trajectory", "tickLength", tickLength).setValue(tickLength);
-
+        setFloat(CAT, "colorRed", colorRed);
+        setFloat(CAT, "colorGreen", colorGreen);
+        setFloat(CAT, "colorBlue", colorBlue);
+        setFloat(CAT, "alpha", alpha);
+        setFloat(CAT, "thickness", thickness);
+        setInt(CAT, "tickLength", tickLength);
     }
 
     public static void updateFields() {
-        enabled = config.get("trajectory", "enabled", enabled).getBoolean();
+        enabled = getBool(CAT, "enabled", enabled);
 
-        colorRed = (float) config.get("trajectory", "colorRed", colorRed).getDouble();
-        colorGreen = (float) config.get("trajectory", "colorGreen", colorGreen).getDouble();
-        colorBlue = (float) config.get("trajectory", "colorBlue", colorBlue).getDouble();
-        alpha = (float) config.get("trajectory", "alpha", alpha).getDouble();
-        thickness = (float) config.get("trajectory", "thickness", thickness).getDouble();
-        tickLength = config.get("trajectory", "tickLength", tickLength).getInt();
+        colorRed = getFloat(CAT, "colorRed", colorRed);
+        colorGreen = getFloat(CAT, "colorGreen", colorGreen);
+        colorBlue = getFloat(CAT, "colorBlue", colorBlue);
+        alpha = getFloat(CAT, "alpha", alpha);
+        thickness = getFloat(CAT, "thickness", thickness);
+        tickLength = getInt(CAT, "tickLength", tickLength);
     }
-
 }
