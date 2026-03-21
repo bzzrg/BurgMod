@@ -24,9 +24,9 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   Uses icons instead of full words for the label. For example, `"Waiting..." -> "..."`
 
 ### Showcases
-<!-- Add 2 showcases here -->
-- (placeholder)
-- (placeholder)
+[![Showcase 1](https://img.youtube.com/vi/Nl3VHL3SM0U/0.jpg)](https://www.youtube.com/watch?v=Nl3VHL3SM0U)
+
+[![Showcase 2](https://img.youtube.com/vi/McFBeERzFMo/0.jpg)](https://www.youtube.com/watch?v=McFBeERzFMo)
 
 ---
 
@@ -125,9 +125,9 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   - Landing must be on top of a block  
 
 ### Showcases
-<!-- Add 2 showcases here -->
-- (placeholder)
-- (placeholder)
+[![Showcase 1](https://img.youtube.com/vi/ogHvuFBKtuM/0.jpg)](https://www.youtube.com/watch?v=ogHvuFBKtuM)
+
+[![Showcase 2](https://img.youtube.com/vi/tBZgtMyY9Es/0.jpg)](https://www.youtube.com/watch?v=tBZgtMyY9Es)
 
 ---
 
@@ -144,9 +144,8 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 - **Tick Length**  
   The amount of ticks that the trajectory line should predict into the future.
 
-### Showcases
-<!-- Add 1 showcase here -->
-- (placeholder)
+### Showcase
+[![Showcase](https://img.youtube.com/vi/WHZO3lhQV0o/0.jpg)](https://www.youtube.com/watch?v=WHZO3lhQV0o)
 
 ---
 
@@ -193,9 +192,8 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 - **pos limit fromstrat `<block_range>`**  
   Uses the final jump position from your strategy
 
-### Showcases
-<!-- Add 1 showcase here -->
-- (placeholder)
+### Showcase
+[![Showcase](https://img.youtube.com/vi/WVmCx3AI-g4/0.jpg)](https://www.youtube.com/watch?v=WVmCx3AI-g4)
 
 ---
 
