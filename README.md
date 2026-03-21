@@ -132,10 +132,12 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 ### Showcases
 
 [![Showcase 1](https://img.youtube.com/vi/ogHvuFBKtuM/0.jpg)](https://www.youtube.com/watch?v=ogHvuFBKtuM)
-**▶ Watch Showcase 1**
+
+[▶ Watch Showcase 1](https://www.youtube.com/watch?v=ogHvuFBKtuM)
 
 [![Showcase 2](https://img.youtube.com/vi/tBZgtMyY9Es/0.jpg)](https://www.youtube.com/watch?v=tBZgtMyY9Es)
-**▶ Watch Showcase 2**
+
+[▶ Watch Showcase 2](https://www.youtube.com/watch?v=tBZgtMyY9Es)
 
 ---
 
@@ -155,7 +157,8 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 ### Showcase
 
 [![Showcase](https://img.youtube.com/vi/WHZO3lhQV0o/0.jpg)](https://www.youtube.com/watch?v=WHZO3lhQV0o)
-**▶ Watch Showcase**
+
+[▶ Watch Showcase](https://www.youtube.com/watch?v=WHZO3lhQV0o)
 
 ---
 
@@ -205,7 +208,8 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 ### Showcase
 
 [![Showcase](https://img.youtube.com/vi/WVmCx3AI-g4/0.jpg)](https://www.youtube.com/watch?v=WVmCx3AI-g4)
-**▶ Watch Showcase**
+
+[▶ Watch Showcase](https://www.youtube.com/watch?v=WVmCx3AI-g4)
 
 ---
 
