@@ -1,4 +1,4 @@
-Copyright (c) 2026 YourName
+Copyright (c) 2026 Burg
 
 This mod is licensed under the GNU Lesser General Public License v2.1 or later.
 
