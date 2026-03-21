@@ -24,9 +24,12 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   Uses icons instead of full words for the label. For example, `"Waiting..." -> "..."`
 
 ### Showcases
+
 [![Showcase 1](https://img.youtube.com/vi/Nl3VHL3SM0U/0.jpg)](https://www.youtube.com/watch?v=Nl3VHL3SM0U)
+**▶ Watch Showcase 1**
 
 [![Showcase 2](https://img.youtube.com/vi/McFBeERzFMo/0.jpg)](https://www.youtube.com/watch?v=McFBeERzFMo)
+**▶ Watch Showcase 2**
 
 ---
 
@@ -125,9 +128,12 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   - Landing must be on top of a block  
 
 ### Showcases
+
 [![Showcase 1](https://img.youtube.com/vi/ogHvuFBKtuM/0.jpg)](https://www.youtube.com/watch?v=ogHvuFBKtuM)
+**▶ Watch Showcase 1**
 
 [![Showcase 2](https://img.youtube.com/vi/tBZgtMyY9Es/0.jpg)](https://www.youtube.com/watch?v=tBZgtMyY9Es)
+**▶ Watch Showcase 2**
 
 ---
 
@@ -145,7 +151,9 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   The amount of ticks that the trajectory line should predict into the future.
 
 ### Showcase
+
 [![Showcase](https://img.youtube.com/vi/WHZO3lhQV0o/0.jpg)](https://www.youtube.com/watch?v=WHZO3lhQV0o)
+**▶ Watch Showcase**
 
 ---
 
@@ -193,7 +201,9 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   Uses the final jump position from your strategy
 
 ### Showcase
+
 [![Showcase](https://img.youtube.com/vi/WVmCx3AI-g4/0.jpg)](https://www.youtube.com/watch?v=WVmCx3AI-g4)
+**▶ Watch Showcase**
 
 ---
 
