@@ -1,4 +1,4 @@
-# Burg Mod
+# BurgMod
 
 Advanced parkour features for precise movement, strategy validation, and jump analysis.
 
