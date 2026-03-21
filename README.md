@@ -26,11 +26,12 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 ### Showcases
 
 [![Showcase 1](https://img.youtube.com/vi/Nl3VHL3SM0U/0.jpg)](https://www.youtube.com/watch?v=Nl3VHL3SM0U)
-**▶ Watch Showcase 1**
+
+[▶ Watch Showcase 1](https://www.youtube.com/watch?v=Nl3VHL3SM0U)
 
 [![Showcase 2](https://img.youtube.com/vi/McFBeERzFMo/0.jpg)](https://www.youtube.com/watch?v=McFBeERzFMo)
-**▶ Watch Showcase 2**
 
+[▶ Watch Showcase 2](https://www.youtube.com/watch?v=McFBeERzFMo)
 ---
 
 ## Perfect 45 Offset
