@@ -110,7 +110,7 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 
 - **What Does Invalid Strategy Mean?**  
   Your strategy is invalid due to one of the following:
-  - # of 45s is greater than number of jumps  
+  - \# of 45s is greater than number of jumps  
   - Last tick is not AIR  
   - 45 jumps are inputted wrong  
 
@@ -123,7 +123,7 @@ Advanced parkour features for precise movement, strategy validation, and jump an
 ### Extra
 - **Important Things To Know**
   - Strategy is required  
-  - # of 45s must be ≤ jumps  
+  - \# of 45s must be ≤ jumps  
   - Last tick must be AIR  
   - Strategy must include strafing  
   - Trim Strategy works  
