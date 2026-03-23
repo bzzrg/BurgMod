@@ -1,6 +1,7 @@
 package com.bzzrg.burgmod.features.trajectory;
 
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.utils.debug.EveryTickDebug;
 import com.bzzrg.burgmod.utils.simulation.PlayerSim;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.Vec3;
@@ -11,6 +12,8 @@ import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.*;
 
 public class TrajectoryHandler {
+
+    public static boolean allow = false;
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent e) {
@@ -26,7 +29,11 @@ public class TrajectoryHandler {
             Vec3 newPos = new Vec3(sim.posX, sim.posY, sim.posZ);
 
             drawLine(oldPos, newPos, TrajectoryConfig.colorRed, TrajectoryConfig.colorGreen, TrajectoryConfig.colorBlue, TrajectoryConfig.alpha, TrajectoryConfig.thickness);
+
+            if (allow) EveryTickDebug.logPlayerState("Traj Sim", sim);
         }
+
+        allow = false;
 
     }
 

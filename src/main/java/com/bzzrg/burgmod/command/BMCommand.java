@@ -6,6 +6,7 @@ import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
 import com.bzzrg.burgmod.features.poschecker.Axis;
 import com.bzzrg.burgmod.features.poschecker.PosChecker;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersDrawer;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
 import com.bzzrg.burgmod.utils.simulation.PlayerSim;
@@ -276,7 +277,7 @@ public class BMCommand extends CommandBase {
                                 PosCheckersConfig.zMax = z + blockRange;
                                 sendUpdatedCheckers.run();
 
-                                PosCheckersLimitBoxDrawer.drawFor4Seconds();
+                                PosCheckersDrawer.drawFor4Seconds();
                                 break;
                             }
                             case "fromcurrent": {
@@ -298,7 +299,7 @@ public class BMCommand extends CommandBase {
                                 PosCheckersConfig.zMax = player.posZ + blockRange;
                                 sendUpdatedCheckers.run();
 
-                                PosCheckersLimitBoxDrawer.drawFor4Seconds();
+                                PosCheckersDrawer.drawFor4Seconds();
                                 break;
                             }
                             case "fromstrat": {
@@ -347,7 +348,7 @@ public class BMCommand extends CommandBase {
                                 PosCheckersConfig.zMax = sim.posZ + blockRange;
                                 sendUpdatedCheckers.run();
 
-                                PosCheckersLimitBoxDrawer.drawFor4Seconds();
+                                PosCheckersDrawer.drawFor4Seconds();
                                 break;
                             }
                             default: {

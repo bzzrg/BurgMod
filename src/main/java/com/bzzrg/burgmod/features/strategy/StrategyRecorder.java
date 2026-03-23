@@ -1,6 +1,5 @@
 package com.bzzrg.burgmod.features.strategy;
 
-import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -26,7 +25,7 @@ public class StrategyRecorder {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
-        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().thePlayer == null || !recording || InputStatusLabel.finished || !ResetHandler.movedSinceReset) {
+        if (event.phase != TickEvent.Phase.END || Minecraft.getMinecraft().thePlayer == null || !recording || !ResetHandler.movedSinceReset) {
             return;
         }
 

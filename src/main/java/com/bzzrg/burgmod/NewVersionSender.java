@@ -35,9 +35,10 @@ public class NewVersionSender {
                 // Send message
                 EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
 
-                if (player != null) {
-                    Minecraft.getMinecraft().addScheduledTask(() -> player.addChatMessage(msg)); // Back to main thread
-                }
+                Minecraft.getMinecraft().addScheduledTask(() -> {
+                    if (player != null) player.addChatMessage(msg);
+                });
+
 
             } catch (Exception ignored) {}
         }, "BurgMod-New-Version-Message").start();

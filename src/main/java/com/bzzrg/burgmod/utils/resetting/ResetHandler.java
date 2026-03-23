@@ -1,7 +1,10 @@
 package com.bzzrg.burgmod.utils.resetting;
 
-import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
-import com.bzzrg.burgmod.features.perfect45offset.P45OffsetLabel;
+import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
+import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
+import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -18,10 +21,10 @@ public class ResetHandler {
 
     public static void globalReset() {
         movedSinceReset = false;
-        InputStatusLabel.onReset();
-        StrategyRecorder.onReset();
-        PosCheckersHandler.onReset();
-        P45OffsetLabel.onReset();
+        if (InputStatusConfig.enabled) InputStatusHandler.onReset();
+        if (StrategyRecorder.recording) StrategyRecorder.onReset();
+        if (PosCheckersConfig.enabled) PosCheckersHandler.onReset();
+        if (P45OffsetConfig.enabled) P45OffsetHandler.onReset();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

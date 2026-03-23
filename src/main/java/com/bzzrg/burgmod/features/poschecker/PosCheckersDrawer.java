@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.command;
+package com.bzzrg.burgmod.features.poschecker;
 
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
 import net.minecraft.client.renderer.GlStateManager;
@@ -19,22 +19,22 @@ import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 
-public class PosCheckersLimitBoxDrawer {
+public class PosCheckersDrawer {
 
-    public static boolean enabled = false;
+    public static boolean shouldDraw = false;
     private static final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     private static final List<ScheduledFuture<?>> scheduledTasks = new ArrayList<>();
 
     public static void drawFor4Seconds() {
         scheduledTasks.forEach(task -> task.cancel(true));
-        enabled = true;
-        scheduledTasks.add(scheduledExecutor.schedule(() -> mc.addScheduledTask(() -> enabled = false), 4, TimeUnit.SECONDS));
+        shouldDraw = true;
+        scheduledTasks.add(scheduledExecutor.schedule(() -> mc.addScheduledTask(() -> shouldDraw = false), 5, TimeUnit.SECONDS));
     }
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent event) {
 
-        if (!enabled || mc.thePlayer == null) return;
+        if (!shouldDraw || mc.thePlayer == null) return;
 
         double camX = mc.getRenderManager().viewerPosX;
         double camY = mc.getRenderManager().viewerPosY;

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.debug.EveryTickDebug.logPlayerState;
+import static com.bzzrg.burgmod.utils.debug.EveryTickDebug.logPlayerState;
 import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
 import static com.bzzrg.burgmod.utils.simulation.SimUtils.*;
 

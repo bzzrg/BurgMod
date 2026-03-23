@@ -19,8 +19,8 @@ public class StrategyTick {
     public Set<InputType> correctInputs;
 
     public final BiMap<InputType, GuiButton> inputButtons = HashBiMap.create();
-    public GuiButton duplicateButton;
-    public GuiButton removeButton;
+    public final GuiButton duplicateButton;
+    public final GuiButton removeButton;
 
     public StrategyJump jump = null;
 

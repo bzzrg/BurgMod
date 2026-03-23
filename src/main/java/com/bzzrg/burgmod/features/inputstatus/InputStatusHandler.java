@@ -17,11 +17,11 @@ import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
 
-public class InputStatusLabel {
+public class InputStatusHandler {
 
     private static int tickNum = 0;
-    public static boolean finished = false;
-    public static String label = color1 + "Input Status: \u00A74Not Loaded";
+    public static boolean finished = true;
+    public static String label = color1 + "Input Status: \u00A7r?";
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
@@ -39,8 +39,9 @@ public class InputStatusLabel {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
-        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || finished || !ResetHandler.movedSinceReset || StrategyRecorder.recording) {
+        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || StrategyRecorder.recording || strategyTicks.isEmpty() || !ResetHandler.movedSinceReset || finished) {
             if (StrategyRecorder.recording) label = color1 + "Input Status: \u00A7bRecording Strategy...";
+            else if (strategyTicks.isEmpty()) label = color1 + "Input Status: \u00A74No Strategy Set";
             return;
         }
 

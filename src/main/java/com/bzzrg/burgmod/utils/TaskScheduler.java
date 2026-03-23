@@ -10,8 +10,8 @@ import java.util.List;
 public class TaskScheduler {
 
     private static class Task {
-        int runTick;
-        Runnable runnable;
+        final int runTick;
+        final Runnable runnable;
 
         Task(int runTick, Runnable runnable) {
             this.runTick = runTick;

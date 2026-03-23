@@ -9,13 +9,13 @@ public class CustomTextField {
 
     public GuiTextField field;
 
-    public int x;
-    public int y;
-    public int width;
-    public int height;
+    public final int x;
+    public final int y;
+    public final int width;
+    public final int height;
 
-    public String label;
-    public String emptyMessage;
+    public final String label;
+    public final String emptyMessage;
 
     public CustomTextField(int id, int x, int y, int width, int height, String label, String emptyMsg) {
 

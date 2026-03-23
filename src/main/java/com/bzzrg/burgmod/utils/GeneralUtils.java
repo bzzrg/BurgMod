@@ -3,19 +3,19 @@ package com.bzzrg.burgmod.utils;
 import com.bzzrg.burgmod.BurgMod;
 import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import static com.bzzrg.burgmod.BurgMod.mc;
 
 public class GeneralUtils {
 
@@ -29,14 +29,15 @@ public class GeneralUtils {
 
 
     public static void chat(String message) {
-        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-        if (player != null) player.addChatMessage(new ChatComponentText(message));
+        if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText(message));
     }
     public static void bmChat(String message) {
         chat("\u00A71[BM] \u00A7r" + message);
     }
 
-
+    public static void playSound(String name, float volume, float pitch) {
+        if (mc.thePlayer != null) mc.thePlayer.playSound(name, volume, pitch);
+    }
 
     public static void createDirectory(File folder) {
         if (folder.mkdirs()) {
@@ -54,37 +55,33 @@ public class GeneralUtils {
 
     public static BlockPos getBlockStandingOn(EntityPlayerSP player) {
 
-        AxisAlignedBB bb = player.getEntityBoundingBox();
-        double feet = bb.minY;
+        double halfWidth = player.width / 2.0;
 
-        World world = player.worldObj;
+        AxisAlignedBB playerBB = new AxisAlignedBB(
+                player.prevPosX - halfWidth, player.posY - 1e-3, player.prevPosZ - halfWidth,
+                player.prevPosX + halfWidth, player.posY, player.prevPosZ + halfWidth
+        );
 
-        int minX = MathHelper.floor_double(bb.minX);
-        int maxX = MathHelper.floor_double(bb.maxX);
-        int minZ = MathHelper.floor_double(bb.minZ);
-        int maxZ = MathHelper.floor_double(bb.maxZ);
+        List<AxisAlignedBB> boxes = player.worldObj.getCollidingBoundingBoxes(player, playerBB);
 
-        int minY = MathHelper.floor_double(feet) - 1;
-        int maxY = MathHelper.floor_double(feet);
+        AxisAlignedBB best = null;
+        double bestArea = 0.0;
 
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                for (int y = minY; y <= maxY; y++) {
+        for (AxisAlignedBB box : boxes) {
+            double overlapX = Math.min(playerBB.maxX, box.maxX) - Math.max(playerBB.minX, box.minX);
+            double overlapZ = Math.min(playerBB.maxZ, box.maxZ) - Math.max(playerBB.minZ, box.minZ);
 
-                    BlockPos pos = new BlockPos(x, y, z);
-                    IBlockState state = world.getBlockState(pos);
+            if (overlapX > 0 && overlapZ > 0) {
+                double area = overlapX * overlapZ;
 
-                    AxisAlignedBB blockBB = state.getBlock().getCollisionBoundingBox(world, pos, state);
-                    if (blockBB == null) continue;
-
-                    if (Math.abs(blockBB.maxY - feet) < 1e-6) {
-                        return pos;
-                    }
+                if (area > bestArea) {
+                    bestArea = area;
+                    best = box;
                 }
             }
         }
 
-        return null;
+        return best != null ? new BlockPos(best.minX, best.minY, best.minZ) : null;
     }
 
 

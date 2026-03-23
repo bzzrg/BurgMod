@@ -20,21 +20,24 @@ public class PlayerSim extends EntityPlayerSP {
     public void playSound(String name, float volume, float pitch) {}
 
     @Override
-    public void updateEntityActionState() {
-        if (!this.isCurrentViewEntity()) {
-            this.moveStrafing = this.movementInput.moveStrafe;
-            this.moveForward = this.movementInput.moveForward;
-            this.isJumping = this.movementInput.jump;
-            this.prevRenderArmYaw = this.renderArmYaw;
-            this.prevRenderArmPitch = this.renderArmPitch;
-            this.renderArmPitch = (float)((double)this.renderArmPitch + (double)(this.rotationPitch - this.renderArmPitch) * 0.5D);
-            this.renderArmYaw = (float)((double)this.renderArmYaw + (double)(this.rotationYaw - this.renderArmYaw) * 0.5D);
-        }
-        super.updateEntityActionState();
+    public void onLivingUpdate() {
+        this.inPortal = false;
+        this.timeInPortal = 0.0F;
+        this.prevTimeInPortal = 0.0F;
+
+        super.onLivingUpdate();
+
+        this.inPortal = false;
+        this.timeInPortal = 0.0F;
+        this.prevTimeInPortal = 0.0F;
+    }
+
+    @Override
+    public boolean isCurrentViewEntity() {
+        return true;
     }
 
     // Stop minecraft calls to make the sim sprinting, that goes off of if im holding sprint, I make sim sprint manually
-
     private static class AntiPacketNetHandler extends NetHandlerPlayClient {
         public AntiPacketNetHandler(Minecraft mcIn, NetworkManager nm, GameProfile gp) {
             super(mcIn, mcIn.currentScreen, nm, gp);

@@ -39,5 +39,5 @@ processResources {
 }
 
 runClient {
-    jvmArgs "-Dfml.coreMods.load=com.bzzrg.burgmod.debug.fieldwatching.CoremodLoader"
+    jvmArgs '-Dfml.coreMods.load=com.bzzrg.burgmod.utils.debug.fieldwatching.FieldWatcher$CoremodLoader'
 }

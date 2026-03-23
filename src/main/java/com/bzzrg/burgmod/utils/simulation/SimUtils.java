@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.potion.PotionEffect;
@@ -70,14 +72,60 @@ public class SimUtils {
             if (options.rotationYaw != null) sim.rotationYaw = options.rotationYaw;
         }
 
-        EffectRenderer old = mc.effectRenderer;
+        EffectRenderer oldEffectRenderer = mc.effectRenderer;
         mc.effectRenderer = new EmptyEffectRenderer(mc.theWorld, mc.renderEngine);
 
         sim.onUpdate();
 
-        ReflectionHelper.setPrivateValue(KeyBinding.class, mc.gameSettings.keyBindSprint, oldSprinting, MCP, OBF);
-        mc.effectRenderer = old;
+        mc.effectRenderer = oldEffectRenderer;
 
+        ReflectionHelper.setPrivateValue(KeyBinding.class, mc.gameSettings.keyBindSprint, oldSprinting, MCP, OBF);
+    }
+
+    public static void stopSim(PlayerSim sim) {
+
+        // Zero horizontal motion only
+        sim.motionX = 0.0;
+        sim.motionZ = 0.0;
+        // leave motionY untouched
+
+        // Zero movement input
+        sim.moveForward = 0.0f;
+        sim.moveStrafing = 0.0f;
+
+        sim.movementInput.moveForward = 0.0f;
+        sim.movementInput.moveStrafe = 0.0f;
+        sim.movementInput.jump = false;
+        sim.movementInput.sneak = false;
+
+        // Stop actions
+        sim.setSprinting(false);
+        sim.setSneaking(false);
+        sim.setJumping(false);
+
+        // Ground state (only guaranteed truths)
+        sim.onGround = true;
+        sim.isAirBorne = false;
+
+        // Reset fall
+        sim.fallDistance = 0.0f;
+
+        // Reset walk accumulation
+        sim.distanceWalkedModified = 0.0f;
+        sim.distanceWalkedOnStepModified = 0.0f;
+
+        // Head follows body (safe)
+        sim.rotationYawHead = sim.rotationYaw;
+
+        // Reset jump delay
+        try {
+            final String MCP = "jumpTicks";
+            final String OBF = "field_70773_bE";
+            ReflectionHelper.setPrivateValue(EntityLivingBase.class, sim, 0, MCP, OBF);
+        } catch (Throwable ignored) {}
+
+        // Velocity flag
+        sim.velocityChanged = false;
     }
 
     public static PlayerSim createSim() {
@@ -86,6 +134,7 @@ public class SimUtils {
         PlayerSim sim = new PlayerSim();
 
         sim.copyLocationAndAnglesFrom(real);
+
         sim.prevPosX = real.prevPosX;
         sim.prevPosY = real.prevPosY;
         sim.prevPosZ = real.prevPosZ;
@@ -113,17 +162,17 @@ public class SimUtils {
         sim.fallDistance = real.fallDistance;
         sim.stepHeight = real.stepHeight;
 
-        sim.rotationYawHead = real.rotationYawHead;
-        sim.renderYawOffset = real.renderYawOffset;
-        sim.prevRotationYaw = real.prevRotationYaw;
-        sim.prevRotationPitch = real.prevRotationPitch;
-
         sim.rotationYaw = real.rotationYaw;
         sim.rotationPitch = real.rotationPitch;
+        sim.prevRotationYaw = real.prevRotationYaw;
+        sim.prevRotationPitch = real.prevRotationPitch;
+        sim.rotationYawHead = real.rotationYawHead;
+        sim.renderYawOffset = real.renderYawOffset;
 
         sim.moveForward = real.moveForward;
         sim.moveStrafing = real.moveStrafing;
         sim.jumpMovementFactor = real.jumpMovementFactor;
+        sim.setAIMoveSpeed(real.getAIMoveSpeed());
 
         sim.movementInput = new MovementInput();
         sim.movementInput.moveForward = real.movementInput.moveForward;
@@ -141,6 +190,8 @@ public class SimUtils {
         sim.capabilities.allowFlying = real.capabilities.allowFlying;
         sim.capabilities.isCreativeMode = real.capabilities.isCreativeMode;
         sim.capabilities.isFlying = real.capabilities.isFlying;
+        sim.capabilities.disableDamage = real.capabilities.disableDamage;
+        sim.capabilities.allowEdit = real.capabilities.allowEdit;
         sim.capabilities.setFlySpeed(real.capabilities.getFlySpeed());
         sim.capabilities.setPlayerWalkSpeed(real.capabilities.getWalkSpeed());
 
@@ -150,6 +201,18 @@ public class SimUtils {
             sim.addPotionEffect(new PotionEffect(effect));
         }
 
+        for (IAttributeInstance realInst : real.getAttributeMap().getAllAttributes()) {
+            IAttributeInstance simInst = sim.getAttributeMap().getAttributeInstance(realInst.getAttribute());
+
+            if (simInst != null) {
+                simInst.setBaseValue(realInst.getBaseValue());
+                simInst.removeAllModifiers();
+
+                for (AttributeModifier mod : realInst.func_111122_c()) {
+                    simInst.applyModifier(mod);
+                }
+            }
+        }
         try {
             {
                 final String MCP = "isJumping";
@@ -158,7 +221,6 @@ public class SimUtils {
                 sim.setJumping(v);
             }
 
-            // EntityPlayerSP.sprintToggleTimer (int)
             {
                 final String MCP = "sprintToggleTimer";
                 final String OBF = "field_71156_d";
@@ -166,7 +228,6 @@ public class SimUtils {
                 ReflectionHelper.setPrivateValue(EntityPlayerSP.class, sim, v, MCP, OBF);
             }
 
-            // EntityLivingBase.jumpTicks (int)
             {
                 final String MCP = "jumpTicks";
                 final String OBF = "field_70773_bE";
@@ -174,15 +235,6 @@ public class SimUtils {
                 ReflectionHelper.setPrivateValue(EntityLivingBase.class, sim, v, MCP, OBF);
             }
 
-            // EntityLivingBase.landMovementFactor (float)
-            {
-                final String MCP = "landMovementFactor";
-                final String OBF = "field_70746_aG";
-                float v = ReflectionHelper.getPrivateValue(EntityLivingBase.class, real, MCP, OBF);
-                ReflectionHelper.setPrivateValue(EntityLivingBase.class, sim, v, MCP, OBF);
-            }
-
-            // EntityPlayer.speedInAir (float)
             {
                 final String MCP = "speedInAir";
                 final String OBF = "field_71102_ce";
@@ -190,7 +242,6 @@ public class SimUtils {
                 ReflectionHelper.setPrivateValue(EntityPlayer.class, sim, v, MCP, OBF);
             }
 
-            // Entity.inWater (boolean)
             {
                 final String MCP = "inWater";
                 final String OBF = "field_70171_ac";
@@ -198,14 +249,12 @@ public class SimUtils {
                 ReflectionHelper.setPrivateValue(Entity.class, sim, v, MCP, OBF);
             }
 
-            // Entity.nextStepDistance (int)
             {
                 final String MCP = "nextStepDistance";
                 final String OBF = "field_70150_b";
                 int v = ReflectionHelper.getPrivateValue(Entity.class, real, MCP, OBF);
                 ReflectionHelper.setPrivateValue(Entity.class, sim, v, MCP, OBF);
             }
-
         } catch (Throwable t) {
             t.printStackTrace();
         }

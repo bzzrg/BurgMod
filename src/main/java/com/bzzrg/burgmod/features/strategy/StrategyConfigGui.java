@@ -1,7 +1,8 @@
 package com.bzzrg.burgmod.features.strategy;
 
 import com.bzzrg.burgmod.config.MainConfigGui;
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
+import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
 import com.bzzrg.burgmod.utils.gui.CustomButton;
 import com.bzzrg.burgmod.utils.gui.CustomTextField;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
@@ -15,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig.numOf45s;
+import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.*;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
@@ -95,21 +96,8 @@ public class StrategyConfigGui extends GuiScreen {
 
         if (strategyTicks.stream().anyMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
             bmChat("\u00A7cWARN: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
-            mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
+            playSound("mob.endermen.portal", 1.0F, 0.5F);
         }
-
-        if (P45OffsetConfig.enabled) {
-            if (StrategyTick.getJumpTick(numOf45s - 1) == null) {
-                bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
-                mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
-            }
-            if (!strategyTicks.isEmpty() && !strategyTicks.get(strategyTicks.size()-1).correctInputs.contains(AIR)) { // If the last tick from strat is not air, send invalid msg
-                bmChat("\u00A7cWARN: Perfect 45 offset feature requires last tick of strategy to be air!");
-                mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
-            }
-        }
-
-
     }
 
     @Override
@@ -195,7 +183,7 @@ public class StrategyConfigGui extends GuiScreen {
                 try {
                     jumpType = JumpType.valueOf(jumpTextField.field.getText().toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    mc.thePlayer.playSound("mob.endermen.portal", 1.0F, 0.5F);
+                    playSound("mob.endermen.portal", 1.0F, 0.5F);
                     bmChat("\u00A7cInvalid jump name! List of valid jump names:");
 
                     for (JumpType t : JumpType.values()) {
@@ -284,9 +272,13 @@ public class StrategyConfigGui extends GuiScreen {
                 StrategyRecorder.recording = !StrategyRecorder.recording;
                 button.displayString = StrategyRecorder.recording ? "\u00A7eStop Recording" : "Record Strategy";
 
-                ResetHandler.globalReset();
-
-                if (!StrategyRecorder.recording) {
+                if (StrategyRecorder.recording) {
+                    ResetHandler.movedSinceReset = false;
+                } else {
+                    InputStatusHandler.label = color1 + "Input Status: \u00A7r?";
+                    P45OffsetHandler.autoLabel = color1 + "Perfect 45 Offset (?): \u00A7r?";
+                    P45OffsetHandler.xLabel = color1 + "Perfect 45 Offset (X?): \u00A7r?";
+                    P45OffsetHandler.zLabel = color1 + "Perfect 45 Offset (Z?): \u00A7r?";
 
                     while (true) {
 

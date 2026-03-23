@@ -1,14 +1,15 @@
 package com.bzzrg.burgmod;
 
 import com.bzzrg.burgmod.command.BMCommand;
-import com.bzzrg.burgmod.command.PosCheckersLimitBoxDrawer;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersDrawer;
 import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
-import com.bzzrg.burgmod.debug.EveryTickDebug;
-import com.bzzrg.burgmod.features.inputstatus.InputStatusLabel;
+import com.bzzrg.burgmod.utils.debug.EveryTickDebug;
+import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
+import com.bzzrg.burgmod.features.perfect45offset.FixStrat45sCommand;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetDrawer;
-import com.bzzrg.burgmod.features.perfect45offset.P45OffsetLabel;
+import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
 import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
@@ -63,6 +64,7 @@ public class BurgMod {
     @EventHandler
     public void initialize(FMLInitializationEvent event) {
         ClientCommandHandler.instance.registerCommand(new BMCommand());
+        ClientCommandHandler.instance.registerCommand(new FixStrat45sCommand());
 
         KeyBinding bind = new KeyBinding("Open Config Gui", Keyboard.KEY_B, "BurgMod");
         ClientRegistry.registerKeyBinding(bind);
@@ -72,15 +74,15 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new MainConfigGuiBind(bind));
         MinecraftForge.EVENT_BUS.register(new NewVersionSender());
         MinecraftForge.EVENT_BUS.register(new AutoStrategyLoad());
-        MinecraftForge.EVENT_BUS.register(new InputStatusLabel());
+        MinecraftForge.EVENT_BUS.register(new InputStatusHandler());
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());
         MinecraftForge.EVENT_BUS.register(new PosCheckersHandler());
         MinecraftForge.EVENT_BUS.register(new TeleportTracker());
-        MinecraftForge.EVENT_BUS.register(new PosCheckersLimitBoxDrawer());
+        MinecraftForge.EVENT_BUS.register(new PosCheckersDrawer());
         MinecraftForge.EVENT_BUS.register(new StrategyPreviewer());
         MinecraftForge.EVENT_BUS.register(new EveryTickDebug());
-        MinecraftForge.EVENT_BUS.register(new P45OffsetLabel());
+        MinecraftForge.EVENT_BUS.register(new P45OffsetHandler());
         MinecraftForge.EVENT_BUS.register(new TaskScheduler());
         MinecraftForge.EVENT_BUS.register(new P45OffsetDrawer());
 

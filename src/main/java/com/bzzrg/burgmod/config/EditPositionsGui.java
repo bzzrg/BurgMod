@@ -40,31 +40,35 @@ public class EditPositionsGui extends GuiScreen {
                 () -> InputStatusConfig.labelX,
                 () -> InputStatusConfig.labelY,
                 v -> InputStatusConfig.labelX = v,
-                v -> InputStatusConfig.labelY = v
+                v -> InputStatusConfig.labelY = v,
+                () -> InputStatusConfig.enabled
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset: " + GeneralConfig.color2 + "Relocating...",
+                () -> GeneralConfig.color1 + "Perfect 45 Offset (?): " + GeneralConfig.color2 + "Relocating...",
                 () -> P45OffsetConfig.autoLabelX,
                 () -> P45OffsetConfig.autoLabelY,
                 v -> P45OffsetConfig.autoLabelX = v,
-                v -> P45OffsetConfig.autoLabelY = v
+                v -> P45OffsetConfig.autoLabelY = v,
+                () -> P45OffsetConfig.enabled && P45OffsetConfig.showAutoOffset
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset (X): " + GeneralConfig.color2 + "Relocating...",
+                () -> GeneralConfig.color1 + "Perfect 45 Offset (X?): " + GeneralConfig.color2 + "Relocating...",
                 () -> P45OffsetConfig.xLabelX,
                 () -> P45OffsetConfig.xLabelY,
                 v -> P45OffsetConfig.xLabelX = v,
-                v -> P45OffsetConfig.xLabelY = v
+                v -> P45OffsetConfig.xLabelY = v,
+                () -> P45OffsetConfig.enabled && P45OffsetConfig.showXOffset
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset (Z): " + GeneralConfig.color2 + "Relocating...",
+                () -> GeneralConfig.color1 + "Perfect 45 Offset (Z?): " + GeneralConfig.color2 + "Relocating...",
                 () -> P45OffsetConfig.zLabelX,
                 () -> P45OffsetConfig.zLabelY,
                 v -> P45OffsetConfig.zLabelX = v,
-                v -> P45OffsetConfig.zLabelY = v
+                v -> P45OffsetConfig.zLabelY = v,
+                () -> P45OffsetConfig.enabled && P45OffsetConfig.showZOffset
         ));
     }
 
@@ -73,10 +77,11 @@ public class EditPositionsGui extends GuiScreen {
 
         drawDefaultBackground();
 
+        // draw labels
         for (Label label : labels) {
+            if (!label.visible.get()) continue;
 
             String text = label.text.get();
-
             int x = label.getX.getAsInt();
             int y = label.getY.getAsInt();
 
@@ -87,13 +92,14 @@ public class EditPositionsGui extends GuiScreen {
             fontRendererObj.drawStringWithShadow(text, x, y, 0xFFFFFF);
         }
 
+        // mouse pressed
         if (Mouse.isButtonDown(0)) {
 
             if (!dragging) {
                 for (Label label : labels) {
+                    if (!label.visible.get()) continue;
 
                     String text = label.text.get();
-
                     int x = label.getX.getAsInt();
                     int y = label.getY.getAsInt();
 
@@ -108,7 +114,6 @@ public class EditPositionsGui extends GuiScreen {
 
                         dragOffsetX = mouseX - x;
                         dragOffsetY = mouseY - y;
-
                         break;
                     }
                 }
@@ -119,6 +124,7 @@ public class EditPositionsGui extends GuiScreen {
             activeLabel = null;
         }
 
+        // dragging update
         if (dragging && activeLabel != null) {
             activeLabel.setX.accept(mouseX - dragOffsetX);
             activeLabel.setY.accept(mouseY - dragOffsetY);
@@ -141,20 +147,29 @@ public class EditPositionsGui extends GuiScreen {
     }
 
     private static class Label {
-        public Supplier<String> text;
+        public final Supplier<String> text;
 
-        public IntSupplier getX;
-        public IntSupplier getY;
+        public final IntSupplier getX;
+        public final IntSupplier getY;
 
-        public IntConsumer setX;
-        public IntConsumer setY;
+        public final IntConsumer setX;
+        public final IntConsumer setY;
 
-        public Label(Supplier<String> text, IntSupplier getX, IntSupplier getY, IntConsumer setX, IntConsumer setY) {
+        public final Supplier<Boolean> visible;
+
+        public Label(Supplier<String> text,
+                     IntSupplier getX,
+                     IntSupplier getY,
+                     IntConsumer setX,
+                     IntConsumer setY,
+                     Supplier<Boolean> visible) {
+
             this.text = text;
             this.getX = getX;
             this.getY = getY;
             this.setX = setX;
             this.setY = setY;
+            this.visible = visible;
         }
     }
 }
