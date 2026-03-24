@@ -1,21 +1,22 @@
 package com.bzzrg.burgmod;
 
 import com.bzzrg.burgmod.command.BMCommand;
-import com.bzzrg.burgmod.features.poschecker.PosCheckersDrawer;
-import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
+import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
-import com.bzzrg.burgmod.utils.debug.EveryTickDebug;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.FixStrat45sCommand;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetDrawer;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersDrawer;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
 import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
+import com.bzzrg.burgmod.utils.GeneralUtils;
 import com.bzzrg.burgmod.utils.TaskScheduler;
+import com.bzzrg.burgmod.utils.debug.EveryTickDebug;
 import com.bzzrg.burgmod.utils.resetting.ResetHandler;
 import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
 import net.minecraft.client.Minecraft;
@@ -30,7 +31,10 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.updateStrategyFields;
 import static com.bzzrg.burgmod.utils.GeneralUtils.createDirectory;
@@ -40,7 +44,9 @@ public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
+
+    public static String latestVersion = "";
 
     public static Minecraft mc;
     public static Logger logger;
@@ -70,9 +76,18 @@ public class BurgMod {
         ClientRegistry.registerKeyBinding(bind);
         updateStrategyFields();
 
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(new URL("https://raw.githubusercontent.com/bzzrg/BurgMod/main/version.txt").openStream()))) {
+
+                latestVersion = reader.readLine();
+
+            } catch (Exception ignored) {}
+        }).start();
+
         MinecraftForge.EVENT_BUS.register(new ResetHandler());
         MinecraftForge.EVENT_BUS.register(new MainConfigGuiBind(bind));
-        MinecraftForge.EVENT_BUS.register(new NewVersionSender());
+        MinecraftForge.EVENT_BUS.register(new NewVersionNotifier());
         MinecraftForge.EVENT_BUS.register(new AutoStrategyLoad());
         MinecraftForge.EVENT_BUS.register(new InputStatusHandler());
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
@@ -85,6 +100,7 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new P45OffsetHandler());
         MinecraftForge.EVENT_BUS.register(new TaskScheduler());
         MinecraftForge.EVENT_BUS.register(new P45OffsetDrawer());
+        MinecraftForge.EVENT_BUS.register(new GeneralUtils());
 
     }
 }

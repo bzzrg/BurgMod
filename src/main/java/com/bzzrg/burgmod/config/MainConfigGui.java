@@ -270,7 +270,7 @@ public class MainConfigGui extends GuiScreen {
                                 "\u00A77- \u00A7bRun 1t: \u00A7eAdds one tick of running after the jump using whatever config is already set for the jump. " +
                                 "For example, Run 1t would add one tick of W+A+SPR if the jump was a Jam with W+A+SPR.\n" +
                                 "\u00A77- \u00A7b1-11t Slider: \u00A7eFor example, if set to 2t, then for HH it would be a 2t HH, for Mark it would be a 2t Mark, etc.");
-                sendInfoBullet("Trim Strategy", "Cuts off all duplicate ticks at the end of your strategy except for one of them. " +
+                sendInfoBullet("Trim Strategy", "Deletes all duplicate ticks at the end of your strategy except for one of them. " +
                         "This is because more than one of the same tick at the end of your strategy is redundant for all strategy related features.");
                 sendInfoBullet("Mirror Strategy", "Switches all ticks/jumps with A selected to have D selected instead and vice versa. " +
                         "If the tick/jump has both A and D selected or has neither selected, it is unaffected.");
@@ -284,7 +284,7 @@ public class MainConfigGui extends GuiScreen {
                 sendInfoBullet("Important Things To Know",
                         "\u00A77- \u00A7eHaving SPR selected for a tick means you are sprinting during that tick, not that you are holding down the sprint key during that tick.\n" +
                                 "\u00A77- \u00A7eHaving SNK selected for a tick means you are sneaking during that tick, not that you are holding down the sneak key during that tick.\n" +
-                                "\u00A77- \u00A7eHaving AIR selected for a tick means you are in the air during that tick, not that you are holding down the jump key during that tick.\n" +
+                                "\u00A77- \u00A7eHaving JMP selected for a tick means you jump on that tick, not that you are holding down the jump key during that tick.\n" +
                                 "\u00A77- \u00A7eFeatures that use strategy might break or warn you if you have a tick with both SPR and SNK selected. " +
                                         "This is because it is impossible to be sprinting and sneaking at the same time.");
 

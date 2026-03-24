@@ -1,20 +1,19 @@
 package com.bzzrg.burgmod.features.perfect45offset;
 
+import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
 import com.bzzrg.burgmod.config.specialconfig.StrategyConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
-import com.bzzrg.burgmod.features.strategy.StrategyJump;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyJumps;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.clearStrategy;
 import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
 
 public class FixStrat45sCommand extends CommandBase {
@@ -37,13 +36,12 @@ public class FixStrat45sCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender iCommandSender, String[] strings) {
 
-        if (P45OffsetHandler.isStrategyPartialInvalid()) {
-            bmChat("\u00A7cPlease fix the other issues with your config before you attempt to fix your strategy's 45 jumps!");
+        if (P45OffsetConfig.numOf45s > StrategyTick.getJumpIndices().size()) {
+            bmChat("\u00A7c# of 45s inside perfect 45 offset config is more than # of jumps inside your strategy! Please fix this before you attempt to use Fix Strat 45s!");
         } else {
 
             List<Set<InputType>> validStratInputs = P45OffsetHandler.getValidStratInputs();
-            new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
-            new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
+            clearStrategy();
 
             for (Set<InputType> inputs : validStratInputs) {
                 StrategyTick.addLoneTick(strategyTicks.size(), inputs);

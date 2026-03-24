@@ -51,7 +51,7 @@ public class StrategyPreviewer {
                     tick.correctInputs.contains(InputType.D),
                     tick.correctInputs.contains(InputType.SPR),
                     tick.correctInputs.contains(InputType.SNK),
-                    tick.correctInputs.contains(InputType.AIR),
+                    tick.correctInputs.contains(InputType.JMP),
                     null));
 
             Vec3 newPos = sim.getPositionVector();

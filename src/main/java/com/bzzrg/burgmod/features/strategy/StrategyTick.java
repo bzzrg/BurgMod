@@ -6,13 +6,13 @@ import com.google.common.collect.HashBiMap;
 import net.minecraft.client.gui.GuiButton;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyJumps;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
+import static com.bzzrg.burgmod.utils.GeneralUtils.getLast;
 
 public class StrategyTick {
 
@@ -35,7 +35,7 @@ public class StrategyTick {
             this.inputButtons.put(inputType, new CustomButton(nextButtonId++, tickX, 0, buttonHeight, buttonHeight, correctInputs.contains(inputType) ? "\u00A7a" + inputType : "\u00A7c" + inputType));
         }
 
-        final int dupeButX = listLeft.get() + tickNumGap + (buttonHeight + buttonGap) * (InputType.AIR.ordinal() + 1);
+        final int dupeButX = listLeft.get() + tickNumGap + (buttonHeight + buttonGap) * (InputType.JMP.ordinal() + 1);
         this.duplicateButton = new CustomButton(nextButtonId++, dupeButX, 0, buttonHeight, buttonHeight, "\u00A7b\u2ffb");
         this.removeButton = new CustomButton(nextButtonId++, dupeButX + buttonHeight + buttonGap, 0, buttonHeight, buttonHeight, "\u00A74\u2716");
 
@@ -113,39 +113,21 @@ public class StrategyTick {
         return buttons;
     }
 
-    public static StrategyTick getJumpTick(int distanceFromLast) {
+    public static List<Integer> getJumpIndices() {
 
-        List<StrategyTick> reversedTicks = new ArrayList<>(strategyTicks);
-        Collections.reverse(reversedTicks);
+        List<Integer> jumpIndices = new ArrayList<>();
 
-        int jumpCount = -1;
-        boolean foundAir = false;
-
-        for (StrategyTick tick : reversedTicks) {
-
-            if (tick.correctInputs.contains(InputType.AIR)) {
-
-                // Different logic for very first tick if its a jump since there is no tick right before it to check if it has no air
-                if (tick.getTickNum() == 0) {
-                    jumpCount++;
-                    if (jumpCount == distanceFromLast) {
-                        return tick;
-                    }
-                }
-
-                foundAir = true;
-            }
-
-            if (foundAir && !tick.correctInputs.contains(InputType.AIR)) {
-                jumpCount++;
-                foundAir = false;
-
-                if (jumpCount == distanceFromLast) {
-                    return strategyTicks.get(tick.getTickNum() + 1);
-                }
+        for (StrategyTick tick : strategyTicks) {
+            if (tick.correctInputs.contains(InputType.JMP)) {
+                jumpIndices.add(tick.getTickNum());
             }
         }
-
-        return null;
+        return jumpIndices;
     }
+
+    public static Integer getLastJumpIndex() {
+        List<Integer> jumpIndices = getJumpIndices();
+        return jumpIndices.isEmpty() ? null : getLast(jumpIndices);
+    }
+
 }

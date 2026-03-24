@@ -33,6 +33,10 @@ public class InputStatusHandler {
     public static void onReset() {
         tickNum = 0;
         finished = false;
+        if (StrategyRecorder.recording || strategyTicks.isEmpty()) {
+            label = color1 + "Input Status: \u00A74No Strategy Set";
+            return;
+        }
         label = InputStatusConfig.shortenLabel ? color1 + "Input Status: \u00A7e..." : color1 + "Input Status: \u00A7eWaiting...";
     }
 
@@ -40,8 +44,6 @@ public class InputStatusHandler {
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
         if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || StrategyRecorder.recording || strategyTicks.isEmpty() || !ResetHandler.movedSinceReset || finished) {
-            if (StrategyRecorder.recording) label = color1 + "Input Status: \u00A7bRecording Strategy...";
-            else if (strategyTicks.isEmpty()) label = color1 + "Input Status: \u00A74No Strategy Set";
             return;
         }
 

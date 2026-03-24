@@ -9,6 +9,9 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.File;
 import java.util.HashSet;
@@ -45,14 +48,11 @@ public class GeneralUtils {
         }
     }
 
-    // can't use onGround alone because teleport causes a 1-tick false, still using because of coyote ground tick when running off a block (where you are sort of standing on air for a tick)
-    public static boolean onGround(EntityPlayerSP player) {
-        return player.onGround || getBlockStandingOn(player) != null;
-    }
     public static boolean onGround() {
-        return onGround(Minecraft.getMinecraft().thePlayer);
+        return getBlockStandingOn(mc.thePlayer) != null;
     }
 
+    // coyote tick is account for in this
     public static BlockPos getBlockStandingOn(EntityPlayerSP player) {
 
         double halfWidth = player.width / 2.0;
@@ -84,13 +84,16 @@ public class GeneralUtils {
         return best != null ? new BlockPos(best.minX, best.minY, best.minZ) : null;
     }
 
+    public static <T> T getLast(List<T> list) {
+        return list.get(list.size()-1);
+    }
 
     public static Set<InputType> getInputs() {
 
         Minecraft mc = Minecraft.getMinecraft();
-        EntityPlayerSP player = mc.thePlayer;
+        EntityPlayerSP p = mc.thePlayer;
 
-        if (player == null) {
+        if (p == null) {
             throw new IllegalStateException("Failed to get player inputs: thePlayer variable is null");
         }
 
@@ -101,15 +104,25 @@ public class GeneralUtils {
         if (mc.gameSettings.keyBindBack.isKeyDown()) inputs.add(InputType.S);
         if (mc.gameSettings.keyBindRight.isKeyDown()) inputs.add(InputType.D);
 
-        if (player.isSprinting()) inputs.add(InputType.SPR);
-        if (player.isSneaking()) inputs.add(InputType.SNK);
-        if (!onGround()) inputs.add(InputType.AIR);
+        if (p.isSprinting()) inputs.add(InputType.SPR);
+        if (p.isSneaking()) inputs.add(InputType.SNK);
+        if (lastOnGround && !onGround() && mc.gameSettings.keyBindJump.isKeyDown()) inputs.add(InputType.JMP);
 
         return inputs;
     }
     public static String formatDp(String format, Object... args) { // Used like string.format except now new identifier, "%dp" that uses decimal precision from config for floats/doubles
         format = format.replace("%dp", "%." + GeneralConfig.decimalPrecision + "f");
         return String.format(format, args);
+    }
+
+    public static boolean lastOnGround = true;
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+
+        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null) return;
+
+        lastOnGround = onGround();
     }
 
 

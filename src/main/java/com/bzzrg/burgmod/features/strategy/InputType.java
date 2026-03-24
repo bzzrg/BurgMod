@@ -7,5 +7,5 @@ public enum InputType {
     D,
     SPR,
     SNK,
-    AIR
+    JMP
 }

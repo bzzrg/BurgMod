@@ -16,7 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.utils.GeneralUtils.createDirectory;
+import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.clearStrategy;
+import static com.bzzrg.burgmod.utils.GeneralUtils.*;
 
 public class StrategyConfig {
 
@@ -87,6 +88,7 @@ public class StrategyConfig {
 
         } catch (IOException e) {
             BurgMod.logger.error("Failed to write to file '" + strategyJson.getName() + "'", e);
+            bmChat("\u00A74ERROR: Failed to write your strategy to file: '\" + strategyJson.getName() + \"'");
 
         }
 
@@ -105,12 +107,13 @@ public class StrategyConfig {
             try (FileReader reader = new FileReader(strategyJson)) {
                 tickArray = new Gson().fromJson(reader, JsonArray.class);
             } catch (IOException e) {
-                BurgMod.logger.error("Failed to load strategy.json into static fields: Could not read the file. Loading an empty strategy instead", e);
+                BurgMod.logger.error("Failed to load strategy.json into static fields: Could not read the file. Loading an empty strategy instead.", e);
+                bmChat("\u00A74ERROR: Failed to load strategy.json into your active strategy: Could not read the file. Loading an empty strategy instead!");
                 return;
             }
 
-        } else {
-            BurgMod.logger.info("Failed to load strategy.json into static fields: File doesn't exist. Loading an empty strategy instead");
+        } else { // expected if strategy.json doesnt exist
+            BurgMod.logger.info("Failed to load strategy.json into static fields: File doesn't exist. Loading an empty strategy instead.");
             return;
         }
 
@@ -177,7 +180,15 @@ public class StrategyConfig {
 
             }
         } catch (Exception e) {
-            BurgMod.logger.error("Failed to load strategy.json into static fields: Json has invalid strategy", e);
+            BurgMod.logger.error("Failed to load strategy.json into static fields: Json has invalid strategy. Deleting strategy.json and loading an empty strategy instead.", e);
+            bmChat("\u00A74ERROR: Your loaded strategy was invalid so an empty one was loaded instead!");
+            chat("\u00A7cNote: If you were trying to load a saved strategy, delete the strategy and remake it. This error means it is most likely invalid now.");
+            clearStrategy();
+            if (strategyJson.delete()) {
+                BurgMod.logger.info("Deleted strategy.json!");
+            } else {
+                BurgMod.logger.info("Failed to delete strategy.json!");
+            }
         }
 
     }

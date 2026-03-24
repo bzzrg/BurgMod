@@ -9,12 +9,11 @@ import net.minecraftforge.fml.client.config.GuiSlider;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyJumps;
 import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
+import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.*;
 
 
 public class StrategyJump {
@@ -140,11 +139,6 @@ public class StrategyJump {
         return buttons;
     }
 
-    @FunctionalInterface
-    public interface TriConsumer<A, B, C> {
-        void accept(A a, B b, C c);
-    }
-
     public void removeTicks() {
         for (StrategyTick tick : new ArrayList<>(ticks)) {
             tick.remove();
@@ -162,123 +156,151 @@ public class StrategyJump {
     // Update jump to match its fields (called when player updates jump fields via its config buttons)
     public void updateTicks() {
 
-        int firstTickIndex = ticks.isEmpty() ? strategyTicks.size() : ticks.get(0).getTickNum();
-
-        TriConsumer<InputType[], List<InputType>, Integer> addTick = (constantInputTypes, varyingInputTypes, iterations) -> {
-            if (constantInputTypes == null) constantInputTypes = new InputType[]{};
-            if (varyingInputTypes == null) varyingInputTypes = new ArrayList<>();
-
-            List<InputType> mergedInputTypes = new ArrayList<>(Arrays.asList(constantInputTypes));
-            mergedInputTypes.addAll(varyingInputTypes);
-
-            IntStream.range(0, iterations).forEach(i -> StrategyTick.addJumpTick(firstTickIndex + ticks.size(), new HashSet<>(mergedInputTypes), this));
-        };
-
         this.removeTicks();
 
         switch (type) {
             case JAM: {
-                List<InputType> directions = new ArrayList<>(this.directions);
+                InputType[] movement = directionsWithSprint();
 
-                if (directions.contains(W)) directions.add(SPR);
-                addTick.accept(new InputType[]{AIR}, directions, 11);
-                addTick.accept(null, directions, 1);
-                if (run1T) addTick.accept(null, directions, 1);
+                addTicks(1, merge(movement, JMP));
+                addTicks(10, movement);
+
+                addTicks(1, movement);
+                if (run1T) addTicks(1, movement);
 
                 break;
             }
             case HH: {
-                List<InputType> directions = new ArrayList<>(this.directions);
-                if (directions.contains(W)) directions.add(SPR);
+                InputType[] movement = directionsWithSprint();
 
-                addTick.accept(null, directions, length);
-                addTick.accept(new InputType[]{AIR}, directions, 11);
-                addTick.accept(null, directions, 1);
-                if (run1T) addTick.accept(null, directions, 1);
+                addTicks(length, movement);
+
+                addTicks(1, merge(movement, JMP));
+                addTicks(10, movement);
+
+                addTicks(1, movement);
+                if (run1T) addTicks(1, movement);
 
                 break;
             }
             case PESSI: {
-                List<InputType> directions = new ArrayList<>(this.directions);
-                if (directions.contains(W)) directions.add(SPR);
+                InputType[] movement = directionsWithSprint();
 
-                addTick.accept(new InputType[]{AIR}, null, length);
-                addTick.accept(new InputType[]{AIR}, directions, 11 - length);
-                addTick.accept(null, directions, 1);
-                if (run1T) addTick.accept(null, directions, 1);
+                addTicks(1, JMP);
+                addTicks(length - 1);
+
+                addTicks(1, merge(movement, JMP));
+                addTicks(11 - length - 1, movement);
+
+                addTicks(1, movement);
+                if (run1T) addTicks(1, movement);
 
                 break;
             }
             case FMM: {
-                List<InputType> directions = new ArrayList<>(this.directions);
+                InputType[] movement = directionsArray();
 
-                addTick.accept(new InputType[]{AIR}, directions, length);
-                addTick.accept(new InputType[]{SPR, AIR}, directions, 11 - length);
-                addTick.accept(new InputType[]{SPR}, directions, 1);
-                if (run1T) addTick.accept(new InputType[]{SPR}, directions, 1);
+                addTicks(1, merge(movement, JMP));
+                addTicks(length - 1, movement);
 
+                addTicks(1, merge(movement, SPR, JMP));
+                addTicks(11 - length - 1, merge(movement, SPR));
+
+                addTicks(1, merge(movement, SPR));
+                if (run1T) addTicks(1, merge(movement, SPR));
 
                 break;
             }
             case MARK: {
-                List<InputType> direction = Collections.singletonList(this.direction);
-                addTick.accept(new InputType[]{AIR}, direction, length);
-                addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11 - length);
-                addTick.accept(new InputType[]{W, SPR}, direction, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                InputType[] strafe = singleDirectionArray();
+
+                addTicks(1, merge(strafe, JMP));
+                addTicks(length - 1, strafe);
+
+                addTicks(1, merge(strafe, W, SPR, JMP));
+                addTicks(11 - length - 1, merge(strafe, W, SPR));
+
+                addTicks(1, merge(strafe, W, SPR));
+                if (run1T) addTicks(1, merge(strafe, W, SPR));
 
                 break;
             }
             case WAD: {
-                List<InputType> direction = Collections.singletonList(this.direction);
+                InputType[] strafe = singleDirectionArray();
 
-                addTick.accept(new InputType[]{W, A, D, SPR, AIR}, null, length);
-                addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11 - length);
-                addTick.accept(new InputType[]{W, SPR}, direction, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                addTicks(1, W, A, D, SPR, JMP);
+                addTicks(length - 1, W, A, D, SPR);
+
+                addTicks(1, merge(strafe, W, SPR, JMP));
+                addTicks(11 - length - 1, merge(strafe, W, SPR));
+
+                addTicks(1, merge(strafe, W, SPR));
+                if (run1T) addTicks(1, merge(strafe, W, SPR));
 
                 break;
             }
             case WDWA: {
-                List<InputType> direction = Collections.singletonList(this.direction);
-                addTick.accept(new InputType[]{W, SPR, AIR}, direction, 1);
-                addTick.accept(new InputType[]{W, SPR, AIR}, direction, 11);
-                addTick.accept(new InputType[]{W, SPR}, direction, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, direction, 1);
+                InputType[] strafe = singleDirectionArray();
+
+                addTicks(1, merge(strafe, W, SPR, JMP));
+
+                addTicks(1, merge(strafe, W, SPR, JMP));
+                addTicks(10, merge(strafe, W, SPR));
+
+                addTicks(1, merge(strafe, W, SPR));
+                if (run1T) addTicks(1, merge(strafe, W, SPR));
 
                 break;
             }
             case BWMM: {
-                addTick.accept(new InputType[]{S, AIR}, null, 11);
-                addTick.accept(new InputType[]{S}, null, 2);
-                addTick.accept(new InputType[]{W, SPR, AIR}, null, 11);
-                addTick.accept(new InputType[]{W, SPR}, null, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
+                addTicks(1, S, JMP);
+                addTicks(10, S);
+
+                addTicks(2, S);
+
+                addTicks(1, W, SPR, JMP);
+                addTicks(10, W, SPR);
+
+                addTicks(1, W, SPR);
+                if (run1T) addTicks(1, W, SPR);
 
                 break;
             }
             case REX: {
-                List<InputType> direction = Collections.singletonList(this.direction);
+                InputType[] strafe = singleDirectionArray();
 
-                addTick.accept(new InputType[]{S, AIR}, null, 11);
-                addTick.accept(new InputType[]{S}, null, 2);
-                addTick.accept(new InputType[]{W, SPR, AIR}, direction, length);
-                addTick.accept(new InputType[]{W, SPR, AIR}, null, 11 - length);
-                addTick.accept(new InputType[]{W, SPR}, null, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
+                addTicks(1, S, JMP);
+                addTicks(10, S);
+
+                addTicks(2, S);
+
+                addTicks(1, merge(strafe, W, SPR, JMP));
+                addTicks(length - 1, merge(strafe, W, SPR));
+
+                addTicks(1, W, SPR, JMP);
+                addTicks(11 - length - 1, W, SPR);
+
+                addTicks(1, W, SPR);
+                if (run1T) addTicks(1, W, SPR);
 
                 break;
             }
             case REVERSE_REX: {
-                List<InputType> direction = Collections.singletonList(this.direction);
+                InputType[] strafe = singleDirectionArray();
 
-                addTick.accept(new InputType[]{S, AIR}, direction, length);
-                addTick.accept(new InputType[]{S, AIR}, null, 11 - length);
-                addTick.accept(new InputType[]{S}, null, 2);
-                addTick.accept(new InputType[]{W, SPR, AIR}, null, 11);
-                addTick.accept(new InputType[]{W, SPR}, null, 1);
-                if (run1T) addTick.accept(new InputType[]{W, SPR}, null, 1);
+                addTicks(1, merge(strafe, S, JMP));
+                addTicks(length - 1, merge(strafe, S));
 
+                addTicks(1, S, JMP);
+                addTicks(11 - length - 1, S);
+
+                addTicks(2, S);
+
+                addTicks(1, W, SPR, JMP);
+                addTicks(10, W, SPR);
+
+                addTicks(1, W, SPR);
+                if (run1T) addTicks(1, W, SPR);
 
                 break;
             }
@@ -287,4 +309,33 @@ public class StrategyJump {
         // Since all ticks were just recreated using addJumpTick (based on jump settings), they weren't added to displayed buttons, so this adds them if the jump they are in is in extended view
         if (extended && gui != null) ticks.forEach(t -> gui.displayedButtons.addAll(t.getButtons()));
     }
+
+    private void addTicks(int count, InputType... inputs) {
+        for (int i = 0; i < count; i++) {
+            Set<InputType> set = new HashSet<>(Arrays.asList(inputs));
+            int tickNum = ticks.isEmpty() ? strategyTicks.size() : ticks.get(0).getTickNum() + ticks.size();
+            StrategyTick.addJumpTick(tickNum, set, this);
+        }
+    }
+
+    private InputType[] directionsArray() {
+        return directions.toArray(new InputType[0]);
+    }
+
+    private InputType[] directionsWithSprint() {
+        List<InputType> result = new ArrayList<>(directions);
+        if (result.contains(W)) result.add(SPR);
+        return result.toArray(new InputType[0]);
+    }
+
+    private InputType[] singleDirectionArray() {
+        return new InputType[]{direction};
+    }
+
+    private InputType[] merge(InputType[] base, InputType... extra) {
+        InputType[] out = Arrays.copyOf(base, base.length + extra.length);
+        System.arraycopy(extra, 0, out, base.length, extra.length);
+        return out;
+    }
+
 }

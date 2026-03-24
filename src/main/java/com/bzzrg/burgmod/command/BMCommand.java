@@ -315,18 +315,16 @@ public class BMCommand extends CommandBase {
                                     break;
                                 }
 
-                                StrategyTick finalJumpTick = StrategyTick.getJumpTick(0);
+                                Integer lastJumpIndex = StrategyTick.getLastJumpIndex();
 
-                                if (finalJumpTick == null) {
+                                if (lastJumpIndex == null) {
                                     bmChat("\u00A7cYour strategy doesn't contain any jumps! (Read this command's info for more explanation)");
                                     break;
                                 }
 
                                 PlayerSim sim = createSim();
-                                boolean lastAir = false;
 
                                 for (StrategyTick tick : strategyTicks) {
-
                                     updateSim(sim, new UpdateSimOptions(
                                             tick.correctInputs.contains(InputType.W),
                                             tick.correctInputs.contains(InputType.A),
@@ -334,11 +332,9 @@ public class BMCommand extends CommandBase {
                                             tick.correctInputs.contains(InputType.D),
                                             tick.correctInputs.contains(InputType.SPR),
                                             tick.correctInputs.contains(InputType.SNK),
-                                            tick.correctInputs.contains(InputType.AIR) && !lastAir,
+                                            tick.correctInputs.contains(InputType.JMP),
                                             null));
-                                    lastAir = tick.correctInputs.contains(InputType.AIR);
-
-                                    if (tick == finalJumpTick) break;
+                                    if (tick.getTickNum() == lastJumpIndex) break;
 
                                 }
 
@@ -375,9 +371,10 @@ public class BMCommand extends CommandBase {
                 Runnable sendStratUsage = () -> {
                     bmChat("\u00A7bUsage (/bm strat):");
                     sendBMBullet("strat save <key>", "Saves strategy under key");
-                    sendBMBullet("strat load <key>", "Loads strategy saved under key");
                     sendBMBullet("strat delete <key>", "Deletes strategy saved under key");
+                    sendBMBullet("strat load <key>", "Loads strategy saved under key");
                     sendBMBullet("strat savehpk <jump #>", "Saves strategy to OJ Jump #, HPK only");
+                    sendBMBullet("strat deletehpk <jump #>", "Deletes strategy saved under an OJ Jump #, HPK only");
                     sendBMBullet("strat autoloadhpk", "Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only");
                     sendBMBullet("strat list", "Lists all keys of saved strategies");
                 };
@@ -403,6 +400,24 @@ public class BMCommand extends CommandBase {
 
                         strategyFieldsToJson(new File(BurgMod.modConfigFolder, "input_status/strategies/" + key + ".json"));
                         bmChat("\u00A7aSaved current strategy under key: \u00A7b" + key);
+
+                        break;
+                    }
+                    case "delete": {
+
+                        String key;
+                        try {
+                            key = strings[2];
+                        } catch (Exception e) {
+                            bmChat("\u00A7cPlease provide a key of a strategy to delete. (3rd argument)");
+                            break;
+                        }
+
+                        if (new File(BurgMod.modConfigFolder, "input_status/strategies/" + key + ".json").delete()) {
+                            bmChat("\u00A7aDeleted strategy under key: \u00A7b" + key);
+                        } else {
+                            bmChat("\u00A7cThere is no strategy saved under the provided key. (3rd argument)");
+                        }
 
                         break;
                     }
@@ -436,24 +451,6 @@ public class BMCommand extends CommandBase {
 
                         break;
                     }
-                    case "delete": {
-
-                        String key;
-                        try {
-                            key = strings[2];
-                        } catch (Exception e) {
-                            bmChat("\u00A7cPlease provide a key of a strategy to delete. (3rd argument)");
-                            break;
-                        }
-
-                        if (new File(BurgMod.modConfigFolder, "input_status/strategies/" + key + ".json").delete()) {
-                            bmChat("\u00A7aDeleted strategy under key: \u00A7b" + key);
-                        } else {
-                            bmChat("\u00A7cThere is no strategy saved under the provided key. (3rd argument)");
-                        }
-
-                        break;
-                    }
                     case "savehpk": {
                         int jumpNum;
                         try {
@@ -465,6 +462,24 @@ public class BMCommand extends CommandBase {
 
                         strategyFieldsToJson(new File(BurgMod.modConfigFolder, "input_status/hpk_strategies/" + jumpNum + ".json"));
                         bmChat("\u00A7aSaved current strategy under jump #: \u00A7b" + jumpNum + " \u00A77(used by autoloadhpk)");
+                        break;
+                    }
+                    case "deletehpk": {
+
+                        int jumpNum;
+                        try {
+                            jumpNum = Integer.parseInt(strings[2]);
+                        } catch (Exception e) {
+                            bmChat("\u00A7cPlease provide a valid jump # of a saved HPK strategy to remove. (3rd argument)");
+                            break;
+                        }
+
+                        if (new File(BurgMod.modConfigFolder, "input_status/hpk_strategies/" + jumpNum + ".json").delete()) {
+                            bmChat("\u00A7aDeleted HPK strategy under jump #: \u00A7b" + jumpNum);
+                        } else {
+                            bmChat("\u00A7cThere is no HPK strategy saved under the provided jump #. (3rd argument)");
+                        }
+
                         break;
                     }
                     case "autoloadhpk": {

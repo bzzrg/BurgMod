@@ -12,7 +12,6 @@ import static com.bzzrg.burgmod.utils.GeneralUtils.*;
 
 public class PosCheckersHandler {
 
-    private static boolean lastOnGround = true;
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -23,7 +22,7 @@ public class PosCheckersHandler {
         boolean validCoords = xMin <= player.posX && player.posX <= xMax &&
                 zMin <= player.posZ && player.posZ <= zMax;
 
-        if (validCoords && !onGround() && lastOnGround) {
+        if (validCoords && lastOnGround && !onGround()) {
 
             for (PosChecker posChecker : posCheckers) {
 
@@ -43,7 +42,6 @@ public class PosCheckersHandler {
 
         }
 
-        lastOnGround = onGround();
     }
 
     public static void onReset() {

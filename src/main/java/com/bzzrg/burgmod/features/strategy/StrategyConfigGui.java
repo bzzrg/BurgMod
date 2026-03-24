@@ -44,6 +44,11 @@ public class StrategyConfigGui extends GuiScreen {
 
     private CustomTextField jumpTextField;
 
+    public static void clearStrategy() {
+        new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
+        new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
+    }
+
     @Override
     public void initGui() {
 
@@ -197,8 +202,7 @@ public class StrategyConfigGui extends GuiScreen {
             }
 
             case 3: { // Clear Strategy
-                new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
-                new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
+                clearStrategy();
                 break;
             }
             case 4: { // Trim Strategy
@@ -220,7 +224,6 @@ public class StrategyConfigGui extends GuiScreen {
 
                     last = tick;
                 }
-
                 break;
             }
             case 5: { // Mirror Strategy
@@ -274,11 +277,12 @@ public class StrategyConfigGui extends GuiScreen {
 
                 if (StrategyRecorder.recording) {
                     ResetHandler.movedSinceReset = false;
+                    InputStatusHandler.label = color1 + "Input Status: \u00A7bRecording Strategy...";
+                    P45OffsetHandler.setAllLabels("\u00A7bRecording Strategy...");
                 } else {
+
                     InputStatusHandler.label = color1 + "Input Status: \u00A7r?";
-                    P45OffsetHandler.autoLabel = color1 + "Perfect 45 Offset (?): \u00A7r?";
-                    P45OffsetHandler.xLabel = color1 + "Perfect 45 Offset (X?): \u00A7r?";
-                    P45OffsetHandler.zLabel = color1 + "Perfect 45 Offset (Z?): \u00A7r?";
+                    P45OffsetHandler.setAllLabels("\u00A7r?");
 
                     while (true) {
 
@@ -296,8 +300,7 @@ public class StrategyConfigGui extends GuiScreen {
 
                     }
 
-                    new ArrayList<>(strategyTicks).forEach(StrategyTick::remove);
-                    new ArrayList<>(strategyJumps).forEach(StrategyJump::remove);
+                    clearStrategy();
 
                     for (Set<InputType> inputs : recordedStrategy) {
                         addLoneTick(strategyTicks.size(), inputs);
