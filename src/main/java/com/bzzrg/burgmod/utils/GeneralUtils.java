@@ -41,6 +41,9 @@ public class GeneralUtils {
     public static void playSound(String name, float volume, float pitch) {
         if (mc.thePlayer != null) mc.thePlayer.playSound(name, volume, pitch);
     }
+    public static void playErrorSound() {
+        playSound("mob.endermen.portal", 1.0F, 0.5F);
+    }
 
     public static void createDirectory(File folder) {
         if (folder.mkdirs()) {

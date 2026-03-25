@@ -71,7 +71,7 @@ public class P45OffsetHandler {
             if (!P45OffsetConfig.jumpAngle.isEmpty() && getJumpAngle() == null) {
                 bmChat("\u00A7cWARN: Your jump angle is invalid! Either leave it blank or input a valid number.");
 
-                playSound("mob.endermen.portal", 1.0F, 0.5F);
+                playErrorSound();
                 setAllLabels("\u00A74Invalid JA");
                 return;
             }
@@ -79,7 +79,7 @@ public class P45OffsetHandler {
             if (numOf45s > StrategyTick.getJumpIndices().size()) {
                 bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
 
-                playSound("mob.endermen.portal", 1.0F, 0.5F);
+                playErrorSound();
                 setAllLabels("\u00A74Invalid Strategy");
                 return;
             } else if (!isStrategyRight()) {
@@ -99,7 +99,7 @@ public class P45OffsetHandler {
                 msg.appendSibling(click);
                 if (mc.thePlayer != null) mc.thePlayer.addChatMessage(msg);
 
-                playSound("mob.endermen.portal", 1.0F, 0.5F);
+                playErrorSound();
                 setAllLabels("\u00A74Invalid Strategy");
                 return;
             }

@@ -1,19 +1,19 @@
 package com.bzzrg.burgmod.features.perfect45offset;
 
-import com.bzzrg.burgmod.features.FeatureConfigGui;
-import com.bzzrg.burgmod.utils.gui.CustomButton;
-import net.minecraft.client.gui.GuiButton;
+import com.bzzrg.burgmod.features.BMConfigGui;
 
 import static com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig.*;
 
-public class P45OffsetConfigGui extends FeatureConfigGui {
+public class P45OffsetConfigGui extends BMConfigGui {
     public P45OffsetConfigGui() {
         this.addStrategyButton();
 
         this.addIntSetting("# of 45s", () -> numOf45s, i -> numOf45s = i, 1, 10);
-        this.addStringSetting("Jump Angle", () -> jumpAngle, s -> jumpAngle = s, "DEFAULT = Reset Angle");
+        this.addFloatSetting("Jump Angle", () -> jumpAngle.isEmpty() ? null : Float.valueOf(jumpAngle),
+                f -> jumpAngle = f == null ? "" : f.toString(), "DEFAULT = Reset Angle");
         this.addBooleanSetting("Apply JA To First", () -> applyJAToFirst, b -> applyJAToFirst = b);
         this.addEnumSetting("45 Key", () -> FortyFiveKey.valueOf(fortyFiveKey), v -> fortyFiveKey = v.name());
+        this.addActionButton("Fix Strat 45s", () -> new FixStrat45sCommand().processCommand(mc.thePlayer, new String[]{}));
         this.nextColumn();
         this.addBooleanSetting("Show Auto Offset", () -> showAutoOffset, b -> showAutoOffset = b);
         this.addBooleanSetting("Show X Offset", () -> showXOffset, b -> showXOffset = b);
@@ -29,27 +29,18 @@ public class P45OffsetConfigGui extends FeatureConfigGui {
         this.addBooleanSetting("Show Jump Block", () -> showJumpBlock, b -> showJumpBlock = b);
         this.addBooleanSetting("Show JB/LB Line", () -> showJBLBLine, b -> showJBLBLine = b);
         this.addBooleanSetting("Show Perfect Line", () -> showPerfectLine, b -> showPerfectLine = b);
+        this.addStringSetting(
+                "Username",
+                () -> username,
+                s -> username = s,
+                "Enter username"
+        );
+        this.addStringSetting(
+                "Command",
+                () -> command,
+                s -> command = s,
+                "e.g. /warp spawn"
+        );
     }
-
-    private static int fixStrat45sButtonID;
-    @Override
-    public void initGui() {
-        super.initGui();
-
-        fixStrat45sButtonID = buttonList.size();
-        final int strafingButtonWidth = 80; // 80 = button width, should match strategy button width inside feature config gui
-        final int strafingButtonX = width - 1 - borderInline - borderThickness - buttonGap - strafingButtonWidth;
-        final int strafingButtonY = height - 1 - borderInline - borderThickness - (buttonGap + buttonHeight)*2;
-
-        buttonList.add(new CustomButton(fixStrat45sButtonID, strafingButtonX, strafingButtonY, strafingButtonWidth, buttonHeight, "Fix Strat 45s"));
-    }
-
-    @Override
-    public void actionPerformed(GuiButton button) {
-        super.actionPerformed(button);
-        if (button.id == fixStrat45sButtonID) {
-            new FixStrat45sCommand().processCommand(mc.thePlayer, new String[]{});
-        }
-    }
-
+    public static String username = "", command = "";
 }

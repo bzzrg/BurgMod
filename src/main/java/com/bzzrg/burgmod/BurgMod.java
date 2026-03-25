@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod;
 
-import com.bzzrg.burgmod.command.BMCommand;
+import com.bzzrg.burgmod.features.general.BMCommand;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
 import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
 import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
@@ -44,7 +44,7 @@ public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.3.0";
 
     public static String latestVersion = "";
 

@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.command;
+package com.bzzrg.burgmod.features.general;
 
 import com.bzzrg.burgmod.BurgMod;
 import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
@@ -16,17 +16,14 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig.posCheckers;
@@ -64,9 +61,6 @@ public class BMCommand extends CommandBase {
             bmChat("\u00A7bUsage (/bm):");
             sendBMBullet("pos", "Adds checkers that send your X/Z pos any amount of ticks (0-100) after jumping");
             sendBMBullet("strat", "Save strategies under keys or smarter HPK OJ keys");
-            sendBMBullet("dp", "Sets # of decimal places to show globally for all features involving numbers");
-            sendBMBullet("c1", "Color 1 for labels");
-            sendBMBullet("c2", "Color 2 for labels");
             chat("\u00A78(Check MC controls to access more BurgMod config)");
         };
 
@@ -74,8 +68,6 @@ public class BMCommand extends CommandBase {
             sendMainUsage.run();
             return;
         }
-
-        List<EnumChatFormatting> colors = Arrays.stream(EnumChatFormatting.values()).filter(EnumChatFormatting::isColor).collect(Collectors.toList());
 
         switch (strings[0]) {
 
@@ -534,46 +526,6 @@ public class BMCommand extends CommandBase {
                     default:
                         sendStratUsage.run();
                         break;
-                }
-                break;
-            }
-            case "dp": {
-
-                try {
-                    int decimalPrecision = Integer.parseInt(strings[1]);
-
-                    if (decimalPrecision < 0 || decimalPrecision > 100) {
-                        bmChat("\u00A7cYour integer must be between 0 and 100! (2nd argument)");
-                        break;
-                    }
-
-                    GeneralConfig.decimalPrecision = decimalPrecision;
-                    bmChat("\u00A7aChanged decimal precision to " + decimalPrecision + " decimal places!");
-
-                } catch (Exception e) {
-                    bmChat("\u00A7bUsage (/bm dp):");
-                    chat("\u00A77- \u00A7e/bm dp <integer> \u00A77(Sets decimal precision globally for all features involving numbers)");
-                    break;
-                }
-                break;
-            }
-            case "c1": {
-                try {
-                    GeneralConfig.color1 = EnumChatFormatting.valueOf(strings[1].toUpperCase()).toString();
-                    bmChat("\u00A7aColor 1 has been set to: " + GeneralConfig.color1 + strings[1].toUpperCase());
-                } catch (Exception e) {
-                    bmChat("\u00A7cInput a valid MC color code (caps don't matter) (2nd argument):");
-                    chat(colors.stream().map(color -> color + color.name()).collect(Collectors.joining(", ")));
-                }
-                break;
-            }
-            case "c2": {
-                try {
-                    GeneralConfig.color2 = EnumChatFormatting.valueOf(strings[1].toUpperCase()).toString();
-                    bmChat("\u00A7aColor 2 has been set to: " + GeneralConfig.color2 + strings[1].toUpperCase());
-                } catch (Exception e) {
-                    bmChat("\u00A7cInput a valid MC color code (caps don't matter) (2nd argument):");
-                    chat(colors.stream().map(color -> color + color.name()).collect(Collectors.joining(", ")));
                 }
                 break;
             }

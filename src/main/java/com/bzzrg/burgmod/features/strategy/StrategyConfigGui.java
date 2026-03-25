@@ -101,7 +101,7 @@ public class StrategyConfigGui extends GuiScreen {
 
         if (strategyTicks.stream().anyMatch(tick -> tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK))) {
             bmChat("\u00A7cWARN: Your strategy is impossible! (You have 1 or more ticks set to sprint and sneak at the same time)");
-            playSound("mob.endermen.portal", 1.0F, 0.5F);
+            playErrorSound();
         }
     }
 
@@ -188,7 +188,7 @@ public class StrategyConfigGui extends GuiScreen {
                 try {
                     jumpType = JumpType.valueOf(jumpTextField.field.getText().toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    playSound("mob.endermen.portal", 1.0F, 0.5F);
+                    playErrorSound();
                     bmChat("\u00A7cInvalid jump name! List of valid jump names:");
 
                     for (JumpType t : JumpType.values()) {

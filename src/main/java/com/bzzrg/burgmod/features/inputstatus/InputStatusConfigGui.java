@@ -1,9 +1,9 @@
 package com.bzzrg.burgmod.features.inputstatus;
 
 import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.features.FeatureConfigGui;
+import com.bzzrg.burgmod.features.BMConfigGui;
 
-public class InputStatusConfigGui extends FeatureConfigGui {
+public class InputStatusConfigGui extends BMConfigGui {
     public InputStatusConfigGui() {
         this.addStrategyButton();
 

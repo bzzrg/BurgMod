@@ -1,9 +1,9 @@
 package com.bzzrg.burgmod.features.trajectory;
 
 import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
-import com.bzzrg.burgmod.features.FeatureConfigGui;
+import com.bzzrg.burgmod.features.BMConfigGui;
 
-public class TrajectoryConfigGui extends FeatureConfigGui {
+public class TrajectoryConfigGui extends BMConfigGui {
     public TrajectoryConfigGui() {
         this.addFloatSetting("Red", () -> TrajectoryConfig.colorRed, f -> TrajectoryConfig.colorRed = f, 0, 1);
         this.addFloatSetting("Green", () -> TrajectoryConfig.colorGreen, f -> TrajectoryConfig.colorGreen = f, 0, 1);

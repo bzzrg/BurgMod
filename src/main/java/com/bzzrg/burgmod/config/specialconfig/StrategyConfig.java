@@ -183,6 +183,7 @@ public class StrategyConfig {
             BurgMod.logger.error("Failed to load strategy.json into static fields: Json has invalid strategy. Deleting strategy.json and loading an empty strategy instead.", e);
             bmChat("\u00A74ERROR: Your loaded strategy was invalid so an empty one was loaded instead!");
             chat("\u00A7cNote: If you were trying to load a saved strategy, delete the strategy and remake it. This error means it is most likely invalid now.");
+            playErrorSound();
             clearStrategy();
             if (strategyJson.delete()) {
                 BurgMod.logger.info("Deleted strategy.json!");
