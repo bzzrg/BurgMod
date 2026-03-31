@@ -1,9 +1,8 @@
 package com.bzzrg.burgmod.features.perfect45offset;
 
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
-import com.bzzrg.burgmod.config.specialconfig.StrategyConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
-import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
+import com.bzzrg.burgmod.features.strategy.StrategyListGui;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
@@ -12,9 +11,8 @@ import net.minecraft.command.ICommandSender;
 import java.util.List;
 import java.util.Set;
 
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.features.strategy.StrategyConfigGui.clearStrategy;
-import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
 
 public class FixStrat45sCommand extends CommandBase {
 
@@ -41,14 +39,13 @@ public class FixStrat45sCommand extends CommandBase {
         } else {
 
             List<Set<InputType>> validStratInputs = P45OffsetHandler.getValidStratInputs();
-            clearStrategy();
+            StrategyListGui.clearStrategy();
 
             for (Set<InputType> inputs : validStratInputs) {
-                StrategyTick.addLoneTick(strategyTicks.size(), inputs);
+                new StrategyTick(strategyTicks.size(), inputs, null);
             }
 
-            StrategyConfig.updateStrategyJson();
-            Minecraft.getMinecraft().displayGuiScreen(new StrategyConfigGui());
+            Minecraft.getMinecraft().displayGuiScreen(new StrategyListGui());
 
             bmChat("\u00A7aFixed the 45 jumps from your strategy!");
         }

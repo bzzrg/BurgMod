@@ -1,9 +1,9 @@
 package com.bzzrg.burgmod.features.inputstatus;
 
-import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
-import com.bzzrg.burgmod.utils.resetting.ResetHandler;
+import com.bzzrg.burgmod.modutils.resetting.ResetHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -13,9 +13,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.utils.GeneralUtils.getInputs;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.getInputs;
 
 public class InputStatusHandler {
 

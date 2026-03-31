@@ -1,10 +1,10 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
-import com.bzzrg.burgmod.config.basicconfig.GeneralConfig;
-import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
-import com.bzzrg.burgmod.utils.gui.CustomButton;
+import com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
+import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
+import com.bzzrg.burgmod.modutils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -142,7 +142,7 @@ public class EditPositionsGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        BasicConfigHandler.updateConfigFile();
+        MainConfigSection.updateFile();
         super.onGuiClosed();
     }
 

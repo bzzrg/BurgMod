@@ -1,15 +1,16 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
-import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
-import com.bzzrg.burgmod.config.basicconfig.TrajectoryConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.TrajectoryConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
 import com.bzzrg.burgmod.features.general.GeneralConfigGui;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusConfigGui;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetConfigGui;
-import com.bzzrg.burgmod.features.strategy.StrategyConfigGui;
+import com.bzzrg.burgmod.features.poschecker.PosCheckersListGui;
+import com.bzzrg.burgmod.features.strategy.StrategyListGui;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryConfigGui;
-import com.bzzrg.burgmod.utils.gui.CustomButton;
+import com.bzzrg.burgmod.modutils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiButton;
@@ -24,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
-import static com.bzzrg.burgmod.utils.GeneralUtils.chat;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.chat;
 
 public class MainConfigGui extends GuiScreen {
 
@@ -35,23 +36,19 @@ public class MainConfigGui extends GuiScreen {
     private static final int titleScale = 4;
     private static final int titleGap = 10;
 
-    private final List<Row> rows = new ArrayList<>();
+    private final List<Option> options = new ArrayList<>();
 
     private int editPositionsId = -1;
     private int commandUsageButtonId = -1;
 
     private void addFeature(String name, Supplier<Boolean> enabledGetter, Runnable onToggle, Runnable onSettings, Runnable onInfo) {
-        rows.add(new Row(name, enabledGetter, onToggle, onSettings, onInfo, false));
+        options.add(new Option(name, enabledGetter, onToggle, onSettings, onInfo, false));
     }
     private void addButton(String name, Runnable onClick, Runnable onSettings, Runnable onInfo) {
-        rows.add(new Row(name, null, onClick, onSettings, onInfo, true));
+        options.add(new Option(name, null, onClick, onSettings, onInfo, true));
     }
 
-    @Override
-    public void initGui() {
-        buttonList.clear();
-        rows.clear();
-
+    private void initOptions() {
         this.addButton(
                 "General Config",
                 () -> mc.displayGuiScreen(new GeneralConfigGui()),
@@ -172,9 +169,31 @@ public class MainConfigGui extends GuiScreen {
                     chat("\u00A77-------- Line Customization --------");
                     sendInfoBullet("Tick Length", "The amount of ticks that the trajectory line should predict into the future.");
                 });
+        this.addFeature(
+                "Position Checkers",
+                () -> PosCheckersConfig.enabled,
+                () -> PosCheckersConfig.enabled = !PosCheckersConfig.enabled,
+                () -> mc.displayGuiScreen(new PosCheckersListGui()),
+                () -> {
+                    Minecraft.getMinecraft().displayGuiScreen(null);
+                    bmChat("\u00A7bPosition Checkers Info:");
+                    chat("\u00A77-------- General --------");
+                    sendInfoBullet("What Does It Do?", "Position Checkers send your X or Z coordinate on a certain air tick.");
+                    chat("\u00A77-------- Checkers --------");
+                    sendInfoBullet("Add Checker", "Adds a new position checker for X/Z/BOTH and a specific airtick.");
+                    sendInfoBullet("Clear Checkers", "Adds a new position checker for X/Z/BOTH and a specific airtick.");
+                    chat("\u00A77-------- Coordinate Limits --------");
+                    sendInfoBullet("Min X", "Sets minumum player X coordinate required for position checkers to work.");
+                    sendInfoBullet("Max X", "Sets maximum player X coordinate allowed for position checkers to work.");
+                    sendInfoBullet("Min Z", "Sets minumum player Z coordinate required for position checkers to work.");
+                    sendInfoBullet("Max Z", "Sets maximum player Z coordinate allowed for position checkers to work.");
+                    sendInfoBullet("Min/Max From Pos", "Sets min/max X/Z values so that only jumps from a certain block range around your current position can set off position checkers.");
+                    sendInfoBullet("Min/Max From Strat", "Same as Min/Max From Pos, but uses the position of your final jump tick from your strategy. " +
+                            "\u00A7cIMPORTANT: Only works if momentum is noturn and button is clicked at reset location.");
+                });
         this.addButton(
                 "Edit Strategy",
-                () -> mc.displayGuiScreen(new StrategyConfigGui()),
+                () -> mc.displayGuiScreen(new StrategyListGui()),
                 null,
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
@@ -184,10 +203,19 @@ public class MainConfigGui extends GuiScreen {
                     sendInfoBullet("What Is It For?", "The strategy editor is used to define the inputs of a strategy for a jump tick by tick. " +
                             "Features like Input Status and Perfect 45 Offset require you to have your strategy set for the jump you are currently doing.");
 
-                    chat("\u00A77-------- Buttons --------");
+                    chat("\u00A77-------- Strategy Editing --------");
                     sendInfoBullet("Add Tick", "Adds an individual tick to the strategy.");
-                    sendInfoBullet("Add Jump", "The add jump button just allows to add preset sequences of ticks that are common (like Jam or HH) instead of needing to do it manually through adding individual ticks. " +
-                            "You use the Add Jump button by typing a jump type in the field below the button and then clicking the button (all jump types are listed if you try to add an invalid jump type).");
+                    sendInfoBullet("Add Jump", "Allows adding preset sequences of ticks that are common based (like Jam or HH) instead of needing to do it manually through adding individual ticks.");
+                    sendInfoBullet("Clear Strat", "Clears your current strategy fully.");
+                    sendInfoBullet("Trim Strat", "Deletes all duplicate ticks at the end of your strategy except for one of them. " +
+                            "This is because more than one of the same tick at the end of your strategy is redundant for all strategy related features.");
+                    sendInfoBullet("Mirror Strat", "Switches all ticks/jumps with A selected to have D selected instead and vice versa. " +
+                            "If the tick/jump has both A and D selected or has neither selected, it is unaffected.");
+                    sendInfoBullet("Record Strat", "Records the player's movement so that the user can perform the strategy in game instead of setting ticks manually. " +
+                            "To record properly, know that recording starts when you start moving after you have reset. " +
+                            "Note that all recorded ticks are cleared when you reset, that way you don't have to re-record every time you fail your inputs while trying to record the strategy. " +
+                            "All empty ticks (ticks with no WASD, SPR, SNK, or AIR) are cut off when you stop recording.");
+                    sendInfoBullet("Preview Strat", "Draws a line that shows the trajectory your player would follow from your current position if your strategy was performed perfectly tick by tick.");
                     sendInfoBullet("Jump Config Buttons",
                             "\u00A77- \u00A7bExtend Button: \u00A7eShows the ticks that actually make up the jump. " +
                                     "These ticks can be modified manually, but changing the config of the jump using its config buttons will override any changes you have made to the jump's ticks manually.\n" +
@@ -196,15 +224,27 @@ public class MainConfigGui extends GuiScreen {
                                     "\u00A77- \u00A7bRun 1t: \u00A7eAdds one tick of running after the jump using whatever config is already set for the jump. " +
                                     "For example, Run 1t would add one tick of W+A+SPR if the jump was a Jam with W+A+SPR.\n" +
                                     "\u00A77- \u00A7b1-11t Slider: \u00A7eFor example, if set to 2t, then for HH it would be a 2t HH, for Mark it would be a 2t Mark, etc.");
-                    sendInfoBullet("Trim Strategy", "Deletes all duplicate ticks at the end of your strategy except for one of them. " +
-                            "This is because more than one of the same tick at the end of your strategy is redundant for all strategy related features.");
-                    sendInfoBullet("Mirror Strategy", "Switches all ticks/jumps with A selected to have D selected instead and vice versa. " +
-                            "If the tick/jump has both A and D selected or has neither selected, it is unaffected.");
-                    sendInfoBullet("Record Strategy", "Records the player's movement so that the user can perform the strategy in game instead of setting ticks manually. " +
-                            "To record properly, know that recording starts when you start moving after you have reset. " +
-                            "Note that all recorded ticks are cleared when you reset, that way you don't have to re-record every time you fail your inputs while trying to record the strategy. " +
-                            "All empty ticks (ticks with no WASD, SPR, SNK, or AIR) are cut off when you stop recording.");
-                    sendInfoBullet("Preview Strategy", "Draws a line that shows the trajectory your player would follow from your current position if your strategy was performed perfectly tick by tick.");
+
+                    chat("\u00A77-------- Strategy Saving --------");
+
+                    sendInfoBullet("Save Strat", "Saves your current strategy under the provided key.");
+                    sendInfoBullet("Delete Strat", "Deletes the strategy saved under the provided key if it exists.");
+                    sendInfoBullet("Load Strat", "Loads the strategy saved under the provided key if it exists.");
+                    sendInfoBullet("Save HPK Strat", "Saves your current strategy under the provided HPK OJ Jump # as an HPK strategy.");
+                    sendInfoBullet("Delete HPK Strat", "Deletes the HPK strategy saved under the provided HPK OJ Jump # if it exists.");
+                    sendInfoBullet("Auto Load HPK", "Enables auto-loading for HPK strategies when joining the jump # it is saved under. " +
+                            "This uses the \" [OJ]Entering Jump...\"  message when joining a jump so these messages must be visible. This only works for HPK Network.");
+                    //sendInfoBullet("");// STRAT LIST
+                    /*
+                    bmChat("\u00A7bUsage (/bm strat):");
+                    sendBMBullet("strat save <key>", "Saves strategy under key");
+                    sendBMBullet("strat delete <key>", "Deletes strategy saved under key");
+                    sendBMBullet("strat load <key>", "Loads strategy saved under key");
+                    sendBMBullet("strat savehpk <jump #>", "Saves strategy to OJ Jump #, HPK only");
+                    sendBMBullet("strat deletehpk <jump #>", "Deletes strategy saved under an OJ Jump #, HPK only");
+                    sendBMBullet("strat autoloadhpk", "Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only");
+                    sendBMBullet("strat list", "Lists all keys of saved strategies");
+                     */
 
                     chat("\u00A77-------- Extra --------");
                     sendInfoBullet("Important Things To Know",
@@ -213,37 +253,50 @@ public class MainConfigGui extends GuiScreen {
                                     "\u00A77- \u00A7eHaving JMP selected for a tick means you jump on that tick, not that you are holding down the jump key during that tick.\n" +
                                     "\u00A77- \u00A7eFeatures that use strategy might break or warn you if you have a tick with both SPR and SNK selected. " +
                                     "This is because it is impossible to be sprinting and sneaking at the same time.");
+
+
+
+
+
                 });
+    }
+
+    @Override
+    public void initGui() {
+        buttonList.clear();
+        options.clear();
+
+        initOptions();
 
         int rowSpacing = buttonHeight + buttonGap;
-        int rowsHeight = rows.size() * buttonHeight + Math.max(0, rows.size() - 1) * buttonGap;
+        int rowsHeight = options.size() * buttonHeight + Math.max(0, options.size() - 1) * buttonGap;
         int titleTopY = (height - (getScaledTitleHeight() + titleGap + rowsHeight)) / 2;
         int firstRowY = titleTopY + getScaledTitleHeight() + titleGap;
 
         int id = 0;
 
-        for (int i = 0; i < rows.size(); i++) {
-            Row row = rows.get(i);
+        for (int i = 0; i < options.size(); i++) {
+            Option option = options.get(i);
 
-            int totalWidth = getRowWidth(row);
+            int totalWidth = getOptionWidth(option);
             int startX = (width - totalWidth) / 2;
             int y = firstRowY + i * rowSpacing;
 
-            row.mainButtonId = id;
-            buttonList.add(new CustomButton(id++, startX, y, mainButtonWidth, buttonHeight, row.getMainLabel()));
+            option.mainButtonId = id;
+            buttonList.add(new CustomButton(id++, startX, y, mainButtonWidth, buttonHeight, option.getMainLabel()));
 
             int currentX = startX + mainButtonWidth;
 
-            if (row.hasSettings()) {
+            if (option.hasSettings()) {
                 currentX += buttonGap;
-                row.settingsButtonId = id;
+                option.settingsButtonId = id;
                 buttonList.add(new CustomButton(id++, currentX, y, buttonHeight, buttonHeight, "\u2699"));
                 currentX += buttonHeight;
             }
 
-            if (row.hasInfo()) {
+            if (option.hasInfo()) {
                 currentX += buttonGap;
-                row.infoButtonId = id;
+                option.infoButtonId = id;
                 buttonList.add(new CustomButton(id++, currentX, y, buttonHeight, buttonHeight, "?"));
             }
         }
@@ -261,18 +314,18 @@ public class MainConfigGui extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) {
-        for (Row row : rows) {
-            if (button.id == row.mainButtonId) {
-                row.onMainClick.run();
-                if (!row.configOnly) initGui();
+        for (Option option : options) {
+            if (button.id == option.mainButtonId) {
+                option.onMainClick.run();
+                if (!option.configOnly) initGui();
                 return;
             }
-            if (button.id == row.settingsButtonId && row.onSettingsClick != null) {
-                row.onSettingsClick.run();
+            if (button.id == option.settingsButtonId && option.onSettingsClick != null) {
+                option.onSettingsClick.run();
                 return;
             }
-            if (button.id == row.infoButtonId && row.onInfoClick != null) {
-                row.onInfoClick.run();
+            if (button.id == option.infoButtonId && option.onInfoClick != null) {
+                option.onInfoClick.run();
                 return;
             }
         }
@@ -292,7 +345,7 @@ public class MainConfigGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
 
-        int rowsHeight = rows.size() * buttonHeight + Math.max(0, rows.size() - 1) * buttonGap;
+        int rowsHeight = options.size() * buttonHeight + Math.max(0, options.size() - 1) * buttonGap;
         int titleTopY = (height - (getScaledTitleHeight() + titleGap + rowsHeight)) / 2;
         int titleCenterX = width / 2;
 
@@ -310,12 +363,6 @@ public class MainConfigGui extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    @Override
-    public void onGuiClosed() {
-        BasicConfigHandler.updateConfigFile();
-        super.onGuiClosed();
-    }
-
     private static void sendInfoBullet(String bullet, String info) {
 
         EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
@@ -328,10 +375,10 @@ public class MainConfigGui extends GuiScreen {
 
     }
 
-    private int getRowWidth(Row row) {
+    private int getOptionWidth(Option option) {
         int width = mainButtonWidth;
-        if (row.hasSettings()) width += buttonGap + buttonHeight;
-        if (row.hasInfo()) width += buttonGap + buttonHeight;
+        if (option.hasSettings()) width += buttonGap + buttonHeight;
+        if (option.hasInfo()) width += buttonGap + buttonHeight;
         return width;
     }
 
@@ -339,7 +386,7 @@ public class MainConfigGui extends GuiScreen {
         return fontRendererObj.FONT_HEIGHT * titleScale;
     }
 
-    private static class Row {
+    private static class Option {
         private final String name;
         private final Supplier<Boolean> enabledGetter;
         private final Runnable onMainClick;
@@ -351,7 +398,7 @@ public class MainConfigGui extends GuiScreen {
         private int settingsButtonId = -1;
         private int infoButtonId = -1;
 
-        private Row(
+        private Option(
                 String name,
                 Supplier<Boolean> enabledGetter,
                 Runnable onMainClick,

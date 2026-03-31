@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.features.strategy;
 
-import com.bzzrg.burgmod.utils.simulation.PlayerSim;
-import com.bzzrg.burgmod.utils.simulation.UpdateSimOptions;
+import com.bzzrg.burgmod.modutils.simulation.PlayerSim;
+import com.bzzrg.burgmod.modutils.simulation.UpdateSimOptions;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -16,10 +16,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
-import static com.bzzrg.burgmod.utils.debug.EveryTickDebug.logPlayerState;
-import static com.bzzrg.burgmod.utils.GeneralUtils.bmChat;
-import static com.bzzrg.burgmod.utils.simulation.SimUtils.*;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.modutils.debug.EveryTickDebug.logPlayerState;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.modutils.simulation.SimUtils.*;
 
 public class StrategyPreviewer {
 

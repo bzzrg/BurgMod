@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod.features.perfect45offset;
 
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.utils.simulation.SimUtils.drawLine;
+import static com.bzzrg.burgmod.modutils.simulation.SimUtils.drawLine;
 
 public class P45OffsetDrawer {
 

@@ -1,24 +1,28 @@
 package com.bzzrg.burgmod;
 
-import com.bzzrg.burgmod.features.general.BMCommand;
 import com.bzzrg.burgmod.config.MainConfigGuiBind;
-import com.bzzrg.burgmod.config.basicconfig.BasicConfigHandler;
-import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.TrajectoryConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig;
+import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.FixStrat45sCommand;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetDrawer;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersDrawer;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
-import com.bzzrg.burgmod.features.strategy.AutoStrategyLoad;
+import com.bzzrg.burgmod.features.strategy.AutoHPKLoader;
 import com.bzzrg.burgmod.features.strategy.StrategyPreviewer;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
-import com.bzzrg.burgmod.utils.GeneralUtils;
-import com.bzzrg.burgmod.utils.TaskScheduler;
-import com.bzzrg.burgmod.utils.debug.EveryTickDebug;
-import com.bzzrg.burgmod.utils.resetting.ResetHandler;
-import com.bzzrg.burgmod.utils.resetting.TeleportTracker;
+import com.bzzrg.burgmod.modutils.GeneralUtils;
+import com.bzzrg.burgmod.modutils.TaskScheduler;
+import com.bzzrg.burgmod.modutils.debug.EveryTickDebug;
+import com.bzzrg.burgmod.modutils.resetting.ResetHandler;
+import com.bzzrg.burgmod.modutils.resetting.TeleportTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -36,8 +40,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.updateStrategyFields;
-import static com.bzzrg.burgmod.utils.GeneralUtils.createDirectory;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.createDirectory;
 
 @Mod(modid = BurgMod.MODID, name = BurgMod.MODNAME, version = BurgMod.VERSION)
 public class BurgMod {
@@ -50,7 +53,6 @@ public class BurgMod {
 
     public static Minecraft mc;
     public static Logger logger;
-    public static File modConfigFile;
     public static File modConfigFolder;
 
     @EventHandler
@@ -58,23 +60,28 @@ public class BurgMod {
         mc = Minecraft.getMinecraft();
         logger = event.getModLog();
 
-        modConfigFile = event.getSuggestedConfigurationFile();
+        MainConfigSection.mainConfigFile = event.getSuggestedConfigurationFile();
         modConfigFolder = new File(event.getModConfigurationDirectory(), "BurgMod");
         createDirectory(modConfigFolder);
 
-        BasicConfigHandler.updateFields();
-        PosCheckersConfig.updateFields();
+        new GeneralConfig();
+        new InputStatusConfig();
+        new P45OffsetConfig();
+        new TrajectoryConfig();
+        MainConfigSection.updateFields();
+
+        PosCheckersConfig.instance.updateFields();
+        StrategyConfig.instance.updateFields();
 
     }
 
     @EventHandler
     public void initialize(FMLInitializationEvent event) {
-        ClientCommandHandler.instance.registerCommand(new BMCommand());
-        ClientCommandHandler.instance.registerCommand(new FixStrat45sCommand());
 
         KeyBinding bind = new KeyBinding("Open Config Gui", Keyboard.KEY_B, "BurgMod");
         ClientRegistry.registerKeyBinding(bind);
-        updateStrategyFields();
+
+        ClientCommandHandler.instance.registerCommand(new FixStrat45sCommand());
 
         new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(
@@ -88,7 +95,7 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new ResetHandler());
         MinecraftForge.EVENT_BUS.register(new MainConfigGuiBind(bind));
         MinecraftForge.EVENT_BUS.register(new NewVersionNotifier());
-        MinecraftForge.EVENT_BUS.register(new AutoStrategyLoad());
+        MinecraftForge.EVENT_BUS.register(new AutoHPKLoader());
         MinecraftForge.EVENT_BUS.register(new InputStatusHandler());
         MinecraftForge.EVENT_BUS.register(new StrategyRecorder());
         MinecraftForge.EVENT_BUS.register(new TrajectoryHandler());

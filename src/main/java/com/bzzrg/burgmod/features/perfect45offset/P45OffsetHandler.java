@@ -1,12 +1,12 @@
 package com.bzzrg.burgmod.features.perfect45offset;
 
-import com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.features.strategy.StrategyTick;
-import com.bzzrg.burgmod.utils.resetting.ResetHandler;
-import com.bzzrg.burgmod.utils.simulation.PlayerSim;
-import com.bzzrg.burgmod.utils.simulation.UpdateSimOptions;
+import com.bzzrg.burgmod.modutils.resetting.ResetHandler;
+import com.bzzrg.burgmod.modutils.simulation.PlayerSim;
+import com.bzzrg.burgmod.modutils.simulation.UpdateSimOptions;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.util.*;
@@ -19,12 +19,12 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.config.basicconfig.GeneralConfig.color1;
-import static com.bzzrg.burgmod.config.basicconfig.P45OffsetConfig.*;
-import static com.bzzrg.burgmod.config.specialconfig.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig.*;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
-import static com.bzzrg.burgmod.utils.GeneralUtils.*;
-import static com.bzzrg.burgmod.utils.simulation.SimUtils.*;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
+import static com.bzzrg.burgmod.modutils.simulation.SimUtils.*;
 
 public class P45OffsetHandler {
 
@@ -445,7 +445,7 @@ public class P45OffsetHandler {
 
         for (StrategyTick tick : strategyTicks) {
             validStratInputs.add(new HashSet<>(tick.correctInputs));
-            if (tick.getTickNum() == jump45Indices.get(0)) {
+            if (tick.getIndex() == jump45Indices.get(0)) {
                 break;
             }
         }

@@ -1,7 +1,7 @@
 package com.bzzrg.burgmod.features.inputstatus;
 
-import com.bzzrg.burgmod.config.basicconfig.InputStatusConfig;
-import com.bzzrg.burgmod.features.BMConfigGui;
+import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
+import com.bzzrg.burgmod.modutils.gui.BMConfigGui;
 
 public class InputStatusConfigGui extends BMConfigGui {
     public InputStatusConfigGui() {

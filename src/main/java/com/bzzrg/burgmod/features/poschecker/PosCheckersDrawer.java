@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod.features.poschecker;
 
-import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;

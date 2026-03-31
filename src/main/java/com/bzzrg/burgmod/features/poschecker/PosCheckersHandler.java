@@ -1,14 +1,14 @@
 package com.bzzrg.burgmod.features.poschecker;
 
-import com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig;
-import com.bzzrg.burgmod.utils.TaskScheduler;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
+import com.bzzrg.burgmod.modutils.TaskScheduler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import static com.bzzrg.burgmod.config.specialconfig.PosCheckersConfig.*;
-import static com.bzzrg.burgmod.utils.GeneralUtils.*;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig.*;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
 
 public class PosCheckersHandler {
 
