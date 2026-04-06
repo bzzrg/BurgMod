@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.bzzrg.burgmod.modutils.debug.fieldwatching.FieldWatcherConfig.specs;
+import static com.bzzrg.burgmod.modutils.debug.fieldwatching.FieldWatcherConfig.SPECS;
 
 public class FieldWatcher {
 
@@ -33,7 +33,7 @@ public class FieldWatcher {
 
     private static void writeBoxed(Object obj, int fieldId, Object newVal) {
 
-        if (!FieldWatcherConfig.enabled) {
+        if (!FieldWatcherConfig.ENABLED) {
             BYPASS = true;
             try {
                 set(obj, fieldId, newVal);
@@ -115,21 +115,21 @@ public class FieldWatcher {
     private static int NEXT_ID = 1;
 
     static {
-        for (Spec spec : specs) {
+        for (Spec spec : SPECS) {
             spec.id = NEXT_ID++;
             FIELD_IDS.put(spec.name, spec.id);
         }
     }
 
     public static boolean isValidClass(String clazz) {
-        for (Spec spec : specs) {
+        for (Spec spec : SPECS) {
             if (spec.clazz.equals(clazz)) return true;
         }
         return false;
     }
 
     public static String fieldName(int id) {
-        for (Spec spec : specs) {
+        for (Spec spec : SPECS) {
             if (spec.id == id) return spec.name;
         }
         return null;

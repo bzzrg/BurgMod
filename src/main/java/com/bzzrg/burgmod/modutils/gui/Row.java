@@ -8,6 +8,8 @@ import java.util.List;
 public abstract class Row {
 
     protected final List<GuiButton> buttons = new ArrayList<>();
+    protected final List<CustomTextField> fields = new ArrayList<>();
+
     protected int topY;
 
     public void init() {}

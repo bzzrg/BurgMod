@@ -1,15 +1,17 @@
 package com.bzzrg.burgmod.config;
 
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.TrajectoryConfig;
-import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
 import com.bzzrg.burgmod.features.general.GeneralConfigGui;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusConfigGui;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetConfigGui;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersListGui;
 import com.bzzrg.burgmod.features.strategy.StrategyListGui;
 import com.bzzrg.burgmod.features.trajectory.TrajectoryConfigGui;
+import com.bzzrg.burgmod.features.turnhelper.TurnHelperListGui;
 import com.bzzrg.burgmod.modutils.gui.CustomButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -36,30 +38,30 @@ public class MainConfigGui extends GuiScreen {
     private static final int titleScale = 4;
     private static final int titleGap = 10;
 
-    private final List<Option> options = new ArrayList<>();
+    public static final List<Option> options = new ArrayList<>();
 
     private int editPositionsId = -1;
     private int commandUsageButtonId = -1;
 
-    private void addFeature(String name, Supplier<Boolean> enabledGetter, Runnable onToggle, Runnable onSettings, Runnable onInfo) {
-        options.add(new Option(name, enabledGetter, onToggle, onSettings, onInfo, false));
+    private static void addFeature(String name, Supplier<Boolean> enabledGetter, Runnable onToggle, Runnable onSettings, Runnable onInfo) {
+        options.add(new Option(name, enabledGetter, onToggle, onSettings, onInfo, true));
     }
-    private void addButton(String name, Runnable onClick, Runnable onSettings, Runnable onInfo) {
-        options.add(new Option(name, null, onClick, onSettings, onInfo, true));
+    private static void addButton(String name, Runnable onClick, Runnable onSettings, Runnable onInfo) {
+        options.add(new Option(name, null, onClick, onSettings, onInfo, false));
     }
-
-    private void initOptions() {
-        this.addButton(
+    
+    public static void initOptions() {
+        addButton(
                 "General Config",
-                () -> mc.displayGuiScreen(new GeneralConfigGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new GeneralConfigGui()),
                 null,
                 null);
 
-        this.addFeature(
+        addFeature(
                 "Input Status",
                 () -> InputStatusConfig.enabled,
                 () -> InputStatusConfig.enabled = !InputStatusConfig.enabled,
-                () -> mc.displayGuiScreen(new InputStatusConfigGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new InputStatusConfigGui()),
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
                     bmChat("\u00A7bInput Status Info:");
@@ -80,11 +82,11 @@ public class MainConfigGui extends GuiScreen {
                     sendInfoBullet("Shorten Label", "Uses icons instead of full words for the label. For example, \"Waiting...\" -> \"...\"");
                 });
 
-        this.addFeature(
+        addFeature(
                 "Perfect 45 Offset",
                 () -> P45OffsetConfig.enabled,
                 () -> P45OffsetConfig.enabled = !P45OffsetConfig.enabled,
-                () -> mc.displayGuiScreen(new P45OffsetConfigGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new P45OffsetConfigGui()),
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
                     bmChat("\u00A7bPerfect 45 Offset Info:");
@@ -130,9 +132,8 @@ public class MainConfigGui extends GuiScreen {
 
                     chat("\u00A77-------- Error Label Meanings --------");
                     sendInfoBullet("What Does Invalid JA Mean?", "The jump angle you have set in config is invalid (must be any valid number, decimals are allowed)");
-                    sendInfoBullet("What Does Invalid Strategy Mean?", "Your strategy is invalid due to one of the following 3:\n" +
+                    sendInfoBullet("What Does Invalid Strategy Mean?", "Your strategy is invalid due to one of the following 2:\n" +
                             "\u00A77- \u00A7eThe # of 45s you have set is greater than the number of jumps in your strategy\n" +
-                            "\u00A77- \u00A7eThe last tick of your strategy is not AIR\n" +
                             "\u00A77- \u00A7eThe 45 jumps from your strategy are inputted wrong (use Fix Strat 45s button)");
                     sendInfoBullet("What Does Can't Find LB Mean?", "Your strategy was simulated without 45 strafing, but no landing block was detected. " +
                             "No horizontal collision occurred within 100 ticks after the last jump. " +
@@ -144,7 +145,6 @@ public class MainConfigGui extends GuiScreen {
                     sendInfoBullet("Important Things To Know",
                             "\u00A77- \u00A7eStrategy is required for offset calculations.\n" +
                                     "\u00A77- \u00A7eYour # of 45s must be equal to or less than the number of jumps in your strategy.\n" +
-                                    "\u00A77- \u00A7eThe last tick of your strategy must be AIR.\n" +
                                     "\u00A77- \u00A7eYour strategy must include the strafing and the A/D tapping you do while 45ing. " +
                                     "If you use Fix Strat 45s, the strafing is included automatically.\n" +
                                     "\u00A77- \u00A7eUsing Trim Strategy works for Perfect 45 Offset. The mod just extends the strategy internally using the last tick's inputs.\n" +
@@ -152,11 +152,12 @@ public class MainConfigGui extends GuiScreen {
                                     "(example: top of a ladder counts; ladder side, water, lava do not).");
                 });
 
-        this.addFeature(
+
+        addFeature(
                 "Trajectory",
                 () -> TrajectoryConfig.enabled,
                 () -> TrajectoryConfig.enabled = !TrajectoryConfig.enabled,
-                () -> mc.displayGuiScreen(new TrajectoryConfigGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new TrajectoryConfigGui()),
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
                     bmChat("\u00A7bTrajectory Info:");
@@ -169,19 +170,19 @@ public class MainConfigGui extends GuiScreen {
                     chat("\u00A77-------- Line Customization --------");
                     sendInfoBullet("Tick Length", "The amount of ticks that the trajectory line should predict into the future.");
                 });
-        this.addFeature(
+        addFeature(
                 "Position Checkers",
                 () -> PosCheckersConfig.enabled,
                 () -> PosCheckersConfig.enabled = !PosCheckersConfig.enabled,
-                () -> mc.displayGuiScreen(new PosCheckersListGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new PosCheckersListGui()),
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
                     bmChat("\u00A7bPosition Checkers Info:");
                     chat("\u00A77-------- General --------");
                     sendInfoBullet("What Does It Do?", "Position Checkers send your X or Z coordinate on a certain air tick.");
                     chat("\u00A77-------- Checkers --------");
-                    sendInfoBullet("Add Checker", "Adds a new position checker for X/Z/BOTH and a specific airtick.");
-                    sendInfoBullet("Clear Checkers", "Adds a new position checker for X/Z/BOTH and a specific airtick.");
+                    sendInfoBullet("Add Checker", "Adds a new position checker for X/Z/BOTH and a specific amount of airtime.");
+                    sendInfoBullet("Clear Checkers", "Clears all position checkers.");
                     chat("\u00A77-------- Coordinate Limits --------");
                     sendInfoBullet("Min X", "Sets minumum player X coordinate required for position checkers to work.");
                     sendInfoBullet("Max X", "Sets maximum player X coordinate allowed for position checkers to work.");
@@ -191,9 +192,42 @@ public class MainConfigGui extends GuiScreen {
                     sendInfoBullet("Min/Max From Strat", "Same as Min/Max From Pos, but uses the position of your final jump tick from your strategy. " +
                             "\u00A7cIMPORTANT: Only works if momentum is noturn and button is clicked at reset location.");
                 });
-        this.addButton(
+        addFeature(
+                "Turn Helper",
+                () -> TurnHelperConfig.enabled,
+                () -> TurnHelperConfig.enabled = !TurnHelperConfig.enabled,
+                () -> Minecraft.getMinecraft().displayGuiScreen(new TurnHelperListGui()),
+                () -> {
+                    Minecraft.getMinecraft().displayGuiScreen(null);
+                    bmChat("\u00A7bTurn Helper Info:");
+                    chat("\u00A77-------- General --------");
+                    sendInfoBullet("What Does It Do?", "Turn Helper moves an in-world customizable target across yaw points set in config to help with turns.");
+                    chat("\u00A77-------- Config --------");
+                    sendInfoBullet("Mode",
+                            "\u00A77- \u00A7bOne Moving Target: \u00A7Slides a target across the yaw points' yaw values at their respective tick #.\n" +
+                                    "\u00A77- \u00A7bAll Targets On: \u00A7eDraws the yaws of all the yaw points constantly " +
+                                    "(tick # for the yaw points is disregarded when using this mode, so if you are using this mode don't worry about tick #).");
+                    sendInfoBullet("Delta Yaws", "Treats yaws from yaw points as changes in yaw like CYV Turning HUD instead of actual yaw values from F3.");
+                    sendInfoBullet("Show Turn Accuracy", "Shows a label that displays how well you followed your yaw points (in %). " +
+                            "Each tick it checks how many degrees your yaw was off by and calculates percentage linearly from that. " +
+                            "If your yaw was 45 or more degrees off, it is treated as 0% for that tick. " +
+                            "Turn accuracy is unaffected by Yaw +-. " +
+                            "Yaw +- is just for thickness of the target. " +
+                            "Note that this percentage doesn't reflect how close you are to making the jump, because some ticks in parkour are way more important to be accurate for making distance " +
+                            "(like jump tick/jump angle).");
+                    sendInfoBullet("Yaw Point Config Buttons",
+                            "\u00A77- \u00A7bYaw: \u00A7eThe yaw you should be looking at for this tick. If Delta Yaws is on, this is treated as the change in yaw you should have for this tick instead.\n" +
+                                    "\u00A77- \u00A7bTick # Slider: \u00A7eTick #1 is the first tick that your position has changed from your reset position. " +
+                                    "To help understand, the Tick # you input here matches the tick # that this tick would be if you were to input your strategy " +
+                                    "(you don't actually need strategy for Turn Helper at all, just used this analogy so you can understand). Minimum is Tick #2 because you never rotate on Tick #1 in parkour.");
+
+                    chat("\u00A77-------- Target Customization --------");
+                    sendInfoBullet("Yaw +-", "The thickness of the target in degrees. The side edges of the target will be at the yaw of whatever yaw point the pillar is at, +/- this value.");
+
+                });
+        addButton(
                 "Edit Strategy",
-                () -> mc.displayGuiScreen(new StrategyListGui()),
+                () -> Minecraft.getMinecraft().displayGuiScreen(new StrategyListGui()),
                 null,
                 () -> {
                     Minecraft.getMinecraft().displayGuiScreen(null);
@@ -214,7 +248,7 @@ public class MainConfigGui extends GuiScreen {
                     sendInfoBullet("Record Strat", "Records the player's movement so that the user can perform the strategy in game instead of setting ticks manually. " +
                             "To record properly, know that recording starts when you start moving after you have reset. " +
                             "Note that all recorded ticks are cleared when you reset, that way you don't have to re-record every time you fail your inputs while trying to record the strategy. " +
-                            "All empty ticks (ticks with no WASD, SPR, SNK, or AIR) are cut off when you stop recording.");
+                            "All empty ticks (ticks with no WASD, SPR, SNK, or JMP) are cut off when you stop recording.");
                     sendInfoBullet("Preview Strat", "Draws a line that shows the trajectory your player would follow from your current position if your strategy was performed perfectly tick by tick.");
                     sendInfoBullet("Jump Config Buttons",
                             "\u00A77- \u00A7bExtend Button: \u00A7eShows the ticks that actually make up the jump. " +
@@ -226,25 +260,14 @@ public class MainConfigGui extends GuiScreen {
                                     "\u00A77- \u00A7b1-11t Slider: \u00A7eFor example, if set to 2t, then for HH it would be a 2t HH, for Mark it would be a 2t Mark, etc.");
 
                     chat("\u00A77-------- Strategy Saving --------");
-
                     sendInfoBullet("Save Strat", "Saves your current strategy under the provided key.");
                     sendInfoBullet("Delete Strat", "Deletes the strategy saved under the provided key if it exists.");
                     sendInfoBullet("Load Strat", "Loads the strategy saved under the provided key if it exists.");
                     sendInfoBullet("Save HPK Strat", "Saves your current strategy under the provided HPK OJ Jump # as an HPK strategy.");
                     sendInfoBullet("Delete HPK Strat", "Deletes the HPK strategy saved under the provided HPK OJ Jump # if it exists.");
                     sendInfoBullet("Auto Load HPK", "Enables auto-loading for HPK strategies when joining the jump # it is saved under. " +
-                            "This uses the \" [OJ]Entering Jump...\"  message when joining a jump so these messages must be visible. This only works for HPK Network.");
-                    //sendInfoBullet("");// STRAT LIST
-                    /*
-                    bmChat("\u00A7bUsage (/bm strat):");
-                    sendBMBullet("strat save <key>", "Saves strategy under key");
-                    sendBMBullet("strat delete <key>", "Deletes strategy saved under key");
-                    sendBMBullet("strat load <key>", "Loads strategy saved under key");
-                    sendBMBullet("strat savehpk <jump #>", "Saves strategy to OJ Jump #, HPK only");
-                    sendBMBullet("strat deletehpk <jump #>", "Deletes strategy saved under an OJ Jump #, HPK only");
-                    sendBMBullet("strat autoloadhpk", "Enables auto-load for strat when joining jump, uses join jump chat msgs & savehpk strats, HPK only");
-                    sendBMBullet("strat list", "Lists all keys of saved strategies");
-                     */
+                            "This uses the \"[OJ] Entering Jump...\"  message when joining a jump so these messages must be visible. This only works for HPK Network.");
+                    sendInfoBullet("List Strats", "Lists all saved strategies and saved HPK strategies in the chat.");
 
                     chat("\u00A77-------- Extra --------");
                     sendInfoBullet("Important Things To Know",
@@ -253,20 +276,12 @@ public class MainConfigGui extends GuiScreen {
                                     "\u00A77- \u00A7eHaving JMP selected for a tick means you jump on that tick, not that you are holding down the jump key during that tick.\n" +
                                     "\u00A77- \u00A7eFeatures that use strategy might break or warn you if you have a tick with both SPR and SNK selected. " +
                                     "This is because it is impossible to be sprinting and sneaking at the same time.");
-
-
-
-
-
                 });
     }
 
     @Override
     public void initGui() {
         buttonList.clear();
-        options.clear();
-
-        initOptions();
 
         int rowSpacing = buttonHeight + buttonGap;
         int rowsHeight = options.size() * buttonHeight + Math.max(0, options.size() - 1) * buttonGap;
@@ -317,7 +332,7 @@ public class MainConfigGui extends GuiScreen {
         for (Option option : options) {
             if (button.id == option.mainButtonId) {
                 option.onMainClick.run();
-                if (!option.configOnly) initGui();
+                if (option.isFeature) initGui();
                 return;
             }
             if (button.id == option.settingsButtonId && option.onSettingsClick != null) {
@@ -336,8 +351,8 @@ public class MainConfigGui extends GuiScreen {
         }
 
         if (button.id == commandUsageButtonId) {
-            mc.displayGuiScreen(null);
-            ClientCommandHandler.instance.executeCommand(mc.thePlayer, "/bm");
+            Minecraft.getMinecraft().displayGuiScreen(null);
+            ClientCommandHandler.instance.executeCommand(Minecraft.getMinecraft().thePlayer, "/bm");
         }
     }
 
@@ -386,44 +401,37 @@ public class MainConfigGui extends GuiScreen {
         return fontRendererObj.FONT_HEIGHT * titleScale;
     }
 
-    private static class Option {
-        private final String name;
-        private final Supplier<Boolean> enabledGetter;
-        private final Runnable onMainClick;
-        private final Runnable onSettingsClick;
-        private final Runnable onInfoClick;
-        private final boolean configOnly;
+    public static class Option {
+        public final String name;
+        public final Supplier<Boolean> enabledGetter;
+        public final Runnable onMainClick;
+        public final Runnable onSettingsClick;
+        public final Runnable onInfoClick;
+        public final boolean isFeature;
 
-        private int mainButtonId = -1;
-        private int settingsButtonId = -1;
-        private int infoButtonId = -1;
+        public int mainButtonId = -1;
+        public int settingsButtonId = -1;
+        public int infoButtonId = -1;
 
-        private Option(
-                String name,
-                Supplier<Boolean> enabledGetter,
-                Runnable onMainClick,
-                Runnable onSettingsClick,
-                Runnable onInfoClick,
-                boolean configOnly
-        ) {
+        public Option(String name, Supplier<Boolean> enabledGetter, Runnable onMainClick, Runnable onSettingsClick, Runnable onInfoClick, boolean isFeature) {
             this.name = name;
             this.enabledGetter = enabledGetter;
             this.onMainClick = onMainClick;
             this.onSettingsClick = onSettingsClick;
             this.onInfoClick = onInfoClick;
-            this.configOnly = configOnly;
+            this.isFeature = isFeature;
         }
 
-        private boolean hasSettings() {
+        public boolean hasSettings() {
             return onSettingsClick != null;
         }
 
-        private boolean hasInfo() {
+        public boolean hasInfo() {
             return onInfoClick != null;
         }
 
-        private String getMainLabel() {
-            if (configOnly) return "\u00A7f" + name;
+        public String getMainLabel() {
+            if (!isFeature) return "\u00A7f" + name;
             return enabledGetter.get()
                     ? "\u00A7a" + name + ": ON"
                     : "\u00A7c" + name + ": OFF";

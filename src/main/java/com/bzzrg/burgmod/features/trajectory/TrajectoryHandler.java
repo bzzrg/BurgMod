@@ -28,7 +28,7 @@ public class TrajectoryHandler {
             updateSim(sim, null);
             Vec3 newPos = new Vec3(sim.posX, sim.posY, sim.posZ);
 
-            drawLine(oldPos, newPos, TrajectoryConfig.colorRed, TrajectoryConfig.colorGreen, TrajectoryConfig.colorBlue, TrajectoryConfig.alpha, TrajectoryConfig.thickness);
+            drawLine(oldPos, newPos, TrajectoryConfig.colorRed, TrajectoryConfig.colorGreen, TrajectoryConfig.colorBlue, TrajectoryConfig.opacity, TrajectoryConfig.thickness);
 
             if (allow) EveryTickDebug.logPlayerState("Traj Sim", sim);
         }

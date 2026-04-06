@@ -1,5 +1,6 @@
 package com.bzzrg.burgmod.modutils.resetting;
 
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
@@ -7,6 +8,7 @@ import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
 import com.bzzrg.burgmod.features.poschecker.PosCheckersHandler;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
+import com.bzzrg.burgmod.features.turnhelper.TurnHelperHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -25,6 +27,7 @@ public class ResetHandler {
         if (StrategyRecorder.recording) StrategyRecorder.onReset();
         if (PosCheckersConfig.enabled) PosCheckersHandler.onReset();
         if (P45OffsetConfig.enabled) P45OffsetHandler.onReset();
+        if (TurnHelperConfig.enabled) TurnHelperHandler.onReset();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

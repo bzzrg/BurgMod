@@ -71,12 +71,13 @@ public abstract class BMListGui extends BMConfigGui {
         rowButtons.clear();
 
         for (Row row : rows) {
-            if (row == preserve && !row.buttons.isEmpty()) {
+            if (row == preserve && (!row.buttons.isEmpty() || !row.fields.isEmpty())) {
                 rowButtons.addAll(row.buttons);
                 continue;
             }
 
             row.buttons.clear();
+            row.fields.clear();
             row.init();
             rowButtons.addAll(row.buttons);
         }
@@ -99,6 +100,24 @@ public abstract class BMListGui extends BMConfigGui {
         }
 
         super.mouseClicked(mouseX, mouseY, mouseButton);
+
+        // FIX: clear focus when clicking outside
+        if (!inside) {
+            for (Row row : rows) {
+                for (CustomTextField field : row.fields) {
+                    field.field.setFocused(false);
+                }
+            }
+        }
+
+        // FIX: only send clicks to fields inside list
+        if (inside) {
+            for (Row row : rows) {
+                for (CustomTextField field : row.fields) {
+                    field.mouseClicked(mouseX, mouseY, mouseButton);
+                }
+            }
+        }
 
         if (!inside) {
             for (GuiButton b : rowButtons) {
@@ -159,8 +178,8 @@ public abstract class BMListGui extends BMConfigGui {
     }
 
     private boolean outside(int x, int y) {
-        return x < listLeft || x > listRight ||
-                y < listTop || y > listBottom;
+        return x < listLeft || x >= listRight ||
+                y < listTop || y >= listBottom;
     }
 
     private void clampScroll() {
@@ -219,6 +238,9 @@ public abstract class BMListGui extends BMConfigGui {
             for (GuiButton button : row.buttons) {
                 button.yPosition += deltaY;
             }
+            for (CustomTextField field : row.fields) {
+                field.moveY(deltaY);
+            }
         }
 
         boolean inside = !outside(mouseX, mouseY);
@@ -230,6 +252,10 @@ public abstract class BMListGui extends BMConfigGui {
 
         for (Row row : rows) {
             row.draw();
+
+            for (CustomTextField field : row.fields) {
+                field.draw(rowMouseX, rowMouseY);
+            }
         }
 
         for (GuiButton button : rowButtons) {
@@ -245,6 +271,24 @@ public abstract class BMListGui extends BMConfigGui {
         for (GuiButton button : buttonList) {
             if (!rowButtons.contains(button)) {
                 button.drawButton(mc, mouseX, mouseY);
+            }
+        }
+    }
+
+    @Override
+    protected void keyTyped(char c, int keyCode) throws IOException {
+        super.keyTyped(c, keyCode);
+
+        int mouseX = Mouse.getX() * width / mc.displayWidth;
+        int mouseY = height - Mouse.getY() * height / mc.displayHeight - 1;
+
+        if (outside(mouseX, mouseY)) return;
+
+        for (Row row : rows) {
+            for (CustomTextField field : row.fields) {
+                if (field.field.isFocused()) {
+                    field.keyTyped(c, keyCode);
+                }
             }
         }
     }

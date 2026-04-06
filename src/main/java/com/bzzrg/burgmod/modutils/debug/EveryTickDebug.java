@@ -1,7 +1,8 @@
 package com.bzzrg.burgmod.modutils.debug;
 
-import com.bzzrg.burgmod.features.trajectory.TrajectoryHandler;
+import com.bzzrg.burgmod.features.turnhelper.TurnHelperHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
@@ -10,7 +11,7 @@ import static com.bzzrg.burgmod.BurgMod.mc;
 
 public class EveryTickDebug {
 
-    public static final boolean enabled = false;
+    public static final boolean ENABLED = false;
 
     public static void logPlayerState(String tag, EntityPlayerSP p) {
 
@@ -57,20 +58,36 @@ public class EveryTickDebug {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         EntityPlayerSP player = mc.thePlayer;
-        if (!enabled || event.phase != TickEvent.Phase.END || player == null) return;
+        if (!ENABLED || event.phase != TickEvent.Phase.END || player == null) return;
 
 
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-            logPlayerState("Real Player", player);
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_P) && !wasPDown) {
-            TrajectoryHandler.allow = true;
+            System.out.printf("yaws: %s, yawBeforeJump: %s%n", TurnHelperHandler.getYaws(), TurnHelperHandler.resetYaw);
         }
 
         wasPDown = Keyboard.isKeyDown(Keyboard.KEY_P);
 
 
+    }
+
+    @SubscribeEvent
+    public void onRender(RenderWorldLastEvent e) {
+        if (mc.thePlayer == null) return;
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
+            /*
+            float yaw = mc.thePlayer.rotationYaw;
+
+            float interpYaw = mc.thePlayer.prevRotationYaw +
+                    (mc.thePlayer.rotationYaw - mc.thePlayer.prevRotationYaw) * e.partialTicks;
+
+            System.out.printf("tickYaw=%.3f | frameYaw=%.3f%n", yaw, interpYaw);
+
+             */
+        }
     }
 
 

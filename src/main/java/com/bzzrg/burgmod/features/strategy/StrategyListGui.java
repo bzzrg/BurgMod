@@ -3,6 +3,7 @@ package com.bzzrg.burgmod.features.strategy;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
+import com.bzzrg.burgmod.features.turnhelper.TurnHelperHandler;
 import com.bzzrg.burgmod.modutils.gui.BMListGui;
 import com.bzzrg.burgmod.modutils.gui.CustomButton;
 import com.bzzrg.burgmod.modutils.gui.CustomSlider;
@@ -17,9 +18,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyJumps;
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
 import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
@@ -156,12 +157,16 @@ public class StrategyListGui extends BMListGui {
 
             if (StrategyRecorder.recording) {
                 ResetHandler.movedSinceReset = false;
-                InputStatusHandler.label = color1 + "Input Status: \u00A7bRecording Strategy...";
-                P45OffsetHandler.setAllLabels("\u00A7bRecording Strategy...");
-            } else {
 
                 InputStatusHandler.label = color1 + "Input Status: \u00A7r?";
-                P45OffsetHandler.setAllLabels("\u00A7r?");
+
+                P45OffsetHandler.autoLabel = color1 + "Perfect 45 Offset (?): \u00A7r?";
+                P45OffsetHandler.xLabel = color1 + "Perfect 45 Offset (X?): \u00A7r?";
+                P45OffsetHandler.zLabel = color1 + "Perfect 45 Offset (Z?): \u00A7r?";
+
+                TurnHelperHandler.turnAccuracyLabel = color1 + "Turn Accuracy: \u00A7r?";
+
+            } else {
 
                 while (true) {
 
@@ -186,7 +191,6 @@ public class StrategyListGui extends BMListGui {
                 }
 
                 recordedStrategy.clear();
-
             }
         });
         this.addActionButton("Preview Strat", b -> {
@@ -206,6 +210,20 @@ public class StrategyListGui extends BMListGui {
         strategyTicks.forEach(t -> t.row = null);
         strategyJumps.forEach(j -> j.row = null);
         strategyListGui = null;
+
+        if (!StrategyRecorder.recording) {
+            if (strategyTicks.isEmpty()) {
+                bmChat("\u00A7cWARN: Your strategy is empty! Features requiring a strategy will not work as intended.");
+                playErrorSound();
+            }
+            for (StrategyTick tick : strategyTicks) {
+                if (tick.correctInputs.contains(SPR) && tick.correctInputs.contains(SNK)) {
+                    bmChat("\u00A7cWARN: Tick #" + (tick.getIndex()+1) + " from your strategy has SPR and SNK selected which is invalid! Features requiring a strategy will not work as intended.");
+                    playErrorSound();
+                }
+            }
+        }
+
         super.onGuiClosed();
     }
 

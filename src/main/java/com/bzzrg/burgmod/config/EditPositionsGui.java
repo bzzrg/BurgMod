@@ -1,6 +1,6 @@
 package com.bzzrg.burgmod.config;
 
-import com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig;
+import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
 import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color2;
 
 public class EditPositionsGui extends GuiScreen {
 
@@ -36,7 +39,7 @@ public class EditPositionsGui extends GuiScreen {
         labels.clear();
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Input Status: " + GeneralConfig.color2 + "Relocating...",
+                () -> color1 + "Input Status: " + color2 + "Relocating...",
                 () -> InputStatusConfig.labelX,
                 () -> InputStatusConfig.labelY,
                 v -> InputStatusConfig.labelX = v,
@@ -45,7 +48,7 @@ public class EditPositionsGui extends GuiScreen {
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset (?): " + GeneralConfig.color2 + "Relocating...",
+                () -> color1 + "Perfect 45 Offset (?): " + color2 + "Relocating...",
                 () -> P45OffsetConfig.autoLabelX,
                 () -> P45OffsetConfig.autoLabelY,
                 v -> P45OffsetConfig.autoLabelX = v,
@@ -54,7 +57,7 @@ public class EditPositionsGui extends GuiScreen {
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset (X?): " + GeneralConfig.color2 + "Relocating...",
+                () -> color1 + "Perfect 45 Offset (X?): " + color2 + "Relocating...",
                 () -> P45OffsetConfig.xLabelX,
                 () -> P45OffsetConfig.xLabelY,
                 v -> P45OffsetConfig.xLabelX = v,
@@ -63,12 +66,21 @@ public class EditPositionsGui extends GuiScreen {
         ));
 
         labels.add(new Label(
-                () -> GeneralConfig.color1 + "Perfect 45 Offset (Z?): " + GeneralConfig.color2 + "Relocating...",
+                () -> color1 + "Perfect 45 Offset (Z?): " + color2 + "Relocating...",
                 () -> P45OffsetConfig.zLabelX,
                 () -> P45OffsetConfig.zLabelY,
                 v -> P45OffsetConfig.zLabelX = v,
                 v -> P45OffsetConfig.zLabelY = v,
                 () -> P45OffsetConfig.enabled && P45OffsetConfig.showZOffset
+        ));
+
+        labels.add(new Label(
+                () -> color1 + "Turn Accuracy: " + color2 + "Relocating...",
+                () -> TurnHelperConfig.turnAccuracyLabelX,
+                () -> TurnHelperConfig.turnAccuracyLabelY,
+                v -> TurnHelperConfig.turnAccuracyLabelX = v,
+                v -> TurnHelperConfig.turnAccuracyLabelY = v,
+                () -> TurnHelperConfig.enabled && TurnHelperConfig.showTurnAccuracy
         ));
     }
 

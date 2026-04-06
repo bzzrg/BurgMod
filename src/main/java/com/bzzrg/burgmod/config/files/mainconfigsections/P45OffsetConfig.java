@@ -4,8 +4,6 @@ import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
 
 public class P45OffsetConfig extends MainConfigSection {
 
-    private static final String CAT = "perfect45Offset";
-
     public static boolean enabled = false;
 
     public static int numOf45s = 1;
@@ -38,37 +36,42 @@ public class P45OffsetConfig extends MainConfigSection {
     public static int zLabelY = 0;
 
     @Override
+    protected String getCategory() {
+        return "perfect45Offset";
+    }
+
+    @Override
     protected void init() {
-        addBool(CAT, "enabled", () -> enabled, v -> enabled = v);
+        addBool("enabled", () -> enabled, v -> enabled = v);
 
-        addInt(CAT, "numOf45s", () -> numOf45s, v -> numOf45s = v);
-        addString(CAT, "jumpAngle", () -> jumpAngle, v -> jumpAngle = v);
-        addBool(CAT, "applyJAToFirst", () -> applyJAToFirst, v -> applyJAToFirst = v);
-        addString(CAT, "fortyFiveKey", () -> fortyFiveKey, v -> fortyFiveKey = v);
+        addInt("numOf45s", () -> numOf45s, v -> numOf45s = v);
+        addString("jumpAngle", () -> jumpAngle, v -> jumpAngle = v);
+        addBool("applyJAToFirst", () -> applyJAToFirst, v -> applyJAToFirst = v);
+        addString("fortyFiveKey", () -> fortyFiveKey, v -> fortyFiveKey = v);
 
-        addBool(CAT, "showAutoOffset", () -> showAutoOffset, v -> showAutoOffset = v);
-        addBool(CAT, "showXOffset", () -> showXOffset, v -> showXOffset = v);
-        addBool(CAT, "showZOffset", () -> showZOffset, v -> showZOffset = v);
-        addBool(CAT, "shortenLabels", () -> shortenLabels, v -> shortenLabels = v);
-        addBool(CAT, "eNotation", () -> eNotation, v -> eNotation = v);
-        addInt(CAT, "eNotationMaxExp", () -> eNotationMaxExp, v -> eNotationMaxExp = v);
-        addInt(CAT, "eNotationPrecision", () -> eNotationPrecision, v -> eNotationPrecision = v);
+        addBool("showAutoOffset", () -> showAutoOffset, v -> showAutoOffset = v);
+        addBool("showXOffset", () -> showXOffset, v -> showXOffset = v);
+        addBool("showZOffset", () -> showZOffset, v -> showZOffset = v);
+        addBool("shortenLabels", () -> shortenLabels, v -> shortenLabels = v);
+        addBool("eNotation", () -> eNotation, v -> eNotation = v);
+        addInt("eNotationMaxExp", () -> eNotationMaxExp, v -> eNotationMaxExp = v);
+        addInt("eNotationPrecision", () -> eNotationPrecision, v -> eNotationPrecision = v);
 
-        addBool(CAT, "stopOnInputFail", () -> stopOnInputFail, v -> stopOnInputFail = v);
-        addBool(CAT, "showOvershootAmount", () -> showOvershootAmount, v -> showOvershootAmount = v);
-        addBool(CAT, "showLB", () -> showLB, v -> showLB = v);
-        addBool(CAT, "showJumpBlock", () -> showJumpBlock, v -> showJumpBlock = v);
-        addBool(CAT, "showJBLBLine", () -> showJBLBLine, v -> showJBLBLine = v);
-        addBool(CAT, "showPerfectLine", () -> showPerfectLine, v -> showPerfectLine = v);
+        addBool("stopOnInputFail", () -> stopOnInputFail, v -> stopOnInputFail = v);
+        addBool("showOvershootAmount", () -> showOvershootAmount, v -> showOvershootAmount = v);
+        addBool("showLB", () -> showLB, v -> showLB = v);
+        addBool("showJumpBlock", () -> showJumpBlock, v -> showJumpBlock = v);
+        addBool("showJBLBLine", () -> showJBLBLine, v -> showJBLBLine = v);
+        addBool("showPerfectLine", () -> showPerfectLine, v -> showPerfectLine = v);
 
-        addInt(CAT, "autoLabelX", () -> autoLabelX, v -> autoLabelX = v);
-        addInt(CAT, "autoLabelY", () -> autoLabelY, v -> autoLabelY = v);
+        addInt("autoLabelX", () -> autoLabelX, v -> autoLabelX = v);
+        addInt("autoLabelY", () -> autoLabelY, v -> autoLabelY = v);
 
-        addInt(CAT, "xLabelX", () -> xLabelX, v -> xLabelX = v);
-        addInt(CAT, "xLabelY", () -> xLabelY, v -> xLabelY = v);
+        addInt("xLabelX", () -> xLabelX, v -> xLabelX = v);
+        addInt("xLabelY", () -> xLabelY, v -> xLabelY = v);
 
-        addInt(CAT, "zLabelX", () -> zLabelX, v -> zLabelX = v);
-        addInt(CAT, "zLabelY", () -> zLabelY, v -> zLabelY = v);
+        addInt("zLabelX", () -> zLabelX, v -> zLabelX = v);
+        addInt("zLabelY", () -> zLabelY, v -> zLabelY = v);
     }
 
     public static Float getJumpAngle() {

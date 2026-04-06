@@ -27,11 +27,13 @@ public class CustomSlider extends GuiSlider {
     public void drawButton(Minecraft mc, int mouseX, int mouseY) {
         if (!this.visible) return;
 
-        // IMPORTANT: this is what makes dragging update like normal GuiSlider
-        this.mouseDragged(mc, mouseX, mouseY);
+        if (this.enabled) {
+            this.mouseDragged(mc, mouseX, mouseY);
+        }
 
         int baseColor = 0x00000000;
         int hoverColor = 0x32FFFFFF;
+        int disabledColor = 0xFF000000; // black
         int borderColor = 0xFFFFFFFF;
         int borderThickness = 1;
 
@@ -40,23 +42,21 @@ public class CustomSlider extends GuiSlider {
 
         int bg = this.hovered ? hoverColor : baseColor;
 
-        // Background
+        if (!this.enabled) bg = disabledColor;
+
         drawRect(xPosition, yPosition, xPosition + width, yPosition + height, bg);
 
-        // Border
         drawRect(xPosition, yPosition, xPosition + width, yPosition + borderThickness, borderColor);
         drawRect(xPosition, yPosition + height - borderThickness, xPosition + width, yPosition + height, borderColor);
         drawRect(xPosition, yPosition, xPosition + borderThickness, yPosition + height, borderColor);
         drawRect(xPosition + width - borderThickness, yPosition, xPosition + width, yPosition + height, borderColor);
 
-        // Knob position (use sliderValue maintained by GuiSlider)
         int pad = 4;
         int left = xPosition + pad;
         int right = xPosition + width - pad;
 
         int knobX = (int) (left + (right - left) * this.sliderValue);
 
-        // Knob (transparent center, full outline)
         int knobW = 8;
         int k1 = knobX - knobW / 2;
         int k2 = knobX + knobW / 2;
@@ -64,18 +64,18 @@ public class CustomSlider extends GuiSlider {
         int knobTop = yPosition + 2;
         int knobBot = yPosition + height - 2;
 
-        int knobBorder = 0xFFFFFFFF;
+        int knobColor = this.enabled ? 0xFFFFFFFF : 0xFF888888;
 
-        drawRect(k1, knobTop, k2, knobTop + 1, knobBorder);
-        drawRect(k1, knobBot - 1, k2, knobBot, knobBorder);
-        drawRect(k1, knobTop, k1 + 1, knobBot, knobBorder);
-        drawRect(k2 - 1, knobTop, k2, knobBot, knobBorder);
+        drawRect(k1, knobTop, k2, knobTop + 1, knobColor);
+        drawRect(k1, knobBot - 1, k2, knobBot, knobColor);
+        drawRect(k1, knobTop, k1 + 1, knobBot, knobColor);
+        drawRect(k2 - 1, knobTop, k2, knobBot, knobColor);
 
+        int textColor = this.enabled ? 0xFFFFFFFF : 0xFF888888;
 
-        // Text
         if (this.displayString != null && !this.displayString.isEmpty()) {
             drawCenteredString(mc.fontRendererObj, this.displayString,
-                    xPosition + width / 2, yPosition + (height - 8) / 2, -1);
+                    xPosition + width / 2, yPosition + (height - 8) / 2, textColor);
         }
     }
 }

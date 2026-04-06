@@ -4,8 +4,6 @@ import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
 
 public class InputStatusConfig extends MainConfigSection {
 
-    private static final String CAT = "inputStatus";
-
     public static boolean enabled = false;
 
     public static boolean showFailTick = true;
@@ -16,12 +14,19 @@ public class InputStatusConfig extends MainConfigSection {
     public static int labelY = 0;
 
     @Override
+    protected String getCategory() {
+        return "inputStatus";
+    }
+
+    @Override
     protected void init() {
-        addBool(CAT, "enabled", () -> enabled, v -> enabled = v);
-        addBool(CAT, "showFailTick", () -> showFailTick, v -> showFailTick = v);
-        addBool(CAT, "showFailReason", () -> showFailReason, v -> showFailReason = v);
-        addBool(CAT, "shortenLabel", () -> shortenLabel, v -> shortenLabel = v);
-        addInt(CAT, "labelX", () -> labelX, v -> labelX = v);
-        addInt(CAT, "labelY", () -> labelY, v -> labelY = v);
+        addBool("enabled", () -> enabled, v -> enabled = v);
+
+        addBool("showFailTick", () -> showFailTick, v -> showFailTick = v);
+        addBool("showFailReason", () -> showFailReason, v -> showFailReason = v);
+        addBool("shortenLabel", () -> shortenLabel, v -> shortenLabel = v);
+
+        addInt("labelX", () -> labelX, v -> labelX = v);
+        addInt("labelY", () -> labelY, v -> labelY = v);
     }
 }

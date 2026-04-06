@@ -12,7 +12,7 @@ public class P45OffsetConfigGui extends BMConfigGui {
         this.addFloatSetting("Jump Angle", () -> jumpAngle.isEmpty() ? null : Float.valueOf(jumpAngle),
                 f -> jumpAngle = f == null ? "" : f.toString(), "DEFAULT = Reset Angle");
         this.addBooleanSetting("Apply JA To First", () -> applyJAToFirst, b -> applyJAToFirst = b);
-        this.addEnumSetting("45 Key", () -> FortyFiveKey.valueOf(fortyFiveKey), v -> fortyFiveKey = v.name());
+        this.addEnumSetting("45 Key", FortyFiveKey.class, () -> fortyFiveKey, v -> fortyFiveKey = v);
         this.addActionButton("Fix Strat 45s", b -> new FixStrat45sCommand().processCommand(mc.thePlayer, new String[]{}));
         this.nextColumn();
         this.addBooleanSetting("Show Auto Offset", () -> showAutoOffset, b -> showAutoOffset = b);

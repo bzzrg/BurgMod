@@ -10,12 +10,17 @@ public class CustomTextField {
     public GuiTextField field;
 
     public final int x;
-    public final int y;
+    public int y;
     public final int width;
     public final int height;
 
     public final String label;
     public final String emptyMessage;
+
+    public void moveY(int deltaY) {
+        y += deltaY;
+        field.yPosition += deltaY;
+    }
 
     public CustomTextField(int id, int x, int y, int width, int height, String label, String emptyMsg) {
 

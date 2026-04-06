@@ -23,6 +23,7 @@ public abstract class MainConfigSection {
     }
 
     protected abstract void init();
+    protected abstract String getCategory();
 
     public static void updateFields() {
         try {
@@ -58,26 +59,32 @@ public abstract class MainConfigSection {
         } catch (Exception ignored) {}
     }
 
-    protected void addString(String cat, String key, Supplier<String> g, Consumer<String> s) {
-        properties.add(new StringProperty(cat, key, g, s));
+    // ===== ADD METHODS =====
+
+    protected void addString(String key, Supplier<String> g, Consumer<String> s) {
+        properties.add(new StringProperty(getCategory(), key, g, s));
     }
 
-    protected void addInt(String cat, String key, Supplier<Integer> g, Consumer<Integer> s) {
-        properties.add(new IntProperty(cat, key, g, s));
+    protected void addInt(String key, Supplier<Integer> g, Consumer<Integer> s) {
+        properties.add(new IntProperty(getCategory(), key, g, s));
     }
 
-    protected void addBool(String cat, String key, Supplier<Boolean> g, Consumer<Boolean> s) {
-        properties.add(new BoolProperty(cat, key, g, s));
+    protected void addBool(String key, Supplier<Boolean> g, Consumer<Boolean> s) {
+        properties.add(new BoolProperty(getCategory(), key, g, s));
     }
 
-    protected void addDouble(String cat, String key, Supplier<Double> g, Consumer<Double> s) {
-        properties.add(new DoubleProperty(cat, key, g, s));
+    protected void addDouble(String key, Supplier<Double> g, Consumer<Double> s) {
+        properties.add(new DoubleProperty(getCategory(), key, g, s));
     }
+
+    // ===== PROPERTY INTERFACE =====
 
     private interface Property {
         void updateField(Configuration config);
         void updateConfig(Configuration config);
     }
+
+    // ===== IMPLEMENTATIONS =====
 
     private static class StringProperty implements Property {
         private final String cat, key;
@@ -85,7 +92,10 @@ public abstract class MainConfigSection {
         private final Consumer<String> s;
 
         private StringProperty(String cat, String key, Supplier<String> g, Consumer<String> s) {
-            this.cat = cat; this.key = key; this.g = g; this.s = s;
+            this.cat = cat;
+            this.key = key;
+            this.g = g;
+            this.s = s;
         }
 
         public void updateField(Configuration config) {
@@ -107,7 +117,10 @@ public abstract class MainConfigSection {
         private final Consumer<Integer> s;
 
         private IntProperty(String cat, String key, Supplier<Integer> g, Consumer<Integer> s) {
-            this.cat = cat; this.key = key; this.g = g; this.s = s;
+            this.cat = cat;
+            this.key = key;
+            this.g = g;
+            this.s = s;
         }
 
         public void updateField(Configuration config) {
@@ -129,7 +142,10 @@ public abstract class MainConfigSection {
         private final Consumer<Boolean> s;
 
         private BoolProperty(String cat, String key, Supplier<Boolean> g, Consumer<Boolean> s) {
-            this.cat = cat; this.key = key; this.g = g; this.s = s;
+            this.cat = cat;
+            this.key = key;
+            this.g = g;
+            this.s = s;
         }
 
         public void updateField(Configuration config) {
@@ -151,7 +167,10 @@ public abstract class MainConfigSection {
         private final Consumer<Double> s;
 
         private DoubleProperty(String cat, String key, Supplier<Double> g, Consumer<Double> s) {
-            this.cat = cat; this.key = key; this.g = g; this.s = s;
+            this.cat = cat;
+            this.key = key;
+            this.g = g;
+            this.s = s;
         }
 
         public void updateField(Configuration config) {

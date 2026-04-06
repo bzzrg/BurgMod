@@ -129,10 +129,10 @@ public class PosCheckersListGui extends BMListGui {
         super.onGuiClosed();
     }
 
-    public void addCheckerRow(PosChecker checker) {
+    public void addCheckerRow(PosChecker pc) {
 
         this.rows.add(new Row() {
-            final PosChecker posChecker = checker;
+            final PosChecker posChecker = pc;
 
             GuiButton axisButton;
             GuiButton removeButton;

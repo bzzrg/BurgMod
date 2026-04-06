@@ -4,7 +4,6 @@ import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.features.strategy.InputType;
 import com.bzzrg.burgmod.features.strategy.StrategyRecorder;
 import com.bzzrg.burgmod.modutils.resetting.ResetHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -13,8 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
-import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.modutils.GeneralUtils.getInputs;
 
 public class InputStatusHandler {
@@ -26,14 +25,21 @@ public class InputStatusHandler {
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
         if (InputStatusConfig.enabled) {
-            Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(label, InputStatusConfig.labelX, InputStatusConfig.labelY, 0xFFFFFF);
+            if (StrategyRecorder.recording) {
+                mc.fontRendererObj.drawStringWithShadow(color1 + "Input Status: \u00A7bRecording Strategy...", InputStatusConfig.labelX, InputStatusConfig.labelY, -1);
+            } else {
+                mc.fontRendererObj.drawStringWithShadow(label, InputStatusConfig.labelX, InputStatusConfig.labelY, -1);
+            }
         }
     }
 
     public static void onReset() {
         tickNum = 0;
         finished = false;
-        if (StrategyRecorder.recording || strategyTicks.isEmpty()) {
+
+        if (StrategyRecorder.recording) return;
+
+        if (strategyTicks.isEmpty()) {
             label = color1 + "Input Status: \u00A74No Strategy Set";
             return;
         }
@@ -43,7 +49,7 @@ public class InputStatusHandler {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
-        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || StrategyRecorder.recording || strategyTicks.isEmpty() || !ResetHandler.movedSinceReset || finished) {
+        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || !ResetHandler.movedSinceReset || finished || StrategyRecorder.recording || strategyTicks.isEmpty()) {
             return;
         }
 

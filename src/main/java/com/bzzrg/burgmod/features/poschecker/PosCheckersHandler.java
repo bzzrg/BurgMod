@@ -17,7 +17,7 @@ public class PosCheckersHandler {
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
         EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
-        if (!PosCheckersConfig.enabled && event.phase != TickEvent.Phase.END || player == null) return;
+        if (!PosCheckersConfig.enabled || event.phase != TickEvent.Phase.END || player == null) return;
 
         boolean validCoords = xMin <= player.posX && player.posX <= xMax &&
                 zMin <= player.posZ && player.posZ <= zMax;

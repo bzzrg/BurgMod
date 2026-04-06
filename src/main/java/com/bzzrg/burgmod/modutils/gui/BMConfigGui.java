@@ -58,13 +58,23 @@ public class BMConfigGui extends GuiScreen {
         return setting;
     }
 
-    public <T extends Enum<T>> ButtonSetting addEnumSetting(String name, Supplier<T> get, Consumer<T> set) {
+    public <T extends Enum<T>> ButtonSetting addEnumSetting(String name, Class<T> enumClass, Supplier<String> get, Consumer<String> set) {
         ButtonSetting setting = new ButtonSetting(
-                () -> name + ": " + get.get(),
+                () -> {
+                    try {
+                        T val = Enum.valueOf(enumClass, get.get());
+                        return name + ": " + val.toString();
+                    } catch (Exception e) {
+                        return name + ": ?";
+                    }
+                },
                 b -> {
-                    T cur = get.get();
-                    T[] vals = cur.getDeclaringClass().getEnumConstants();
-                    set.accept(vals[(cur.ordinal() + 1) % vals.length]);
+                    try {
+                        T cur = Enum.valueOf(enumClass, get.get());
+                        T[] vals = enumClass.getEnumConstants();
+                        T next = vals[(cur.ordinal() + 1) % vals.length];
+                        set.accept(next.name());
+                    } catch (Exception ignored) {}
                 }
         );
         settings.add(setting);
@@ -130,10 +140,10 @@ public class BMConfigGui extends GuiScreen {
     // ===================== INIT =====================
 
     protected void setConstants() {
-        configLeft = borderInline;
-        configRight = width - borderInline;
-        configTop = borderInline;
-        configBottom = height - borderInline;
+        configLeft = borderInline + borderThickness;
+        configRight = width - borderInline - borderThickness;
+        configTop = borderInline + borderThickness;
+        configBottom = height - borderInline - borderThickness;
 
         settingWidth = 160;
     }
@@ -145,8 +155,8 @@ public class BMConfigGui extends GuiScreen {
         setConstants();
 
         int id = 0;
-        int startX = configLeft + borderThickness + buttonGap;
-        int startY = configTop + borderThickness + buttonGap;
+        int startX = configLeft + buttonGap;
+        int startY = configTop + buttonGap;
 
         int x = startX;
         int y = startY;
@@ -162,20 +172,13 @@ public class BMConfigGui extends GuiScreen {
         }
 
         backButtonId = id;
-        int bottomY = configBottom - borderThickness - buttonGap - buttonHeight;
+        int bottomY = configBottom - buttonGap - buttonHeight;
         buttonList.add(new CustomButton(id++, startX, bottomY, buttonHeight, buttonHeight, "<"));
 
         if (addStrategyButton) {
             strategyButtonId = id;
-            int strategyX = configRight - borderThickness - buttonGap - strategyButtonWidth;
-            buttonList.add(new CustomButton(
-                    id,
-                    strategyX,
-                    bottomY,
-                    strategyButtonWidth,
-                    buttonHeight,
-                    "Edit Strategy"
-            ));
+            int strategyX = configRight - buttonGap - strategyButtonWidth;
+            buttonList.add(new CustomButton(id, strategyX, bottomY, strategyButtonWidth, buttonHeight, "Edit Strategy"));
         }
     }
 
@@ -211,10 +214,10 @@ public class BMConfigGui extends GuiScreen {
     protected void drawConfigBorder() {
         int c = 0xFFFFFFFF;
 
-        drawRect(configLeft, configTop, configRight, configTop + borderThickness, c);
-        drawRect(configLeft, configBottom - borderThickness, configRight, configBottom, c);
-        drawRect(configLeft, configTop, configLeft + borderThickness, configBottom, c);
-        drawRect(configRight - borderThickness, configTop, configRight, configBottom, c);
+        drawRect(configLeft - borderThickness, configTop - borderThickness, configRight + borderThickness, configTop, c);
+        drawRect(configLeft - borderThickness, configBottom, configRight + borderThickness, configBottom + borderThickness, c);
+        drawRect(configLeft - borderThickness, configTop - borderThickness, configLeft, configBottom + borderThickness, c);
+        drawRect(configRight, configTop - borderThickness, configRight + borderThickness, configBottom + borderThickness, c);
     }
 
     @Override
@@ -299,6 +302,8 @@ public class BMConfigGui extends GuiScreen {
         public final int min;
         public final int max;
 
+        public GuiSlider slider; // <-- ADD THIS
+
         public IntSliderSetting(String name, Supplier<Integer> get, Consumer<Integer> set, int min, int max) {
             this.name = name;
             this.get = get;
@@ -312,7 +317,7 @@ public class BMConfigGui extends GuiScreen {
             Integer current = get.get();
             int start = current == null ? min : current;
 
-            GuiSlider slider = new CustomSlider(
+            slider = new CustomSlider(
                     id, x, y, settingWidth, buttonHeight,
                     name + ": ", "", min, max, start, false, true,
                     s -> {
@@ -320,6 +325,7 @@ public class BMConfigGui extends GuiScreen {
                         set.accept(value);
                     }
             );
+
             gui.buttonList.add(slider);
             return id + 1;
         }
@@ -335,6 +341,8 @@ public class BMConfigGui extends GuiScreen {
         public final double max;
         public final Function<Double, T> converter;
 
+        public GuiSlider slider; // <-- ADD THIS
+
         public DecimalSliderSetting(String name, Supplier<T> get, Consumer<T> set, double min, double max, Function<Double, T> converter) {
             this.name = name;
             this.get = get;
@@ -349,7 +357,7 @@ public class BMConfigGui extends GuiScreen {
             T current = get.get();
             double start = current == null ? min : current.doubleValue();
 
-            GuiSlider slider = new CustomSlider(
+            slider = new CustomSlider(
                     id, x, y, settingWidth, buttonHeight,
                     name + ": ", "", min, max, start, true, true,
                     s -> {

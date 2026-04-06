@@ -19,9 +19,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig.*;
-import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
 import static com.bzzrg.burgmod.modutils.simulation.SimUtils.*;
@@ -44,15 +44,68 @@ public class P45OffsetHandler {
     public void onRender(RenderGameOverlayEvent.Text event) {
         if (P45OffsetConfig.enabled) {
             if (showAutoOffset) {
-                mc.fontRendererObj.drawStringWithShadow(autoLabel, P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, 0xFFFFFF);
+
+                if (StrategyRecorder.recording) {
+                    mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (?): \u00A7bRecording Strategy...", P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, -1);
+                } else {
+                    mc.fontRendererObj.drawStringWithShadow(autoLabel, P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, -1);
+                }
+
             }
             if (showXOffset) {
-                mc.fontRendererObj.drawStringWithShadow(xLabel, P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, 0xFFFFFF);
+                if (StrategyRecorder.recording) {
+                    mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (X?): \u00A7bRecording Strategy...", P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, -1);
+                } else {
+                    mc.fontRendererObj.drawStringWithShadow(xLabel, P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, -1);
+                }
             }
             if (showZOffset) {
-                mc.fontRendererObj.drawStringWithShadow(zLabel, P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, 0xFFFFFF);
+                if (StrategyRecorder.recording) {
+                    mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (Z?): \u00A7bRecording Strategy...", P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, -1);
+                } else {
+                    mc.fontRendererObj.drawStringWithShadow(zLabel, P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, -1);
+                }
             }
         }
+    }
+
+    public static List<Integer> getInvalidStates() {
+        List<Integer> invalidStates = new ArrayList<>();
+        if (!P45OffsetConfig.jumpAngle.isEmpty() && getJumpAngle() == null) {
+            invalidStates.add(0);
+        }
+        if (StrategyRecorder.recording) {
+            invalidStates.add(1);
+        }
+        if (strategyTicks.isEmpty()) {
+            invalidStates.add(2);
+        }
+        if (numOf45s > StrategyTick.getJumpIndices().size()) {
+            invalidStates.add(3);
+        } else {
+            List<Set<InputType>> validStratInputs = getValidStratInputs();
+
+            for (int i = 0; i < strategyTicks.size(); i++) {
+
+                if (i < validStratInputs.size()) {
+                    if (!validStratInputs.get(i).equals(strategyTicks.get(i).correctInputs)) {
+                        invalidStates.add(4);
+                        break;
+                    }
+                } else {
+                    if (!getLast(validStratInputs).equals(strategyTicks.get(i).correctInputs)) {
+                        invalidStates.add(4);
+                        break;
+                    }
+                }
+
+
+            }
+        }
+
+
+
+        return invalidStates;
     }
 
     public static void onReset() {
@@ -63,26 +116,27 @@ public class P45OffsetHandler {
         jumpPos = null;
         optionsToSimStrat.clear();
 
-        if (!StrategyRecorder.recording) {
-            if (strategyTicks.isEmpty()) {
-                setAllLabels("\u00A74No Strategy Set");
-                return;
-            }
-            if (!P45OffsetConfig.jumpAngle.isEmpty() && getJumpAngle() == null) {
-                bmChat("\u00A7cWARN: Your jump angle is invalid! Either leave it blank or input a valid number.");
+        List<Integer> invalidStates = getInvalidStates();
+        if (!invalidStates.isEmpty()) {
 
+            if (invalidStates.contains(0)) {
+                bmChat("\u00A7cWARN: Your jump angle is invalid! Either leave it blank or input a valid number.");
                 playErrorSound();
                 setAllLabels("\u00A74Invalid JA");
-                return;
             }
 
-            if (numOf45s > StrategyTick.getJumpIndices().size()) {
-                bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
+            if (invalidStates.contains(1)) return;
 
+            if (invalidStates.contains(2)) {
+                setAllLabels("\u00A74No Strategy Set");
+
+            } else if (invalidStates.contains(3)) {
+                bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
                 playErrorSound();
                 setAllLabels("\u00A74Invalid Strategy");
                 return;
-            } else if (!isStrategyRight()) {
+
+            } else if (invalidStates.contains(4)) {
                 IChatComponent msg = new ChatComponentText("\u00A71[BM] \u00A7cWARN: The 45 jumps from your strategy are inputted wrong! Use the Fix Strat 45s button to fix your 45 jumps or ");
                 IChatComponent click = new ChatComponentText("\u00A7l\u00A7b[Click Here]");
 
@@ -242,7 +296,7 @@ public class P45OffsetHandler {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
 
-        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || StrategyRecorder.recording || strategyTicks.isEmpty() || !ResetHandler.movedSinceReset || finished
+        if (event.phase != TickEvent.Phase.END || mc.thePlayer == null || !ResetHandler.movedSinceReset || finished || !getInvalidStates().isEmpty()
                 || landingPos == null || jumpPos == null) {
             return;
         }
@@ -304,28 +358,6 @@ public class P45OffsetHandler {
         autoLabel = autoLabel.substring(0, autoLabel.indexOf(')') + 3) + msg;
         xLabel = xLabel.substring(0, xLabel.indexOf(')') + 3) + msg;
         zLabel = zLabel.substring(0, zLabel.indexOf(')') + 3) + msg;
-    }
-
-    public static boolean isStrategyRight() {
-
-        List<Set<InputType>> validStratInputs = getValidStratInputs();
-
-        for (int i = 0; i < strategyTicks.size(); i++) {
-
-            if (i < validStratInputs.size()) {
-                if (!validStratInputs.get(i).equals(strategyTicks.get(i).correctInputs)) {
-                    return false;
-                }
-            } else {
-                if (!getLast(validStratInputs).equals(strategyTicks.get(i).correctInputs)) {
-                    return false;
-                }
-            }
-
-
-        }
-        return true;
-
     }
 
     private static void updateLandOffset(AxisAlignedBB playerBB) { // use .getEntityBoundingBox() to call this

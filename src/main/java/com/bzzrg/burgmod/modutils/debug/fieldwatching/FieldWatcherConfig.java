@@ -7,9 +7,9 @@ import org.lwjgl.input.Keyboard;
 public final class FieldWatcherConfig {
     private FieldWatcherConfig() {}
 
-    public static final boolean enabled = false;
+    public static final boolean ENABLED = false;
 
-    public static final Spec[] specs = {
+    public static final Spec[] SPECS = {
             new Spec("net/minecraft/entity/Entity", "posX"),
             new Spec("net/minecraft/entity/Entity", "posY"),
             new Spec("net/minecraft/entity/Entity", "posZ"),

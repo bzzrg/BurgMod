@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PosCheckersConfig extends JsonConfigFile {
 
-    public static boolean enabled = true;
+    public static boolean enabled = false;
 
     public static double xMin = -10000;
     public static double xMax = 10000;
