@@ -207,6 +207,7 @@ public class MainConfigGui extends GuiScreen {
                             "\u00A77- \u00A7bOne Moving Target: \u00A7Slides a target across the yaw points' yaw values at their respective tick #.\n" +
                                     "\u00A77- \u00A7bAll Targets On: \u00A7eDraws the yaws of all the yaw points constantly " +
                                     "(tick # for the yaw points is disregarded when using this mode, so if you are using this mode don't worry about tick #).");
+                    sendInfoBullet("Shape", "Changes shape of the target(s). Can be either a dot shape or a line shape.");
                     sendInfoBullet("Delta Yaws", "Treats yaws from yaw points as changes in yaw like CYV Turning HUD instead of actual yaw values from F3.");
                     sendInfoBullet("Show Turn Accuracy", "Shows a label that displays how well you followed your yaw points (in %). " +
                             "Each tick it checks how many degrees your yaw was off by and calculates percentage linearly from that. " +
@@ -216,13 +217,17 @@ public class MainConfigGui extends GuiScreen {
                             "Note that this percentage doesn't reflect how close you are to making the jump, because some ticks in parkour are way more important to be accurate for making distance " +
                             "(like jump tick/jump angle).");
                     sendInfoBullet("Yaw Point Config Buttons",
-                            "\u00A77- \u00A7bYaw: \u00A7eThe yaw you should be looking at for this tick. If Delta Yaws is on, this is treated as the change in yaw you should have for this tick instead.\n" +
-                                    "\u00A77- \u00A7bTick # Slider: \u00A7eTick #1 is the first tick that your position has changed from your reset position. " +
+                            "\u00A77- \u00A7bTick #: \u00A7eTick #1 is the first tick that your position has changed from your reset position. " +
                                     "To help understand, the Tick # you input here matches the tick # that this tick would be if you were to input your strategy " +
-                                    "(you don't actually need strategy for Turn Helper at all, just used this analogy so you can understand). Minimum is Tick #2 because you never rotate on Tick #1 in parkour.");
+                                    "(you don't actually need strategy for Turn Helper at all, just used this analogy so you can understand). Minimum is Tick #2 because you never rotate on Tick #1 in parkour.\n" +
+                                    "\u00A77- \u00A7bYaw: \u00A7eThe yaw you should be looking at for this tick. If Delta Yaws is on, this is treated as the change in yaw you should have for this tick instead.");
 
                     chat("\u00A77-------- Target Customization --------");
-                    sendInfoBullet("Yaw +-", "The thickness of the target in degrees. The side edges of the target will be at the yaw of whatever yaw point the pillar is at, +/- this value.");
+                    sendInfoBullet("Thickness (Dot)", "Controls the thickness of the dot. " +
+                            "This setting is only for if you are using the dot shape.");
+                    sendInfoBullet("Yaw +- (Line)", "Controls the thickness of the line in degrees. " +
+                            "This setting is only for if you are using the line shape. " +
+                            "The side edges of the line will be at the yaw of whatever yaw point the line is at, +/- this value.");
 
                 });
         addButton(

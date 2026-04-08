@@ -1,12 +1,12 @@
 package com.bzzrg.burgmod.features.turnhelper;
 
 public class YawPoint {
-    public float yaw;
     public int tickNum;
+    public float yaw;
     public TurnHelperListGui.YawPointRow row = null;
 
-    public YawPoint(float yaw, int tickNum) {
-        this.yaw = yaw;
+    public YawPoint(int tickNum, float yaw) {
         this.tickNum = tickNum;
+        this.yaw = yaw;
     }
 }

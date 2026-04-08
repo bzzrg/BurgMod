@@ -16,6 +16,7 @@ public class TurnHelperConfig extends JsonConfigFile {
     public static boolean enabled = false;
 
     public static String mode = "ONE_MOVING_TARGET";
+    public static String shape = "DOT";
     public static boolean deltaYaws = true;
     public static boolean showTurnAccuracy = false;
 
@@ -23,6 +24,7 @@ public class TurnHelperConfig extends JsonConfigFile {
     public static float colorGreen = 0.85f;
     public static float colorBlue = 0.9f;
     public static float opacity = 0.5f;
+    public static float thickness = 0.5f;
     public static float yawPlusMinus = 1f;
 
     public static List<YawPoint> yawPoints = new ArrayList<>();
@@ -40,6 +42,7 @@ public class TurnHelperConfig extends JsonConfigFile {
         addBool("enabled", () -> enabled, v -> enabled = v);
 
         addString("mode", () -> mode, v -> mode = v);
+        addString("shape", () -> shape, v -> shape = v);
         addBool("deltaYaws", () -> deltaYaws, v -> deltaYaws = v);
         addBool("showTurnAccuracy", () -> showTurnAccuracy, v -> showTurnAccuracy = v);
 
@@ -47,6 +50,7 @@ public class TurnHelperConfig extends JsonConfigFile {
         addDouble("colorGreen", () -> (double) colorGreen, v -> colorGreen = v.floatValue());
         addDouble("colorBlue", () -> (double) colorBlue, v -> colorBlue = v.floatValue());
         addDouble("opacity", () -> (double) opacity, v -> opacity = v.floatValue());
+        addDouble("thickness", () -> (double) thickness, v -> thickness = v.floatValue());
         addDouble("yawPlusMinus", () -> (double) yawPlusMinus, v -> yawPlusMinus = v.floatValue());
 
         addList("yawPoints", () -> yawPoints, v -> yawPoints = v, convertor);
@@ -60,17 +64,17 @@ public class TurnHelperConfig extends JsonConfigFile {
         @Override
         public JsonElement toJson(YawPoint yawPoint) {
             JsonObject obj = new JsonObject();
-            obj.addProperty("yaw", yawPoint.yaw);
             obj.addProperty("tickNum", yawPoint.tickNum);
+            obj.addProperty("yaw", yawPoint.yaw);
             return obj;
         }
 
         @Override
         public YawPoint fromJson(JsonElement element) {
             JsonObject obj = element.getAsJsonObject();
-            float yaw = obj.get("yaw").getAsFloat();
             int tickNum = obj.get("tickNum").getAsInt();
-            return new YawPoint(yaw, tickNum);
+            float yaw = obj.get("yaw").getAsFloat();
+            return new YawPoint(tickNum, yaw);
         }
     };
 

@@ -31,12 +31,10 @@ public class TurnHelperDrawer {
 
     private static boolean queued = false;
     private static boolean moving = false;
-
     private static int currentIndex = 0;
 
     private static float renderYaw = 0f;
     private static float lastPartial = 0f;
-
     private static float currentTickYaw = 0f;
     private static float nextTickYaw = 0f;
 
@@ -60,10 +58,8 @@ public class TurnHelperDrawer {
         renderYaw = resetYaw;
         currentTickYaw = resetYaw;
         nextTickYaw = resetYaw;
-
         lastPartial = 0f;
         currentIndex = 0;
-
         queued = true;
         moving = false;
     }
@@ -71,31 +67,27 @@ public class TurnHelperDrawer {
     public static void resetMoving() {
         queued = false;
         moving = false;
-
         currentIndex = 0;
-
         renderYaw = 0f;
         currentTickYaw = 0f;
         nextTickYaw = 0f;
-
         lastPartial = 0f;
-
         unwrapped.clear();
     }
 
-    // IMPORTANT: low priority bceause this must run after another onclienttick i have since i call startmoving from an onclienttick and it needs to start running on that tick
+    // IMPORTANT: LOWEST priority because startMoving() is called from another onClientTick,
+    // and movement must begin on the next tick after that call.
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onClientTick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.END || mc.thePlayer == null) return;
 
         if (queued) {
             queued = false;
-
             if (unwrapped.size() >= 2) {
                 moving = true;
                 currentIndex = 0;
-                currentTickYaw = unwrapped.get(currentIndex);
-                nextTickYaw = unwrapped.get(currentIndex + 1);
+                currentTickYaw = unwrapped.get(0);
+                nextTickYaw = unwrapped.get(1);
                 renderYaw = currentTickYaw;
             } else {
                 moving = false;
@@ -109,7 +101,6 @@ public class TurnHelperDrawer {
             if (currentIndex < unwrapped.size() - 1) {
                 currentIndex++;
                 currentTickYaw = unwrapped.get(currentIndex);
-
                 if (currentIndex < unwrapped.size() - 1) {
                     nextTickYaw = unwrapped.get(currentIndex + 1);
                 } else {
@@ -121,7 +112,6 @@ public class TurnHelperDrawer {
                 currentTickYaw = unwrapped.get(unwrapped.size() - 1);
                 nextTickYaw = currentTickYaw;
             }
-
             renderYaw = currentTickYaw;
             lastPartial = 0f;
 
@@ -135,23 +125,17 @@ public class TurnHelperDrawer {
 
     @SubscribeEvent
     public void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null) return;
-        if (!moving) return;
+        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || !moving) return;
 
-        float renderTickTime = event.renderTickTime;
-        float dt = renderTickTime - lastPartial;
-
+        float dt = event.renderTickTime - lastPartial;
         if (dt < 0.1f) return;
 
         float tickDelta = nextTickYaw - currentTickYaw;
-
-        double yawChange = tickDelta * dt;
-
         double smallestAngle = 1.2 * Math.pow((0.6 * mc.gameSettings.mouseSensitivity + 0.2), 3);
-        yawChange = smallestAngle * Math.round(yawChange / smallestAngle);
+        double yawChange = smallestAngle * Math.round((tickDelta * dt) / smallestAngle);
 
         renderYaw += (float) yawChange;
-        lastPartial = renderTickTime;
+        lastPartial = event.renderTickTime;
     }
 
     @SubscribeEvent
@@ -164,13 +148,15 @@ public class TurnHelperDrawer {
                 mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * e.partialTicks
         );
 
+        boolean isDot = "DOT".equals(shape);
+
         if ("ALL_TARGETS_ON".equals(mode)) {
             List<Float> yaws = getYaws();
             List<Float> drawn = new ArrayList<>();
-
             for (float yaw : yaws) {
                 if (!drawn.contains(yaw)) {
-                    drawPillar(pos, yaw);
+                    if (isDot) drawDot(pos, yaw);
+                    else drawPillar(pos, yaw);
                     drawn.add(yaw);
                 }
             }
@@ -178,20 +164,74 @@ public class TurnHelperDrawer {
         } else if ("ONE_MOVING_TARGET".equals(mode)) {
             if (resetYaw == null) return;
 
-            float yaw;
-
-            if (moving || !unwrapped.isEmpty()) {
-                yaw = renderYaw;
-            } else {
-                yaw = resetYaw;
-            }
+            float yaw = (moving || !unwrapped.isEmpty()) ? renderYaw : resetYaw;
 
             yaw %= 360f;
             if (yaw > 180f) yaw -= 360f;
             if (yaw < -180f) yaw += 360f;
 
-            drawPillar(pos, yaw);
+            if (isDot) drawDot(pos, yaw);
+            else drawPillar(pos, yaw);
         }
+    }
+
+    // Draws a screen-aligned circle at DRAW_DISTANCE in the direction of (yaw, playerPitch).
+    private static void drawDot(Vec3 feet, float yaw) {
+        float pitch = mc.thePlayer.rotationPitch;
+
+        Vec3 eye = feet.addVector(0, mc.thePlayer.getEyeHeight(), 0);
+        Vec3 dir = direction(yaw + YAW_OFFSET, pitch);
+        Vec3 center = eye.addVector(dir.xCoord * DRAW_DISTANCE, dir.yCoord * DRAW_DISTANCE, dir.zCoord * DRAW_DISTANCE);
+
+        Vec3 forward = direction(mc.thePlayer.rotationYaw, pitch).normalize();
+        Vec3 worldUp = (Math.abs(pitch) > 85f) ? new Vec3(0, 0, pitch > 0 ? 1 : -1) : new Vec3(0, 1, 0);
+        Vec3 right = forward.crossProduct(worldUp).normalize();
+        Vec3 up = right.crossProduct(forward).normalize();
+
+        double cx = mc.getRenderManager().viewerPosX;
+        double cy = mc.getRenderManager().viewerPosY;
+        double cz = mc.getRenderManager().viewerPosZ;
+
+        int segments = 64;
+        double step = Math.PI * 2 / segments;
+
+        Tessellator t = Tessellator.getInstance();
+        WorldRenderer w = t.getWorldRenderer();
+
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+        GlStateManager.disableAlpha();
+        GlStateManager.disableCull();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.color(colorRed, colorGreen, colorBlue, opacity);
+
+        w.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION);
+
+        w.pos(center.xCoord - cx, center.yCoord - cy, center.zCoord - cz).endVertex();
+
+        for (int i = 0; i <= segments; i++) {
+            double a = i * step;
+            double cos = Math.cos(a);
+            double sin = Math.sin(a);
+            w.pos(
+                    center.xCoord - cx + (right.xCoord * cos + up.xCoord * sin) * thickness,
+                    center.yCoord - cy + (right.yCoord * cos + up.yCoord * sin) * thickness,
+                    center.zCoord - cz + (right.zCoord * cos + up.zCoord * sin) * thickness
+            ).endVertex();
+        }
+
+        t.draw();
+
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableCull();
+        GlStateManager.enableAlpha();
+        GlStateManager.disableBlend();
+        GlStateManager.enableTexture2D();
+        GlStateManager.popMatrix();
     }
 
     private static void drawPillar(Vec3 feet, float yaw) {
@@ -210,7 +250,7 @@ public class TurnHelperDrawer {
             Vec3 l = direction(yaw - yawPlusMinus, (float) pitch);
             Vec3 r = direction(yaw + yawPlusMinus, (float) pitch);
 
-            Vec3 left = eye.addVector(l.xCoord * DRAW_DISTANCE, l.yCoord * DRAW_DISTANCE, l.zCoord * DRAW_DISTANCE);
+            Vec3 left  = eye.addVector(l.xCoord * DRAW_DISTANCE, l.yCoord * DRAW_DISTANCE, l.zCoord * DRAW_DISTANCE);
             Vec3 right = eye.addVector(r.xCoord * DRAW_DISTANCE, r.yCoord * DRAW_DISTANCE, r.zCoord * DRAW_DISTANCE);
 
             mids[i] = new Vec3(
@@ -218,7 +258,6 @@ public class TurnHelperDrawer {
                     (left.yCoord + right.yCoord) * 0.5,
                     (left.zCoord + right.zCoord) * 0.5
             );
-
             halfs[i] = new Vec3(
                     (right.xCoord - left.xCoord) * 0.5,
                     (right.yCoord - left.yCoord) * 0.5,
@@ -229,14 +268,12 @@ public class TurnHelperDrawer {
         Vec3 forward = direction(yaw, 0);
 
         for (int i = 0; i < ROWS; i++) {
-            Vec3 mid = mids[i];
+            Vec3 mid  = mids[i];
             Vec3 half = halfs[i];
-
             double len = half.lengthVector();
+
             if (len < 1e-6) {
-                for (int s = 0; s < SIDES; s++) {
-                    rings[i][s] = mid;
-                }
+                for (int s = 0; s < SIDES; s++) rings[i][s] = mid;
                 continue;
             }
 
@@ -248,9 +285,7 @@ public class TurnHelperDrawer {
 
             Vec3 w = half.normalize();
             Vec3 d = tangent.crossProduct(w);
-
             if (d.lengthVector() < 1e-6) d = forward.crossProduct(w);
-
             d = d.normalize();
 
             double radius = Math.max(len * 0.28, 0.02);
@@ -269,8 +304,8 @@ public class TurnHelperDrawer {
         double cy = mc.getRenderManager().viewerPosY;
         double cz = mc.getRenderManager().viewerPosZ;
 
-        Tessellator t = Tessellator.getInstance();
-        WorldRenderer w = t.getWorldRenderer();
+        Tessellator tess = Tessellator.getInstance();
+        WorldRenderer wr = tess.getWorldRenderer();
 
         GlStateManager.pushMatrix();
         GlStateManager.disableTexture2D();
@@ -282,7 +317,7 @@ public class TurnHelperDrawer {
         GlStateManager.depthMask(false);
         GlStateManager.color(colorRed, colorGreen, colorBlue, opacity);
 
-        w.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
 
         for (int i = 0; i < ROWS - 1; i++) {
             for (int s = 0; s < SIDES; s++) {
@@ -293,14 +328,14 @@ public class TurnHelperDrawer {
                 Vec3 c = rings[i + 1][n];
                 Vec3 d = rings[i + 1][s];
 
-                w.pos(a.xCoord - cx, a.yCoord - cy, a.zCoord - cz).endVertex();
-                w.pos(b.xCoord - cx, b.yCoord - cy, b.zCoord - cz).endVertex();
-                w.pos(c.xCoord - cx, c.yCoord - cy, c.zCoord - cz).endVertex();
-                w.pos(d.xCoord - cx, d.yCoord - cy, d.zCoord - cz).endVertex();
+                wr.pos(a.xCoord - cx, a.yCoord - cy, a.zCoord - cz).endVertex();
+                wr.pos(b.xCoord - cx, b.yCoord - cy, b.zCoord - cz).endVertex();
+                wr.pos(c.xCoord - cx, c.yCoord - cy, c.zCoord - cz).endVertex();
+                wr.pos(d.xCoord - cx, d.yCoord - cy, d.zCoord - cz).endVertex();
             }
         }
 
-        t.draw();
+        tess.draw();
 
         GlStateManager.depthMask(true);
         GlStateManager.enableDepth();

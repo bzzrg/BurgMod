@@ -12,13 +12,13 @@ import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
 public class TurnHelperListGui extends BMListGui {
 
     private static final int yawFieldWidth = 50;
-    private static final int tickNumWidth = 150;
+    private static final int tickNumFieldWidth = 100;
     private static final int removeWidth = buttonHeight;
 
     public TurnHelperListGui() {
 
-        this.setSettingWidth(150);
-        this.setListWidth(yawFieldWidth + tickNumWidth + removeWidth + buttonGap * 4);
+        this.setSettingWidth(160);
+        this.setListWidth(yawFieldWidth + tickNumFieldWidth + removeWidth + buttonGap * 4);
 
         yawPoints.forEach(this::addYawPointRow);
 
@@ -31,7 +31,7 @@ public class TurnHelperListGui extends BMListGui {
                 tickNum = Math.min(lowestTickNum + 1, 50);
             }
 
-            YawPoint yawPoint = new YawPoint(0, tickNum);
+            YawPoint yawPoint = new YawPoint(tickNum, 0);
             yawPoints.add(yawPoint);
             addYawPointRow(yawPoint);
         });
@@ -45,20 +45,32 @@ public class TurnHelperListGui extends BMListGui {
                 bmChat("\u00A7eNOTE: Tick #s for Yaw Points are not used/needed when using All Targets On mode (Tick #s are only needed for One Moving Target mode and Show Turn Accuracy).");
             }
         });
+
+        this.addEnumSetting("Shape", Shape.class, () -> shape, v -> {
+            shape = v;
+            thicknessSetting.slider.enabled = "DOT".equals(shape);
+            yawPlusMinusSetting.slider.enabled = "LINE".equals(shape);
+        });
         this.addBooleanSetting("Delta Yaws", () -> deltaYaws, v -> deltaYaws = v);
         this.addBooleanSetting("Show Turn Accuracy", () -> showTurnAccuracy, v -> showTurnAccuracy = v);
         this.nextColumn();
         this.addFloatSetting("Red", () -> colorRed, v -> colorRed = v, 0, 1);
         this.addFloatSetting("Green", () -> colorGreen, v -> colorGreen = v, 0, 1);
         this.addFloatSetting("Blue", () -> colorBlue, v -> colorBlue = v, 0, 1);
-        this.addFloatSetting("Alpha", () -> opacity, v -> opacity = v, 0, 1);
-        this.addFloatSetting("Yaw +-", () -> yawPlusMinus, v -> yawPlusMinus = v, 0, 10);
+        this.addFloatSetting("Opacity", () -> opacity, v -> opacity = v, 0, 1);
+        thicknessSetting = this.addFloatSetting("Thickness (Dot)", () -> thickness, v -> thickness = v, 0, 1);
+        yawPlusMinusSetting = this.addFloatSetting("Yaw +- (Line)", () -> yawPlusMinus, v -> yawPlusMinus = v, 0, 10);
 
     }
+
+    private static DecimalSliderSetting<Float> thicknessSetting;
+    private static DecimalSliderSetting<Float> yawPlusMinusSetting;
 
     @Override
     public void initGui() {
         super.initGui();
+        thicknessSetting.slider.enabled = "DOT".equals(shape);
+        yawPlusMinusSetting.slider.enabled = "LINE".equals(shape);
     }
 
     public void addYawPointRow(YawPoint yp) {
@@ -75,21 +87,40 @@ public class TurnHelperListGui extends BMListGui {
 
         for (YawPoint yp : clone) {
             int ypNum = clone.indexOf(yp)+1;
+
             try {
-                yp.row.yawPoint.yaw = Float.parseFloat(yp.row.yawField.field.getText());
+                yp.tickNum = Integer.parseInt(yp.row.tickNumField.field.getText());
             } catch (NumberFormatException e) {
                 yawPoints.remove(yp);
-                bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had invalid yaw: %s", ypNum, yp.row.yawField.field.getText()));
+                bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had invalid tick #: %s", ypNum, yp.row.tickNumField.field.getText()));
+                return;
+            }
+
+            if (yp.tickNum < 2) {
+                yawPoints.remove(yp);
+                bmChat(String.format("\u00A7cDeleted Yaw Point #%d because its tick # was less than 2! (Tick # must be greater than or equal to 2)", ypNum));
+                return;
             }
 
             if ("ONE_MOVING_TARGET".equals(mode) || showTurnAccuracy) {
                 if (tickNums.containsKey(yp.tickNum)) {
                     yawPoints.remove(yp);
-                    bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had the same tick # as Yaw Point #%d: (Tick #: %d) (Tick # for each Yaw Point must be unique)", ypNum, tickNums.get(yp.tickNum), yp.tickNum));
+                    bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had the same tick # as Yaw Point #%d! (Tick # for each Yaw Point must be unique)", ypNum, tickNums.get(yp.tickNum)));
+                    return;
                 } else {
                     tickNums.put(yp.tickNum, ypNum);
                 }
             }
+
+            try {
+                yp.yaw = Float.parseFloat(yp.row.yawField.field.getText());
+            } catch (NumberFormatException e) {
+                yawPoints.remove(yp);
+                bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had invalid yaw: %s", ypNum, yp.row.yawField.field.getText()));
+                return;
+            }
+
+
 
         }
 
@@ -101,6 +132,7 @@ public class TurnHelperListGui extends BMListGui {
         YawPoint yawPoint;
 
         CustomTextField yawField;
+        CustomTextField tickNumField;
         GuiButton removeButton;
 
         public YawPointRow(YawPoint yawPoint) {
@@ -109,16 +141,18 @@ public class TurnHelperListGui extends BMListGui {
 
         @Override
         public void init() {
-            String fieldText = yawField == null ? String.valueOf(yawPoint.yaw) : yawField.field.getText();
-            yawField = new CustomTextField(0, listLeft + buttonGap, getCenteredY(buttonHeight), yawFieldWidth, buttonHeight, "Yaw", "Facing");
-            yawField.field.setText(fieldText);
 
+            String tickNumFieldText = yawField == null ? String.valueOf(yawPoint.tickNum) : tickNumField.field.getText();
+            tickNumField = new CustomTextField(0, listLeft + buttonGap, getCenteredY(buttonHeight), tickNumFieldWidth, buttonHeight, "Tick #", "Must be >= 2");
+            tickNumField.field.setText(tickNumFieldText);
+            fields.add(tickNumField);
+
+            String yawFieldText = yawField == null ? String.valueOf(yawPoint.yaw) : yawField.field.getText();
+            yawField = new CustomTextField(0, listLeft + tickNumFieldWidth + buttonGap * 2, getCenteredY(buttonHeight), yawFieldWidth, buttonHeight, "Yaw", "Facing");
+            yawField.field.setText(yawFieldText);
             fields.add(yawField);
 
-            buttons.add(new CustomSlider(buttonList.size(), listLeft + yawFieldWidth + buttonGap * 2, getCenteredY(buttonHeight), tickNumWidth, buttonHeight, "Tick #: ", "", 2, 50, yawPoint.tickNum, false, true,
-                    s -> yawPoint.tickNum = s.getValueInt()));
-
-            removeButton = new CustomButton(buttonList.size(), listLeft + yawFieldWidth + tickNumWidth + buttonGap * 3, getCenteredY(buttonHeight), removeWidth, buttonHeight, "\u00A74\u2716");
+            removeButton = new CustomButton(buttonList.size(), listLeft + tickNumFieldWidth + yawFieldWidth + buttonGap * 3, getCenteredY(buttonHeight), removeWidth, buttonHeight, "\u00A74\u2716");
             buttons.add(removeButton);
         }
 
