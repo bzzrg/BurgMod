@@ -108,12 +108,14 @@ public class StrategySavingHandler {
             File strategies = new File(BurgMod.modConfigFolder, "strategy/saved-strategies");
             createDirectory(strategies);
 
-            File[] strategiesArray = Objects.requireNonNull(strategies.listFiles());
+            File[] strategiesArray = strategies.listFiles();
+            if (strategiesArray == null) return; // never null in practice
 
             File hpkStrategies = new File(BurgMod.modConfigFolder, "strategy/saved-hpk-strategies");
             createDirectory(hpkStrategies);
 
-            File[] hpkStrategiesArray = Objects.requireNonNull(hpkStrategies.listFiles());
+            File[] hpkStrategiesArray = hpkStrategies.listFiles();
+            if (hpkStrategiesArray == null) return;  // never null in practice
 
             bmChat("\u00A7bSaved Strategies:");
 

@@ -23,12 +23,11 @@ public class PosCheckersListGui extends BMListGui {
 
     private static final int axisWidth = 40;
     private static final int airtimeWidth = 150;
-    private static final int removeWidth = buttonHeight;
 
     public PosCheckersListGui() {
 
         this.setSettingWidth(130);
-        this.setListWidth(axisWidth + airtimeWidth + removeWidth + buttonGap * 4);
+        this.setListWidth(axisWidth + airtimeWidth + buttonHeight*2 + buttonGap*5);
 
         posCheckers.forEach(this::addCheckerRow);
 
@@ -131,32 +130,41 @@ public class PosCheckersListGui extends BMListGui {
 
     public void addCheckerRow(PosChecker pc) {
 
-        this.rows.add(new Row() {
+        this.rows.add(posCheckers.indexOf(pc), new Row(this) {
             final PosChecker posChecker = pc;
 
             GuiButton axisButton;
+            GuiButton duplicateButton;
             GuiButton removeButton;
 
             @Override
             public void init() {
 
+                int centeredY = getCenteredY(buttonHeight);
 
-                axisButton = new CustomButton(buttonList.size(), listLeft + buttonGap, getCenteredY(buttonHeight), axisWidth, buttonHeight, posChecker.axis.name());
+                axisButton = new CustomButton(buttonList.size(), listLeft + buttonGap, centeredY, axisWidth, buttonHeight, posChecker.axis.name());
                 buttons.add(axisButton);
 
-                buttons.add(new CustomSlider(buttonList.size(), listLeft + axisWidth + buttonGap * 2, getCenteredY(buttonHeight), airtimeWidth, buttonHeight, "Airtime: ", "t", 1, 100, posChecker.airtime, false, true,
+                buttons.add(new CustomSlider(buttonList.size(), listLeft + axisWidth + buttonGap*2, centeredY, airtimeWidth, buttonHeight, "Airtime: ", "t", 1, 100, posChecker.airtime, false, true,
                         s -> posChecker.airtime = s.getValueInt()));
 
-                removeButton = new CustomButton(buttonList.size(), listLeft + axisWidth + airtimeWidth + buttonGap * 3, getCenteredY(buttonHeight), removeWidth, buttonHeight, "\u00A74\u2716");
+                duplicateButton = new CustomButton(buttonList.size(), listLeft + axisWidth + airtimeWidth + buttonGap*3, centeredY, buttonHeight, buttonHeight, "\u00A7b\u2ffb");
+                buttons.add(duplicateButton);
+
+                removeButton = new CustomButton(buttonList.size(), listLeft + axisWidth + airtimeWidth + buttonHeight + buttonGap*4, centeredY, buttonHeight, buttonHeight, "\u00A74\u2716");
                 buttons.add(removeButton);
             }
 
             @Override
-            public void click(GuiButton button) {
+            public void buttonClicked(GuiButton button) {
                 if (button == axisButton) {
                     Axis next = Axis.values()[(posChecker.axis.ordinal() + 1) % Axis.values().length];
                     posChecker.axis = next;
                     axisButton.displayString = next.name();
+                } else if (button == duplicateButton) {
+                    PosChecker newPc = new PosChecker(posChecker.axis, posChecker.airtime);
+                    posCheckers.add(posCheckers.indexOf(posChecker), newPc);
+                    addCheckerRow(newPc);
                 } else if (button == removeButton) {
                     posCheckers.remove(posChecker);
                     rows.remove(this);

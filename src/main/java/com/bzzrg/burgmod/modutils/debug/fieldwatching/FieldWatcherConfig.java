@@ -13,7 +13,6 @@ public final class FieldWatcherConfig {
             new Spec("net/minecraft/entity/Entity", "posX"),
             new Spec("net/minecraft/entity/Entity", "posY"),
             new Spec("net/minecraft/entity/Entity", "posZ"),
-
     };
 
     public static boolean shouldLogFieldWrite(Object owner) {
@@ -21,15 +20,11 @@ public final class FieldWatcherConfig {
 
         EntityPlayerSP player = (EntityPlayerSP) owner;
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_I) && player == Minecraft.getMinecraft().thePlayer) {
-            return true;
+        if (player == Minecraft.getMinecraft().thePlayer) {
+            return Keyboard.isKeyDown(Keyboard.KEY_L);
+        } else {
+            return Keyboard.isKeyDown(Keyboard.KEY_K);
         }
-
-        if (Keyboard.isKeyDown(Keyboard.KEY_U) && player != Minecraft.getMinecraft().thePlayer) {
-            return true;
-        }
-
-        return false;
     }
 
 

@@ -56,8 +56,6 @@ public class StrategyPreviewer {
 
             Vec3 newPos = sim.getPositionVector();
             locPairs.put(oldPos, newPos);
-
-            System.out.printf("Preview Sim Pos: %s%n", newPos);
         }
 
         tasks.add(scheduledExecutor.schedule(() -> mc.addScheduledTask(locPairs::clear), 5, TimeUnit.SECONDS));

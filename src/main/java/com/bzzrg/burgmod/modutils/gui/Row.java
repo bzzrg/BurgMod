@@ -7,18 +7,26 @@ import java.util.List;
 
 public abstract class Row {
 
+    private final BMListGui gui;
+
     protected final List<GuiButton> buttons = new ArrayList<>();
     protected final List<CustomTextField> fields = new ArrayList<>();
 
     protected int topY;
 
+    public Row(BMListGui gui) {
+        this.gui = gui;
+    }
+
     public void init() {}
 
-    public void draw() {}
+    public void draw(int mouseX, int mouseY, float partialTicks) {}
 
-    public void click(GuiButton button) {}
+    public void buttonClicked(GuiButton button) {}
+
+    public void fieldTextChanged(char c, int keyCode, CustomTextField field) {}
 
     public final int getCenteredY(int elementHeight) {
-        return this.topY + (BMListGui.rowHeight - elementHeight) / 2;
+        return this.topY + (gui.rowHeight - elementHeight) / 2;
     }
 }

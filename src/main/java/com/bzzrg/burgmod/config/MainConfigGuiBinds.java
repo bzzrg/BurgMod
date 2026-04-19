@@ -15,7 +15,7 @@ import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
 public class MainConfigGuiBinds {
 
     public KeyBinding openGuiBind;
-    public Map<KeyBinding, MainConfigGui.Option> featureToggleBinds = new HashMap<>();
+    public Map<KeyBinding, MainConfigGui.Option> optionBinds = new HashMap<>();
 
     public MainConfigGuiBinds() {
 
@@ -23,11 +23,9 @@ public class MainConfigGuiBinds {
         ClientRegistry.registerKeyBinding(openGuiBind);
 
         for (MainConfigGui.Option option : MainConfigGui.options) {
-            if (option.isFeature) {
-                KeyBinding bind = new KeyBinding("Toggle " + option.name, Keyboard.KEY_NONE, "BurgMod");
-                featureToggleBinds.put(bind, option);
-                ClientRegistry.registerKeyBinding(bind);
-            }
+            KeyBinding bind = new KeyBinding(option.isFeature ? "Toggle " + option.name : option.name, Keyboard.KEY_NONE, "BurgMod");
+            optionBinds.put(bind, option);
+            ClientRegistry.registerKeyBinding(bind);
         }
 
     }
@@ -38,15 +36,16 @@ public class MainConfigGuiBinds {
             Minecraft.getMinecraft().displayGuiScreen(new MainConfigGui());
         } else {
 
-            for (Map.Entry<KeyBinding, MainConfigGui.Option> entry : featureToggleBinds.entrySet()) {
+            for (Map.Entry<KeyBinding, MainConfigGui.Option> entry : optionBinds.entrySet()) {
                 if (entry.getKey().isPressed()) {
+
                     MainConfigGui.Option option = entry.getValue();
                     option.onMainClick.run();
-                    if (option.enabledGetter.get()) {
-                        bmChat(String.format("\u00A7aEnabled %s!", option.name));
-                    } else {
-                        bmChat(String.format("\u00A7eDisabled %s!", option.name));
+
+                    if (option.isFeature) {
+                        bmChat(String.format(option.enabledGetter.get() ? "\u00A7aEnabled %s!" : "\u00A7eDisabled %s!", option.name));
                     }
+
                 }
             }
 

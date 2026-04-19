@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.getNextEnumValue;
 
 @SuppressWarnings("UnusedReturnValue")
 public class BMConfigGui extends GuiScreen {
@@ -29,10 +30,10 @@ public class BMConfigGui extends GuiScreen {
     protected static final int buttonGap = 5;
 
     protected static final int confirmButtonWidth = 20;
-    protected static final int strategyButtonWidth = 80;
+    protected static final int strategyButtonWidth = 100;
 
-    protected int backButtonId = -1;
-    protected int strategyButtonId = -1;
+    protected GuiButton backButton = null;
+    protected GuiButton strategyButton = null;
 
     protected int settingWidth = 160;
 
@@ -63,7 +64,7 @@ public class BMConfigGui extends GuiScreen {
                 () -> {
                     try {
                         T val = Enum.valueOf(enumClass, get.get());
-                        return name + ": " + val.toString();
+                        return name + ": " + val;
                     } catch (Exception e) {
                         return name + ": ?";
                     }
@@ -71,9 +72,8 @@ public class BMConfigGui extends GuiScreen {
                 b -> {
                     try {
                         T cur = Enum.valueOf(enumClass, get.get());
-                        T[] vals = enumClass.getEnumConstants();
-                        T next = vals[(cur.ordinal() + 1) % vals.length];
-                        set.accept(next.name());
+                        T next = getNextEnumValue(cur);
+                        set.accept(next.toString());
                     } catch (Exception ignored) {}
                 }
         );
@@ -171,14 +171,14 @@ public class BMConfigGui extends GuiScreen {
             y += buttonHeight + buttonGap;
         }
 
-        backButtonId = id;
         int bottomY = configBottom - buttonGap - buttonHeight;
-        buttonList.add(new CustomButton(id++, startX, bottomY, buttonHeight, buttonHeight, "<"));
+        backButton = new CustomButton(-1, startX, bottomY, buttonHeight, buttonHeight, "<");
+        buttonList.add(backButton);
 
         if (addStrategyButton) {
-            strategyButtonId = id;
             int strategyX = configRight - buttonGap - strategyButtonWidth;
-            buttonList.add(new CustomButton(id, strategyX, bottomY, strategyButtonWidth, buttonHeight, "Edit Strategy"));
+            strategyButton = new CustomButton(-1, strategyX, bottomY, strategyButtonWidth, buttonHeight, "Strategy Editor");
+            buttonList.add(strategyButton);
         }
     }
 
@@ -190,9 +190,9 @@ public class BMConfigGui extends GuiScreen {
             setting.click(button);
         }
 
-        if (button.id == backButtonId) {
+        if (button == backButton) {
             Minecraft.getMinecraft().displayGuiScreen(new MainConfigGui());
-        } else if (button.id == strategyButtonId) {
+        } else if (button == strategyButton) {
             Minecraft.getMinecraft().displayGuiScreen(new StrategyListGui());
         }
     }

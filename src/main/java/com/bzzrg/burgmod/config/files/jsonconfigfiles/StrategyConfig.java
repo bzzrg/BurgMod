@@ -19,6 +19,10 @@ public class StrategyConfig extends JsonConfigFile {
     public static final List<StrategyTick> strategyTicks = new ArrayList<>();
     public static final List<StrategyJump> strategyJumps = new ArrayList<>();
 
+    public static boolean showTickNum = false;
+    public static int tickNumLabelX = 0;
+    public static int tickNumLabelY = 0;
+
     private StrategyConfig(File file) {
         super(file);
     }
@@ -52,7 +56,6 @@ public class StrategyConfig extends JsonConfigFile {
                     JsonObject jumpJson = new JsonObject();
 
                     jumpJson.addProperty("type", tick.jump.type.name());
-                    jumpJson.addProperty("run1T", tick.jump.run1T);
 
                     if (tick.jump.wasdDirections != null) {
                         JsonArray dirs = new JsonArray();
@@ -66,6 +69,10 @@ public class StrategyConfig extends JsonConfigFile {
                     if (tick.jump.length != null) {
                         jumpJson.addProperty("length", tick.jump.length);
                     }
+
+                    jumpJson.addProperty("run1T", tick.jump.run1T);
+
+                    jumpJson.addProperty("ceilingHeight", tick.jump.ceilingHeight.name());
 
                     JsonArray jumpTicks = new JsonArray();
 
@@ -108,9 +115,7 @@ public class StrategyConfig extends JsonConfigFile {
                         JsonObject jumpJson = elem.getAsJsonObject();
 
                         JumpType type = JumpType.valueOf(jumpJson.get("type").getAsString());
-                        StrategyJump jump = new StrategyJump(type);
-
-                        jump.run1T = jumpJson.get("run1T").getAsBoolean();
+                        StrategyJump jump = new StrategyJump(strategyJumps.size(), type);
 
                         if (jumpJson.has("directions")) {
                             jump.wasdDirections.clear();
@@ -126,7 +131,10 @@ public class StrategyConfig extends JsonConfigFile {
                             jump.length = jumpJson.get("length").getAsInt();
                         }
 
-                        new ArrayList<>(jump.ticks).forEach(t -> t.remove(false));
+                        jump.run1T = jumpJson.get("run1T").getAsBoolean();
+                        jump.ceilingHeight = CeilingHeight.valueOf(jumpJson.get("ceilingHeight").getAsString());
+
+                        jump.removeTicks();
 
                         JsonArray jumpTicks = jumpJson.getAsJsonArray("ticks");
 
@@ -141,8 +149,8 @@ public class StrategyConfig extends JsonConfigFile {
 
             } catch (Exception e) {
 
-                BurgMod.logger.error("Invalid strategy data, resetting", e);
-                bmChat("§4ERROR: Invalid strategy loaded, reset!");
+                BurgMod.logger.error("Invalid strategy loaded! Using empty strategy.", e);
+                bmChat("\u00A74ERROR: Invalid strategy loaded! Using empty strategy.");
                 playErrorSound();
 
                 StrategyListGui.clearStrategy();

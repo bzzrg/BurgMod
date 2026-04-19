@@ -15,9 +15,6 @@ public class P45OffsetConfig extends MainConfigSection {
     public static boolean showXOffset = false;
     public static boolean showZOffset = false;
     public static boolean shortenLabels = false;
-    public static boolean eNotation = false;
-    public static int eNotationMaxExp = -3;
-    public static int eNotationPrecision = 2;
 
     public static boolean stopOnInputFail = true;
     public static boolean showOvershootAmount = false;
@@ -53,9 +50,6 @@ public class P45OffsetConfig extends MainConfigSection {
         addBool("showXOffset", () -> showXOffset, v -> showXOffset = v);
         addBool("showZOffset", () -> showZOffset, v -> showZOffset = v);
         addBool("shortenLabels", () -> shortenLabels, v -> shortenLabels = v);
-        addBool("eNotation", () -> eNotation, v -> eNotation = v);
-        addInt("eNotationMaxExp", () -> eNotationMaxExp, v -> eNotationMaxExp = v);
-        addInt("eNotationPrecision", () -> eNotationPrecision, v -> eNotationPrecision = v);
 
         addBool("stopOnInputFail", () -> stopOnInputFail, v -> stopOnInputFail = v);
         addBool("showOvershootAmount", () -> showOvershootAmount, v -> showOvershootAmount = v);

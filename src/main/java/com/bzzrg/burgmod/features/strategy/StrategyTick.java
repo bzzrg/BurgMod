@@ -16,6 +16,7 @@ public class StrategyTick {
     public StrategyJump jump;
     public StrategyListGui.TickRow row = null;
 
+    // adds a new tick to the strat when called, is not in the list view by default, use add tick row if u want it in list view
     public StrategyTick(int index, Set<InputType> correctInputs, StrategyJump jump) {
         this.correctInputs = new HashSet<>(correctInputs);
         this.jump = jump;

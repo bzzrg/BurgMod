@@ -53,7 +53,7 @@ public class CustomTextField {
 
         } else {
 
-            fieldY = y + (height - fieldHeight) / 2 + 2;
+            fieldY = y + (height - fieldHeight) / 2 + 3;
 
         }
 

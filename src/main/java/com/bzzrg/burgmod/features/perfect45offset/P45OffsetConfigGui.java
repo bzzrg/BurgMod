@@ -19,9 +19,6 @@ public class P45OffsetConfigGui extends BMConfigGui {
         this.addBooleanSetting("Show X Offset", () -> showXOffset, b -> showXOffset = b);
         this.addBooleanSetting("Show Z Offset", () -> showZOffset, b -> showZOffset = b);
         this.addBooleanSetting("Shorten Label", () -> shortenLabels, b -> shortenLabels = b);
-        this.addBooleanSetting("E Notation", () -> eNotation, b -> eNotation = b);
-        this.addIntSetting("E Notation Max Exp", () -> eNotationMaxExp, i -> eNotationMaxExp = i, -10, -1);
-        this.addIntSetting("E Notation Precision", () -> eNotationPrecision, i -> eNotationPrecision = i, 0, 10);
         this.nextColumn();
         this.addBooleanSetting("Stop On Input Fail", () -> stopOnInputFail, b -> stopOnInputFail = b);
         this.addBooleanSetting("Show Overshoot Amount", () -> showOvershootAmount, b -> showOvershootAmount = b);

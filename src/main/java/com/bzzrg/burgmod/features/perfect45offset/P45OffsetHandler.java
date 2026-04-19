@@ -83,24 +83,34 @@ public class P45OffsetHandler {
         if (numOf45s > StrategyTick.getJumpIndices().size()) {
             invalidStates.add(3);
         } else {
-            List<Set<InputType>> validStratInputs = getValidStratInputs();
 
-            for (int i = 0; i < strategyTicks.size(); i++) {
+            List<Integer> jump45Indices = getJump45Indices();
 
-                if (i < validStratInputs.size()) {
-                    if (!validStratInputs.get(i).equals(strategyTicks.get(i).correctInputs)) {
+            if (getLast(jump45Indices) == getLast(strategyTicks).getIndex()) {
+                invalidStates.add(4);
+            } else {
+                int i = jump45Indices.get(0) + 1;
+                for (Set<InputType> validInputs : getValid45Ticks()) {
+                    Set<InputType> inputs = strategyTicks.get(i).correctInputs;
+
+                    if (!inputs.equals(validInputs)) {
+
+                        Set<InputType> tapJumpTick = new HashSet<>(Arrays.asList(W, A, D, SPR, JMP));
+                        Set<InputType> releaseJumpTick = new HashSet<>(Arrays.asList(W, SPR, JMP));
+
+                        // if the user has inputted release jump ticks for their strategy instead of tap jump ticks, then its not invalid
+                        if (validInputs.equals(tapJumpTick) && inputs.equals(releaseJumpTick)) {
+                            continue;
+                        }
+
                         invalidStates.add(4);
                         break;
                     }
-                } else {
-                    if (!getLast(validStratInputs).equals(strategyTicks.get(i).correctInputs)) {
-                        invalidStates.add(4);
-                        break;
-                    }
+
+                    i++;
                 }
-
-
             }
+
         }
 
 
@@ -117,48 +127,48 @@ public class P45OffsetHandler {
         optionsToSimStrat.clear();
 
         List<Integer> invalidStates = getInvalidStates();
-        if (!invalidStates.isEmpty()) {
 
-            if (invalidStates.contains(0)) {
-                bmChat("\u00A7cWARN: Your jump angle is invalid! Either leave it blank or input a valid number.");
-                playErrorSound();
-                setAllLabels("\u00A74Invalid JA");
-            }
-
-            if (invalidStates.contains(1)) return;
-
-            if (invalidStates.contains(2)) {
-                setAllLabels("\u00A74No Strategy Set");
-
-            } else if (invalidStates.contains(3)) {
-                bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
-                playErrorSound();
-                setAllLabels("\u00A74Invalid Strategy");
-                return;
-
-            } else if (invalidStates.contains(4)) {
-                IChatComponent msg = new ChatComponentText("\u00A71[BM] \u00A7cWARN: The 45 jumps from your strategy are inputted wrong! Use the Fix Strat 45s button to fix your 45 jumps or ");
-                IChatComponent click = new ChatComponentText("\u00A7l\u00A7b[Click Here]");
-
-                click.getChatStyle()
-                        .setChatClickEvent(new ClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                "/bmfixstrat45s"
-                        ))
-                        .setChatHoverEvent(new net.minecraft.event.HoverEvent(
-                                net.minecraft.event.HoverEvent.Action.SHOW_TEXT,
-                                new ChatComponentText("\u00A7eClick to fix your 45 jumps!")
-                        ));
-
-                msg.appendSibling(click);
-                if (mc.thePlayer != null) mc.thePlayer.addChatMessage(msg);
-
-                playErrorSound();
-                setAllLabels("\u00A74Invalid Strategy");
-                return;
-            }
-
+        if (invalidStates.contains(0)) {
+            bmChat("\u00A7cWARN: Your jump angle is invalid! Either leave it blank or input a valid number.");
+            playErrorSound();
+            setAllLabels("\u00A74Invalid JA");
+            return;
         }
+
+        if (invalidStates.contains(1)) return;
+
+        if (invalidStates.contains(2)) {
+            setAllLabels("\u00A74No Strategy Set");
+            return;
+        } else if (invalidStates.contains(3)) {
+            bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
+            playErrorSound();
+            setAllLabels("\u00A74Invalid Strategy");
+            return;
+
+        } else if (invalidStates.contains(4)) {
+            IChatComponent msg = new ChatComponentText("\u00A71[BM] \u00A7cWARN: The 45 jumps from your strategy are inputted wrong! Use the Fix Strat 45s button to fix your 45 jumps or ");
+            IChatComponent click = new ChatComponentText("\u00A7l\u00A7b[Click Here]");
+
+            click.getChatStyle()
+                    .setChatClickEvent(new ClickEvent(
+                            ClickEvent.Action.RUN_COMMAND,
+                            "/bmfixstrat45s"
+                    ))
+                    .setChatHoverEvent(new net.minecraft.event.HoverEvent(
+                            net.minecraft.event.HoverEvent.Action.SHOW_TEXT,
+                            new ChatComponentText("\u00A7eClick to fix your 45 jumps!")
+                    ));
+
+            msg.appendSibling(click);
+            if (mc.thePlayer != null) mc.thePlayer.addChatMessage(msg);
+
+            playErrorSound();
+            setAllLabels("\u00A74Invalid Strategy");
+            return;
+        }
+
+
 
         ja = (((getJumpAngle() == null ? mc.thePlayer.rotationYaw : getJumpAngle()) + 180) % 360 + 360) % 360 - 180; // can be values -180 <= value < 180, 180 outputs -180 which is expected
 
@@ -169,7 +179,10 @@ public class P45OffsetHandler {
 
         // Get needed variables
         List<Integer> jump45Indices = getJump45Indices();
-        int lastJumpIndex = Objects.requireNonNull(StrategyTick.getLastJumpIndex());
+
+        Integer lastJumpIndex = StrategyTick.getLastJumpIndex();
+        if (lastJumpIndex == null) return; // never null in practice
+
         Set<InputType> lastInputs = getLast(strategyTicks).correctInputs;
 
         // Reset lines
@@ -308,7 +321,7 @@ public class P45OffsetHandler {
             try {
                 correctInputs = new HashSet<>(strategyTicks.get(tickNum).correctInputs);
             } catch (Exception e) {
-                correctInputs = new HashSet<>(strategyTicks.get(strategyTicks.size()-1).correctInputs);
+                correctInputs = new HashSet<>(getLast(strategyTicks).correctInputs);
             }
 
             if (!inputs.equals(correctInputs)) {
@@ -320,7 +333,8 @@ public class P45OffsetHandler {
 
         PlayerSim sim = createSim();
 
-        int lastJumpTick = Objects.requireNonNull(StrategyTick.getLastJumpIndex());
+        Integer lastJumpTick = StrategyTick.getLastJumpIndex();
+        if (lastJumpTick == null) return; // never null in practice
 
         // Index for optionsToSimStrat represents the updateOptions needed to update the sim TO THAT tickNum
         // so start one above the tickNum or else you will try to update to the position you are already at
@@ -362,14 +376,14 @@ public class P45OffsetHandler {
 
     private static void updateLandOffset(AxisAlignedBB playerBB) { // use .getEntityBoundingBox() to call this
 
-        AxisAlignedBB lbBB = mc.theWorld.getBlockState(landingPos).getBlock().getCollisionBoundingBox(mc.theWorld, landingPos, mc.theWorld.getBlockState(landingPos));
+        AxisAlignedBB lbBB = getCollisionBox(landingPos);
         if (lbBB == null) return;
 
         double xOffset = xLabel.contains("+)") ? playerBB.maxX - lbBB.minX : lbBB.maxX - playerBB.minX;
         double zOffset = zLabel.contains("+)") ? playerBB.maxZ - lbBB.minZ : lbBB.maxZ - playerBB.minZ;
 
-        xLabel = xLabel.substring(0, xLabel.indexOf(')') + 3) + formatOffset(xOffset);
-        zLabel = zLabel.substring(0, zLabel.indexOf(')') + 3) + formatOffset(zOffset);
+        xLabel = formatDp("%s%s%dp", xLabel.substring(0, xLabel.indexOf(')') + 3), xOffset >= 0 ? "\u00A7a+" : "\u00A7c", xOffset);
+        zLabel = formatDp("%s%s%dp", zLabel.substring(0, zLabel.indexOf(')') + 3), zOffset >= 0 ? "\u00A7a+" : "\u00A7c", zOffset);
 
         autoLabel = (EnumFacing.fromAngle(ja).getAxis() == EnumFacing.Axis.X) ? xLabel : zLabel;
     }
@@ -381,43 +395,16 @@ public class P45OffsetHandler {
             return;
         }
 
-        AxisAlignedBB jumpBB = mc.theWorld.getBlockState(jumpPos).getBlock().getCollisionBoundingBox(mc.theWorld, jumpPos, mc.theWorld.getBlockState(jumpPos));
+        AxisAlignedBB jumpBB = getCollisionBox(jumpPos);
         if (jumpBB == null) return;
 
         double xOffset = xLabel.contains("+)") ? playerBB.minX - jumpBB.maxX : jumpBB.minX - playerBB.maxX;
         double zOffset = zLabel.contains("+)") ? playerBB.minZ - jumpBB.maxZ : jumpBB.minZ - playerBB.maxZ;
 
-        xOffset = Math.abs(xOffset);
-        zOffset = Math.abs(zOffset);
-
-        String xStr = formatOffset(xOffset).replace("\u00A7a+", "\u00A7eOS (").replace("\u00A7c", "\u00A7eOS (") + ")";
-        String zStr = formatOffset(zOffset).replace("\u00A7a+", "\u00A7eOS (").replace("\u00A7c", "\u00A7eOS (") + ")";
-
-        xLabel = xLabel.substring(0, xLabel.indexOf(')') + 3) + xStr;
-        zLabel = zLabel.substring(0, zLabel.indexOf(')') + 3) + zStr;
+        xLabel = formatDp("%s\u00A7eOS (%dp)", xLabel.substring(0, xLabel.indexOf(')') + 3), xOffset);
+        zLabel = formatDp("%s\u00A7eOS (%dp)", zLabel.substring(0, zLabel.indexOf(')') + 3), zOffset);
 
         autoLabel = (EnumFacing.fromAngle(ja).getAxis() == EnumFacing.Axis.X) ? xLabel : zLabel;
-    }
-
-    private static String formatOffset(double offset) {
-
-        String color = offset >= 0 ? "\u00A7a+" : "\u00A7c";
-        double abs = Math.abs(offset);
-
-        if (P45OffsetConfig.eNotation && abs > 0) {
-
-            int exponent = (int) Math.floor(Math.log10(abs));
-
-            if (exponent <= P45OffsetConfig.eNotationMaxExp) {
-                double leadingNum = abs / Math.pow(10, exponent);
-                if (offset < 0) leadingNum = -leadingNum;
-
-                String leadingNumStr = String.format("%." + P45OffsetConfig.eNotationPrecision + "f", leadingNum);
-                return color + leadingNumStr + "e" + exponent;
-            }
-        }
-
-        return formatDp("%s%dp", color, offset);
     }
 
     private static BlockPos getHorizontalCollisionBlock(EntityPlayerSP player) {
@@ -471,28 +458,21 @@ public class P45OffsetHandler {
         return jumpIndices.subList(jumpIndices.size() - numOf45s, jumpIndices.size());
     }
 
-    public static List<Set<InputType>> getValidStratInputs() {
+    public static List<Set<InputType>> getValid45Ticks() {
         List<Integer> jump45Indices = getJump45Indices();
-        List<Set<InputType>> validStratInputs = new ArrayList<>();
+        List<Set<InputType>> valid45Ticks = new ArrayList<>();
 
-        for (StrategyTick tick : strategyTicks) {
-            validStratInputs.add(new HashSet<>(tick.correctInputs));
-            if (tick.getIndex() == jump45Indices.get(0)) {
-                break;
-            }
-        }
-
-        for (int i = jump45Indices.get(0)+1; i <= jump45Indices.get(jump45Indices.size()-1)+1; i++) {
+        for (int i = jump45Indices.get(0)+1; i < strategyTicks.size(); i++) {
             InputType strafe = P45OffsetConfig.fortyFiveKey.equals("A") ? A : D;
             if (jump45Indices.contains(i)) {
-                validStratInputs.add(new HashSet<>(Arrays.asList(W, A, D, SPR, JMP)));
+                valid45Ticks.add(new HashSet<>(Arrays.asList(W, A, D, SPR, JMP)));
             } else {
-                validStratInputs.add(new HashSet<>(Arrays.asList(W, strafe, SPR)));
+                valid45Ticks.add(new HashSet<>(Arrays.asList(W, strafe, SPR)));
             }
 
         }
 
-        return validStratInputs;
+        return valid45Ticks;
     }
 
 

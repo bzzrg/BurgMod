@@ -7,9 +7,9 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
-import java.util.Objects;
 
-import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.createDirectory;
 
 public class AutoHPKLoader {
 
@@ -22,10 +22,14 @@ public class AutoHPKLoader {
 
             File hpkStrategies = new File(BurgMod.modConfigFolder, "strategy/saved-hpk-strategies");
             createDirectory(hpkStrategies);
+            File[] hpkStrategiesList = hpkStrategies.listFiles();
+            if (hpkStrategiesList == null) return;
 
             String jumpNum = msg.replace("[OJ] Entering Jump ", "").replace("...", "");
 
-            for (File hpkStratFile : Objects.requireNonNull(hpkStrategies.listFiles())) {
+
+
+            for (File hpkStratFile : hpkStrategiesList) {
 
                 String trimmedName = hpkStratFile.getName().replace(".json", "");
 

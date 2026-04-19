@@ -1,7 +1,10 @@
 package com.bzzrg.burgmod.features.turnhelper;
 
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
-import com.bzzrg.burgmod.modutils.gui.*;
+import com.bzzrg.burgmod.modutils.gui.BMListGui;
+import com.bzzrg.burgmod.modutils.gui.CustomButton;
+import com.bzzrg.burgmod.modutils.gui.CustomTextField;
+import com.bzzrg.burgmod.modutils.gui.Row;
 import net.minecraft.client.gui.GuiButton;
 
 import java.util.*;
@@ -13,12 +16,11 @@ public class TurnHelperListGui extends BMListGui {
 
     private static final int yawFieldWidth = 50;
     private static final int tickNumFieldWidth = 100;
-    private static final int removeWidth = buttonHeight;
 
     public TurnHelperListGui() {
 
         this.setSettingWidth(160);
-        this.setListWidth(yawFieldWidth + tickNumFieldWidth + removeWidth + buttonGap * 4);
+        this.setListWidth(yawFieldWidth + tickNumFieldWidth + buttonHeight*2 + buttonGap*5);
 
         yawPoints.forEach(this::addYawPointRow);
 
@@ -28,7 +30,7 @@ public class TurnHelperListGui extends BMListGui {
                 tickNum = 2;
             } else {
                 int lowestTickNum = Collections.max(yawPoints, Comparator.comparingInt(p -> p.tickNum)).tickNum;
-                tickNum = Math.min(lowestTickNum + 1, 50);
+                tickNum = Math.max(lowestTickNum + 1, 2);
             }
 
             YawPoint yawPoint = new YawPoint(tickNum, 0);
@@ -75,7 +77,7 @@ public class TurnHelperListGui extends BMListGui {
 
     public void addYawPointRow(YawPoint yp) {
         yp.row = new YawPointRow(yp);
-        this.rows.add(yp.row);
+        this.rows.add(yawPoints.indexOf(yp), yp.row);
     }
 
     @Override
@@ -89,35 +91,34 @@ public class TurnHelperListGui extends BMListGui {
             int ypNum = clone.indexOf(yp)+1;
 
             try {
-                yp.tickNum = Integer.parseInt(yp.row.tickNumField.field.getText());
+                Integer.parseInt(yp.row.tickNumField.field.getText());
             } catch (NumberFormatException e) {
                 yawPoints.remove(yp);
                 bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had invalid tick #: %s", ypNum, yp.row.tickNumField.field.getText()));
-                return;
+                continue;
             }
 
             if (yp.tickNum < 2) {
                 yawPoints.remove(yp);
                 bmChat(String.format("\u00A7cDeleted Yaw Point #%d because its tick # was less than 2! (Tick # must be greater than or equal to 2)", ypNum));
-                return;
+                continue;
             }
 
             if ("ONE_MOVING_TARGET".equals(mode) || showTurnAccuracy) {
                 if (tickNums.containsKey(yp.tickNum)) {
                     yawPoints.remove(yp);
                     bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had the same tick # as Yaw Point #%d! (Tick # for each Yaw Point must be unique)", ypNum, tickNums.get(yp.tickNum)));
-                    return;
+                    continue;
                 } else {
                     tickNums.put(yp.tickNum, ypNum);
                 }
             }
 
             try {
-                yp.yaw = Float.parseFloat(yp.row.yawField.field.getText());
+                Float.parseFloat(yp.row.yawField.field.getText());
             } catch (NumberFormatException e) {
                 yawPoints.remove(yp);
                 bmChat(String.format("\u00A7cDeleted Yaw Point #%d because it had invalid yaw: %s", ypNum, yp.row.yawField.field.getText()));
-                return;
             }
 
 
@@ -131,36 +132,62 @@ public class TurnHelperListGui extends BMListGui {
     public class YawPointRow extends Row {
         YawPoint yawPoint;
 
-        CustomTextField yawField;
         CustomTextField tickNumField;
+        CustomTextField yawField;
+        GuiButton duplicateButton;
         GuiButton removeButton;
 
         public YawPointRow(YawPoint yawPoint) {
+            super(TurnHelperListGui.this);
             this.yawPoint = yawPoint;
         }
 
         @Override
         public void init() {
-
-            String tickNumFieldText = yawField == null ? String.valueOf(yawPoint.tickNum) : tickNumField.field.getText();
-            tickNumField = new CustomTextField(0, listLeft + buttonGap, getCenteredY(buttonHeight), tickNumFieldWidth, buttonHeight, "Tick #", "Must be >= 2");
+            int centeredY = getCenteredY(buttonHeight);
+            // line below is bc if it is an invalid tick num, like 13e or somehting, it will revert to 13 on init if it just set it from yawPoint.tickNum
+            String tickNumFieldText = tickNumField == null ? String.valueOf(yawPoint.tickNum) : tickNumField.field.getText();
+            tickNumField = new CustomTextField(0, listLeft + buttonGap, centeredY, tickNumFieldWidth, buttonHeight, "Tick #", "Must be >= 2");
             tickNumField.field.setText(tickNumFieldText);
             fields.add(tickNumField);
 
             String yawFieldText = yawField == null ? String.valueOf(yawPoint.yaw) : yawField.field.getText();
-            yawField = new CustomTextField(0, listLeft + tickNumFieldWidth + buttonGap * 2, getCenteredY(buttonHeight), yawFieldWidth, buttonHeight, "Yaw", "Facing");
+            yawField = new CustomTextField(0, listLeft + tickNumFieldWidth + buttonGap * 2, centeredY, yawFieldWidth, buttonHeight, "Yaw", "Facing");
             yawField.field.setText(yawFieldText);
             fields.add(yawField);
 
-            removeButton = new CustomButton(buttonList.size(), listLeft + tickNumFieldWidth + yawFieldWidth + buttonGap * 3, getCenteredY(buttonHeight), removeWidth, buttonHeight, "\u00A74\u2716");
+            duplicateButton = new CustomButton(buttonList.size(), listLeft + tickNumFieldWidth + yawFieldWidth + buttonGap*3, centeredY, buttonHeight, buttonHeight, "\u00A7b\u2ffb");
+            buttons.add(duplicateButton);
+
+            removeButton = new CustomButton(buttonList.size(), listLeft + tickNumFieldWidth + yawFieldWidth + buttonHeight + buttonGap*4, centeredY, buttonHeight, buttonHeight, "\u00A74\u2716");
             buttons.add(removeButton);
         }
 
         @Override
-        public void click(GuiButton button) {
-            if (button == removeButton) {
+        public void buttonClicked(GuiButton button) {
+
+             if (button == duplicateButton) {
+                YawPoint newYp = new YawPoint(yawPoint.tickNum, yawPoint.yaw);
+                yawPoints.add(yawPoints.indexOf(yawPoint), newYp);
+                addYawPointRow(newYp);
+            } else if (button == removeButton) {
                 yawPoints.remove(yawPoint);
                 rows.remove(this);
+            }
+        }
+
+        @Override
+        public void fieldTextChanged(char c, int keyCode, CustomTextField field) {
+            if (field == tickNumField) {
+                try {
+                    yawPoint.tickNum = Integer.parseInt(tickNumField.field.getText());
+                } catch (NumberFormatException ignored) {
+                }
+            } else if (field == yawField) {
+                try {
+                    yawPoint.yaw = Float.parseFloat(yawField.field.getText());
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
     }

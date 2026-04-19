@@ -38,6 +38,8 @@ public class GeneralConfigGui extends BMConfigGui {
         }, "MC Color Code");
 
         this.addIntSetting("Decimal Precision", () -> decimalPrecision, i -> decimalPrecision = i, 0, 100);
+        this.addBooleanSetting("E Notation", () -> eNotation, b -> eNotation = b);
+        this.addIntSetting("E Notation Max Exp", () -> eNotationMaxExp, i -> eNotationMaxExp = i, -10, -1);
     }
 
     private static String charToName(String color) {

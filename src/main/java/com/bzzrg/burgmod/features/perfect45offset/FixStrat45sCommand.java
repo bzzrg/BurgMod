@@ -8,11 +8,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler.getJump45Indices;
+import static com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler.getValid45Ticks;
 import static com.bzzrg.burgmod.modutils.GeneralUtils.bmChat;
+import static com.bzzrg.burgmod.modutils.GeneralUtils.getLast;
 
 public class FixStrat45sCommand extends CommandBase {
 
@@ -23,7 +27,7 @@ public class FixStrat45sCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender iCommandSender) {
-        return "/" + getCommandName();
+        return null;
     }
 
     @Override
@@ -38,16 +42,23 @@ public class FixStrat45sCommand extends CommandBase {
             bmChat("\u00A7c# of 45s inside perfect 45 offset config is more than # of jumps inside your strategy! Please fix this before you attempt to use Fix Strat 45s!");
         } else {
 
-            List<Set<InputType>> validStratInputs = P45OffsetHandler.getValidStratInputs();
-            StrategyListGui.clearStrategy();
+            List<Integer> jump45Indices = getJump45Indices();
 
-            for (Set<InputType> inputs : validStratInputs) {
-                new StrategyTick(strategyTicks.size(), inputs, null);
+            StrategyTick lastTick = getLast(strategyTicks);
+            if (getLast(jump45Indices) == lastTick.getIndex()) {
+                // correctInputs for this tick will be overriden by the fix so use empty HashSet
+                new StrategyTick(strategyTicks.size(), new HashSet<>(), lastTick.jump);
+            }
+
+            int i = jump45Indices.get(0) + 1;
+            for (Set<InputType> validInputs : getValid45Ticks()) {
+                strategyTicks.get(i).correctInputs = validInputs;
+                i++;
             }
 
             Minecraft.getMinecraft().displayGuiScreen(new StrategyListGui());
 
-            bmChat("\u00A7aFixed the 45 jumps from your strategy!");
+            bmChat("\u00A7aFixed the 45 jumps from your strategy! \u00A7e(Note: Assumes that you use tapping A/D on jump ticks for 45s. If you don't, just replace remove the A & D from your 45 jump ticks)");
         }
 
 

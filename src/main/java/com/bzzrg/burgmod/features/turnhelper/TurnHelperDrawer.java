@@ -140,7 +140,7 @@ public class TurnHelperDrawer {
 
     @SubscribeEvent
     public void onRenderWorld(RenderWorldLastEvent e) {
-        if (!enabled || mc.thePlayer == null || mc.theWorld == null) return;
+        if (!enabled || mc.thePlayer == null || mc.theWorld == null || yawPoints.isEmpty()) return;
 
         Vec3 pos = new Vec3(
                 mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * e.partialTicks,

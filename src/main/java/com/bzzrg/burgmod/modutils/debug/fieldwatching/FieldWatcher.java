@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static com.bzzrg.burgmod.modutils.debug.fieldwatching.FieldWatcherConfig.SPECS;
 
+@SuppressWarnings("unused")
 public class FieldWatcher {
 
     public static boolean BYPASS = false;
@@ -193,7 +194,7 @@ public class FieldWatcher {
         public byte[] transform(String name, String transformedName, byte[] bytes) {
 
             if (bytes == null) return null;
-            if (name.startsWith("com.bzzrg.burgmod.utils.debug")) return bytes;
+            if (name.startsWith("com.bzzrg.burgmod.modutils.debug.fieldwatching")) return bytes;
 
             ClassNode cn = new ClassNode();
             new ClassReader(bytes).accept(cn, 0);
@@ -275,7 +276,6 @@ public class FieldWatcher {
 
         private static int loadOpcode(Type type) {
             switch (type.getSort()) {
-                case Type.INT: return Opcodes.ILOAD;
                 case Type.FLOAT: return Opcodes.FLOAD;
                 case Type.LONG: return Opcodes.LLOAD;
                 case Type.DOUBLE: return Opcodes.DLOAD;
@@ -285,7 +285,6 @@ public class FieldWatcher {
 
         private static int storeOpcode(Type type) {
             switch (type.getSort()) {
-                case Type.INT: return Opcodes.ISTORE;
                 case Type.FLOAT: return Opcodes.FSTORE;
                 case Type.LONG: return Opcodes.LSTORE;
                 case Type.DOUBLE: return Opcodes.DSTORE;
@@ -301,7 +300,7 @@ public class FieldWatcher {
         @Override
         public String[] getASMTransformerClass() {
             return new String[] {
-                    "com.bzzrg.burgmod.utils.debug.fieldwatching.FieldWatcher$FieldWriteTransformer"
+                    "com.bzzrg.burgmod.modutils.debug.fieldwatching.FieldWatcher$FieldWriteTransformer"
             };
         }
 

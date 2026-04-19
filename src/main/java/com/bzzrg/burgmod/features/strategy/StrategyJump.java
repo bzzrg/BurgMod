@@ -11,10 +11,7 @@ import static com.bzzrg.burgmod.features.strategy.StrategyListGui.strategyListGu
 public class StrategyJump {
 
     public final JumpType type;
-    public final List<StrategyTick> ticks = new ArrayList<>();
-    public StrategyListGui.JumpRow row = null;
 
-    public boolean extended = false;
 
     public Set<InputType> wasdDirections = null;
     public InputType adDirection = null;
@@ -23,12 +20,20 @@ public class StrategyJump {
 
     public Integer length = null;
 
-    public StrategyJump(JumpType type) {
+    public CeilingHeight ceilingHeight = CeilingHeight.NO_CEIL;
+
+    public final List<StrategyTick> ticks = new ArrayList<>();
+
+    public boolean extended = false;
+
+    public StrategyListGui.JumpRow row = null;
+
+    public StrategyJump(int index, JumpType type) {
         this.type = type;
-        strategyJumps.add(this);
+        strategyJumps.add(index, this);
 
         if (type == JumpType.JAM || type == JumpType.HH || type == JumpType.PESSI || type == JumpType.FMM) {
-            wasdDirections = new HashSet<>(Collections.singleton(W));
+            wasdDirections = new HashSet<>();
         } else if (type != JumpType.BWMM) {
             adDirection = A;
         }
@@ -56,8 +61,12 @@ public class StrategyJump {
         }
     }
 
-    public void remove() {
+    public void removeTicks() {
         new ArrayList<>(this.ticks).forEach(t -> t.remove(false));
+    }
+
+    public void remove() {
+        this.removeTicks();
         if (strategyListGui != null && this.row != null) strategyListGui.rows.remove(this.row);
         strategyJumps.remove(this);
     }
@@ -83,105 +92,70 @@ public class StrategyJump {
 
     // Update jump to match its fields (called when player updates jump fields via its config buttons)
     private static int firstTickNum = -1;
+
     public void updateTicks() {
-
         firstTickNum = ticks.isEmpty() ? strategyTicks.size() : ticks.get(0).getIndex();
-        new ArrayList<>(this.ticks).forEach(t -> t.remove(false));
-
-        InputType[] wasd = wasdDirections != null ? wasdDirections.toArray(new InputType[0]) : null;
-        InputType[] wasdSpr = wasd != null && Arrays.asList(wasd).contains(W) ? merge(wasd, SPR) : wasd;
-        InputType[] ad = adDirection != null ? new InputType[]{adDirection} : null;
+        this.removeTicks();
+        InputType[] wasd = wasdDirections != null ? wasdDirections.toArray(new InputType[0]) : arr();
+        InputType[] wasdSpr = Arrays.asList(wasd).contains(W) ? merge(wasd, SPR) : wasd;
+        InputType[] ad = adDirection != null ? new InputType[]{adDirection} : arr();
 
         switch (type) {
-
-            case JAM: {
-                addTicks(1, merge(wasdSpr, JMP));
-                addTicks(11, wasdSpr);
-                if (run1T) addTicks(1, wasdSpr);
+            case JAM:
+                addJump(1, wasdSpr, wasdSpr, run1T);
                 break;
-            }
-
-            case HH: {
+            case HH:
                 addTicks(length, wasdSpr);
-                addTicks(1, merge(wasdSpr, JMP));
-                addTicks(11, wasdSpr);
-                if (run1T) addTicks(1, wasdSpr);
+                addJump(1, wasdSpr, wasdSpr, run1T);
                 break;
-            }
-
-            case PESSI: {
-                addTicks(1, JMP);
-                addTicks(length - 1);
-                addTicks(12 - length, wasdSpr);
-                if (run1T) addTicks(1, wasdSpr);
+            case PESSI:
+                addJump(length, arr(), wasdSpr, run1T);
                 break;
-            }
-
-            case FMM: {
-                addTicks(1, merge(wasd, JMP));
-                addTicks(length - 1, wasd);
-                addTicks(12 - length, merge(wasd, SPR));
-                if (run1T) addTicks(1, merge(wasd, SPR));
+            case FMM:
+                addJump(length, wasd, merge(wasd, SPR), run1T);
                 break;
-            }
-
-            case MARK: {
-                addTicks(1, merge(ad, JMP));
-                addTicks(length - 1, ad);
-                addTicks(12 - length, merge(ad, W, SPR));
-                if (run1T) addTicks(1, merge(ad, W, SPR));
+            case MARK:
+                addJump(length, ad, merge(ad, W, SPR), run1T);
                 break;
-            }
-
             case WAD: {
-                addTicks(1, W, A, D, SPR, JMP);
-                addTicks(length - 1, W, A, D, SPR);
-                addTicks(12 - length, merge(ad, W, SPR));
-                if (run1T) addTicks(1, merge(ad, W, SPR));
+                addJump(length, arr(W, A, D, SPR), merge(ad, W, SPR), run1T);
                 break;
             }
-
-            case WDWA: {
-                addTicks(1, merge(ad, W, SPR, JMP));
-                addTicks(11, merge(ad, W, SPR));
-                if (run1T) addTicks(1, merge(ad, W, SPR));
+            case WDWA:
+                addJump(1, merge(ad, W, SPR), merge(ad, W, SPR), run1T);
                 break;
-            }
-
-            case BWMM: {
-                addTicks(1, S, JMP);
-                addTicks(12, S);
-
-                addTicks(1, W, SPR, JMP);
-                addTicks(11, W, SPR);
-                if (run1T) addTicks(1, W, SPR);
+            case BWMM:
+                addJump(1, arr(S), arr(S), true);
+                addJump(1, arr(W, SPR), arr(W, SPR), run1T);
                 break;
-            }
-
-            case REX: {
-                addTicks(1, S, JMP);
-                addTicks(12, S);
-
-                addTicks(1, merge(ad, W, SPR, JMP));
-                addTicks(length - 1, merge(ad, W, SPR));
-                addTicks(12 - length, W, SPR);
-                if (run1T) addTicks(1, W, SPR);
+            case REX:
+                addJump(1, arr(S), arr(S), true);
+                addJump(length, merge(ad, W, SPR), arr(W, SPR), run1T);
                 break;
-            }
-
-            case REVERSE_REX: {
-                addTicks(1, merge(ad, S, JMP));
-                addTicks(length - 1, merge(ad, S));
-                addTicks(13 - length, S);
-
-                addTicks(1, W, SPR, JMP);
-                addTicks(11, W, SPR);
-                if (run1T) addTicks(1, W, SPR);
+            case REVERSE_REX:
+                addJump(length, merge(ad, S), arr(S), true);
+                addJump(1, arr(W, SPR), arr(W, SPR), run1T);
                 break;
-            }
         }
-
         this.fixExtension();
+    }
+
+    // 1 jump tick (jumpInputs + JMP), firstLength-1 first ticks, jumpLength-firstLength second ticks, optional run1T (ex: firstLength = 2t for 2t pessi, ex: second length = 8t for 3bc 3t mark)
+    private void addJump(int firstLength, InputType[] firstInputs, InputType[] secondInputs, boolean run1T) {
+
+        addTicks(1, merge(firstInputs, JMP));
+        addTicks(firstLength - 1, firstInputs);
+        addTicks(ceilingHeight.getJumpLength() - firstLength, secondInputs);
+        if (run1T) addTicks(1, secondInputs);
+    }
+
+    private InputType[] arr(InputType... inputs) { return inputs; }
+
+    private InputType[] merge(InputType[] base, InputType... extra) {
+        if (base == null || base.length == 0) return extra;
+        InputType[] out = Arrays.copyOf(base, base.length + extra.length);
+        System.arraycopy(extra, 0, out, base.length, extra.length);
+        return out;
     }
 
     private void addTicks(int count, InputType... inputs) {
@@ -196,12 +170,6 @@ public class StrategyJump {
             }
         }
 
-    }
-
-    private InputType[] merge(InputType[] base, InputType... extra) {
-        InputType[] out = Arrays.copyOf(base, base.length + extra.length);
-        System.arraycopy(extra, 0, out, base.length, extra.length);
-        return out;
     }
 
 }

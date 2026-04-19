@@ -18,8 +18,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyJumps;
-import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.strategyTicks;
+import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.*;
 import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
@@ -34,6 +33,7 @@ public class StrategyListGui extends BMListGui {
 
     private static final int run1TButLength = 40;
     private static final int lengthSliderLength = 40;
+    private static final int ceilingHeightButLength = 50;
 
     public static void clearStrategy() {
         strategyTicks.clear();
@@ -60,15 +60,15 @@ public class StrategyListGui extends BMListGui {
     public StrategyListGui() {
         strategyListGui = this;
         this.setSettingWidth(120);
-        this.setListWidth(jumpTypeGap + buttonGap*8 + buttonHeight*6 + run1TButLength + lengthSliderLength);
+        this.setListWidth(jumpTypeGap + buttonGap*10 + buttonHeight*7 + run1TButLength + lengthSliderLength + ceilingHeightButLength);
 
         resetRows();
 
-        this.addActionButton("Add Tick", b -> addTickRow(new StrategyTick(strategyTicks.size(), Collections.singleton(InputType.W), null)));
+        this.addActionButton("Add Tick", b -> addTickRow(new StrategyTick(strategyTicks.size(), new HashSet<>(), null)));
         this.addStringSetting("Add Jump", () -> "", s -> {
             StrategyJump strategyJump;
             try {
-                strategyJump = new StrategyJump(JumpType.valueOf(s.toUpperCase()));
+                strategyJump = new StrategyJump(strategyJumps.size(), JumpType.valueOf(s.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 bmChat("\u00A7cInvalid jump type! List of valid jump types:");
                 chat("\u00A7e" + Arrays.stream(JumpType.values()).map(t -> t.name().toLowerCase(Locale.ROOT)).collect(Collectors.joining(", ")));
@@ -89,7 +89,9 @@ public class StrategyListGui extends BMListGui {
             for (StrategyTick tick : reversed) {
                 if (last != null) {
 
-                    if (last.correctInputs.equals(tick.correctInputs)) {
+                    Set<InputType> clone = new HashSet<>(last.correctInputs);
+                    clone.add(JMP);
+                    if (tick.correctInputs.equals(clone) || tick.correctInputs.equals(last.correctInputs)) {
                         last.remove(true);
                     } else {
                         break;
@@ -168,20 +170,15 @@ public class StrategyListGui extends BMListGui {
 
             } else {
 
-                while (true) {
+                List<Set<InputType>> reversed = new ArrayList<>(recordedStrategy);
+                Collections.reverse(reversed);
 
-                    if (recordedStrategy.isEmpty()) {
-                        break;
-                    }
-
-                    Set<InputType> inputs = recordedStrategy.get(recordedStrategy.size() - 1);
-
+                for (Set<InputType> inputs : reversed) {
                     if (inputs.isEmpty()) {
-                        recordedStrategy.remove(inputs);
+                        recordedStrategy.remove(recordedStrategy.size()-1);
                     } else {
                         break;
                     }
-
                 }
 
                 clearStrategy();
@@ -199,6 +196,7 @@ public class StrategyListGui extends BMListGui {
                 StrategyPreviewer.draw();
             }
         });
+        this.addBooleanSetting("Show Tick #", () -> showTickNum, v -> showTickNum = v);
         this.nextColumn();
         StrategySavingHandler.addSavingSettings(this);
 
@@ -247,11 +245,13 @@ public class StrategyListGui extends BMListGui {
         public GuiButton removeButton;
 
         public TickRow(StrategyTick tick) {
+            super(StrategyListGui.this);
             this.tick = tick;
         }
 
         @Override
         public void init() {
+
             int nextButtonId = buttonList.size();
             final int centeredY = getCenteredY(buttonHeight);
 
@@ -272,7 +272,7 @@ public class StrategyListGui extends BMListGui {
         }
 
         @Override
-        public void draw() {
+        public void draw(int mouseX, int mouseY, float partialTicks) {
             if (tick.jump != null) drawRect(listLeft, topY, listRight, topY + rowHeight, 0x96000000);
 
             int textWidth = fontRendererObj.getStringWidth("T" + (tick.getIndex() + 1));
@@ -281,7 +281,7 @@ public class StrategyListGui extends BMListGui {
         }
 
         @Override
-        public void click(GuiButton button) {
+        public void buttonClicked(GuiButton button) {
 
             if (button == duplicateButton) { // Duplicate Tick
                 addTickRow(new StrategyTick(tick.getIndex(), new HashSet<>(tick.correctInputs), tick.jump));
@@ -318,10 +318,30 @@ public class StrategyListGui extends BMListGui {
 
         public GuiSlider lengthSlider = null;
 
+        public GuiButton ceilingHeightButton;
+
+        public GuiButton duplicateButton;
         public GuiButton removeButton;
 
         public JumpRow(StrategyJump jump) {
+            super(StrategyListGui.this);
             this.jump = jump;
+        }
+
+        // call jump.updateTicks() after this, not included in method for consistency, also this method is just meant to change ur jump's ceilingheight constant, thats it
+        private void fixCeiling() {
+            if (jump.length == null || jump.type == JumpType.HH) return; // if jump has no length option, or if jump is HH, ceiling can't be broken so there's nothing to fix
+            while (true) {
+                if (jump.ceilingHeight.getJumpLength() <= jump.length) {
+
+                    CeilingHeight next = getNextEnumValue(jump.ceilingHeight);
+                    jump.ceilingHeight = next;
+                    ceilingHeightButton.displayString = next.toString();
+
+                } else {
+                    break;
+                }
+            }
         }
 
         @Override
@@ -350,27 +370,33 @@ public class StrategyListGui extends BMListGui {
                 adButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(buttonHeight + buttonGap), centeredY, buttonHeight, buttonHeight, jump.adDirection.name());
             }
 
-            run1TButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(run1TButLength + buttonGap), centeredY, run1TButLength, buttonHeight, jump.run1T ? "\u00A7aRun 1t" : "\u00A7cRun 1t");
-
             if (jump.type != JumpType.JAM && jump.type != JumpType.WDWA && jump.type != JumpType.BWMM) {
                 lengthSlider = new CustomSlider(nextButtonId++, buttonX.getAndAdd(lengthSliderLength + buttonGap), centeredY, lengthSliderLength, buttonHeight, "", "t", 1, 11, jump.length, false, true, slider -> {
                     jump.length = slider.getValueInt();
+                    fixCeiling();
                     jump.updateTicks();
                 });
             }
 
+            run1TButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(run1TButLength + buttonGap), centeredY, run1TButLength, buttonHeight, jump.run1T ? "\u00A7aRun 1t" : "\u00A7cRun 1t");
+
+            ceilingHeightButton = new CustomButton(nextButtonId++, buttonX.getAndAdd(ceilingHeightButLength + buttonGap), centeredY, ceilingHeightButLength, buttonHeight, jump.ceilingHeight.toString());
+
+            duplicateButton = new CustomButton(nextButtonId, buttonX.getAndAdd(buttonHeight + buttonGap), centeredY, buttonHeight, buttonHeight, "\u00A7b\u2ffb");
             removeButton = new CustomButton(nextButtonId, buttonX.getAndAdd(buttonHeight + buttonGap), centeredY, buttonHeight, buttonHeight, "\u00A74\u2716");
 
             buttons.add(extendButton);
             if (wasdButtons != null) buttons.addAll(wasdButtons.values());
             if (adButton != null) buttons.add(adButton);
             buttons.add(run1TButton);
+            buttons.add(ceilingHeightButton);
+            buttons.add(duplicateButton);
             buttons.add(removeButton);
             if (lengthSlider != null) buttons.add(lengthSlider);
         }
 
         @Override
-        public void draw() {
+        public void draw(int mouseX, int mouseY, float partialTicks) {
             drawRect(listLeft, topY, listRight, topY + rowHeight, 0x96000000);
 
             int textWidth = fontRendererObj.getStringWidth(jump.getName());
@@ -379,7 +405,7 @@ public class StrategyListGui extends BMListGui {
         }
 
         @Override
-        public void click(GuiButton button) {
+        public void buttonClicked(GuiButton button) {
 
             if (button == extendButton) { // Extend button for jumps
                 jump.extended = !jump.extended;
@@ -409,11 +435,40 @@ public class StrategyListGui extends BMListGui {
                 run1TButton.displayString = jump.run1T ? "\u00A7aRun 1t" : "\u00A7cRun 1t";
                 jump.updateTicks();
 
+            } else if (button == ceilingHeightButton) {
+                CeilingHeight next = getNextEnumValue(jump.ceilingHeight);
+                jump.ceilingHeight = next;
+                ceilingHeightButton.displayString = next.toString();
+                fixCeiling();
+                jump.updateTicks();
+
+            } else if (button == duplicateButton) {
+                this.jump.extended = false;
+                button.displayString = "\u2227";
+                this.jump.fixExtension();
+                StrategyJump jump = new StrategyJump(strategyJumps.indexOf(this.jump), this.jump.type);
+
+                jump.wasdDirections = new HashSet<>(this.jump.wasdDirections);
+                jump.adDirection = this.jump.adDirection;
+                jump.run1T = this.jump.run1T;
+                jump.length = this.jump.length;
+                jump.ceilingHeight = this.jump.ceilingHeight;
+
+                jump.removeTicks();
+                int i = this.jump.ticks.get(0).getIndex();
+
+                for (StrategyTick tick : this.jump.ticks) {
+                    new StrategyTick(i, new HashSet<>(tick.correctInputs), jump);
+                    i++;
+                }
+
+                addJumpRow(jump);
             } else if (button == removeButton) { // Remove button for jumps
                 jump.remove();
             }
 
         }
     }
+
 
 }

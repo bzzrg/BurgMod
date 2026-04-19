@@ -19,7 +19,7 @@ public abstract class BMListGui extends BMConfigGui {
 
     private static final float scrollSpeed = 0.1f;
     private static final int scrollStep = 20;
-    public static final int rowHeight = buttonHeight + buttonGap * 2;
+    protected int rowHeight = buttonHeight + buttonGap * 2;
 
     protected int listLeft, listRight, listTop, listBottom;
 
@@ -29,8 +29,15 @@ public abstract class BMListGui extends BMConfigGui {
     private Row activeSliderRow = null;
     private int builtRowsHash = 0;
 
+    private boolean fullscreen = false;
+    private GuiButton fullscreenButton = null;
+
     protected void setListWidth(int width) {
         this.customListRight = borderInline + borderThickness + width;
+    }
+
+    protected void setRowHeight(int rowHeight) {
+        this.rowHeight = rowHeight;
     }
 
     @Override
@@ -44,7 +51,9 @@ public abstract class BMListGui extends BMConfigGui {
         listTop = borderInline + borderThickness;
         listBottom = height - borderInline - borderThickness;
 
-        configLeft = listRight + borderInline + borderThickness * 2;
+        configLeft = fullscreen
+                ? borderInline + borderThickness
+                : listRight + borderInline + borderThickness * 2;
         configRight = width - borderInline - borderThickness;
         configTop = borderInline + borderThickness;
         configBottom = height - borderInline - borderThickness;
@@ -56,6 +65,11 @@ public abstract class BMListGui extends BMConfigGui {
         super.initGui();
         rebuildRows(null);
         scroll = targetScroll;
+
+        int bottomY = configBottom - buttonGap - buttonHeight;
+        int fullscreenX = configLeft + buttonGap + buttonHeight + buttonGap;
+        fullscreenButton = new CustomButton(-1, fullscreenX, bottomY, buttonHeight, buttonHeight, fullscreen ? "><" : "<>");
+        buttonList.add(fullscreenButton);
     }
 
     private int rowsHash() {
@@ -126,10 +140,18 @@ public abstract class BMListGui extends BMConfigGui {
         }
     }
 
+
+
     @Override
     protected void actionPerformed(GuiButton button) {
         if (consumedClick) return;
         consumedClick = true;
+
+        if (button == fullscreenButton) {
+            fullscreen = !fullscreen;
+            initGui();
+            return;
+        }
 
         int before = rowsHash();
 
@@ -151,7 +173,7 @@ public abstract class BMListGui extends BMConfigGui {
             activeSliderRow = button instanceof GuiSlider ? row : null;
 
             before = rowsHash();
-            row.click(button);
+            row.buttonClicked(button);
 
             if (rowsHash() != before && !(button instanceof GuiSlider)) {
                 rebuildRows(null);
@@ -178,6 +200,7 @@ public abstract class BMListGui extends BMConfigGui {
     }
 
     private boolean outside(int x, int y) {
+        if (fullscreen) return true;
         return x < listLeft || x >= listRight ||
                 y < listTop || y >= listBottom;
     }
@@ -222,7 +245,7 @@ public abstract class BMListGui extends BMConfigGui {
         clampScroll();
         updateScroll();
 
-        drawListBorder();
+        if (!fullscreen) drawListBorder();
         drawConfigBorder();
 
         int startY = listTop - Math.round(scroll);
@@ -243,26 +266,28 @@ public abstract class BMListGui extends BMConfigGui {
             }
         }
 
-        boolean inside = !outside(mouseX, mouseY);
+        if (!fullscreen) {
+            boolean inside = !outside(mouseX, mouseY);
 
-        int rowMouseX = inside ? mouseX : Integer.MIN_VALUE;
-        int rowMouseY = inside ? mouseY : Integer.MIN_VALUE;
+            int rowMouseX = inside ? mouseX : Integer.MIN_VALUE;
+            int rowMouseY = inside ? mouseY : Integer.MIN_VALUE;
 
-        enableScissor(listLeft, listTop, listRight, listBottom);
+            enableScissor(listLeft, listTop, listRight, listBottom);
 
-        for (Row row : rows) {
-            row.draw();
+            for (Row row : rows) {
+                row.draw(mouseX, mouseY, partialTicks);
 
-            for (CustomTextField field : row.fields) {
-                field.draw(rowMouseX, rowMouseY);
+                for (CustomTextField field : row.fields) {
+                    field.draw(rowMouseX, rowMouseY);
+                }
             }
-        }
 
-        for (GuiButton button : rowButtons) {
-            button.drawButton(mc, rowMouseX, rowMouseY);
-        }
+            for (GuiButton button : rowButtons) {
+                button.drawButton(mc, rowMouseX, rowMouseY);
+            }
 
-        disableScissor();
+            disableScissor();
+        }
 
         for (Setting setting : settings) {
             setting.draw(mouseX, mouseY);
@@ -287,7 +312,11 @@ public abstract class BMListGui extends BMConfigGui {
         for (Row row : rows) {
             for (CustomTextField field : row.fields) {
                 if (field.field.isFocused()) {
+                    String before = field.field.getText();
                     field.keyTyped(c, keyCode);
+                    if (!field.field.getText().equals(before)) {
+                        row.fieldTextChanged(c, keyCode, field);
+                    }
                 }
             }
         }
