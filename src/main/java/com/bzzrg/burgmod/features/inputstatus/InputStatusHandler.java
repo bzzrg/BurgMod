@@ -20,7 +20,7 @@ public class InputStatusHandler {
 
     private static int tickNum = 0;
     public static boolean finished = true;
-    public static String label = color1 + "Input Status: \u00A7r?";
+    public static String labelText = "\u00A7r?";
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
@@ -28,7 +28,7 @@ public class InputStatusHandler {
             if (StrategyRecorder.recording) {
                 mc.fontRendererObj.drawStringWithShadow(color1 + "Input Status: \u00A7bRecording Strategy...", InputStatusConfig.labelX, InputStatusConfig.labelY, -1);
             } else {
-                mc.fontRendererObj.drawStringWithShadow(label, InputStatusConfig.labelX, InputStatusConfig.labelY, -1);
+                mc.fontRendererObj.drawStringWithShadow(color1 + "Input Status: " + labelText, InputStatusConfig.labelX, InputStatusConfig.labelY, -1);
             }
         }
     }
@@ -40,10 +40,10 @@ public class InputStatusHandler {
         if (StrategyRecorder.recording) return;
 
         if (strategyTicks.isEmpty()) {
-            label = color1 + "Input Status: \u00A74No Strategy Set";
+            labelText = "\u00A74No Strategy Set";
             return;
         }
-        label = InputStatusConfig.shortenLabel ? color1 + "Input Status: \u00A7e..." : color1 + "Input Status: \u00A7eWaiting...";
+        labelText = InputStatusConfig.shortenLabel ? "\u00A7e..." : "\u00A7eWaiting...";
     }
 
     @SubscribeEvent
@@ -55,7 +55,7 @@ public class InputStatusHandler {
 
         // Set label to be started
         if (tickNum == 0) {
-            label = InputStatusConfig.shortenLabel ? color1 + "Input Status: \u00A7a\u2714" : color1 + "Input Status: \u00A7aGood";
+            labelText = InputStatusConfig.shortenLabel ? "\u00A7a\u2714" : "\u00A7aGood";
         }
 
         // Get player's current inputs
@@ -67,7 +67,7 @@ public class InputStatusHandler {
             correctInputs = new HashSet<>(strategyTicks.get(tickNum).correctInputs);
 
         } catch (Exception e) { // If tickNum is out of the range of strategyTicks, that means the strategy is complete and this code will run
-            label = InputStatusConfig.shortenLabel ? color1 + "Input Status: \u00A7d\u2714" : color1 + "Input Status: \u00A7dSuccess";
+            labelText = InputStatusConfig.shortenLabel ? "\u00A7d\u2714" : color1 + "\u00A7dSuccess";
             finished = true;
             return;
         }
@@ -75,10 +75,9 @@ public class InputStatusHandler {
         // Input fail logic
         if (!inputs.equals(correctInputs)) {
 
-            String failed = InputStatusConfig.shortenLabel ? "\u2716" : "Failed";
-            label = color1 + "Input Status: \u00A7c" + failed;
+            labelText = "\u00A7c" + (InputStatusConfig.shortenLabel ? "\u2716" : "Failed");
 
-            if (InputStatusConfig.showFailTick) label += " (T" + (tickNum+1) + ")";
+            if (InputStatusConfig.showFailTick) labelText += " (T" + (tickNum+1) + ")";
 
             if (InputStatusConfig.showFailReason) {
 
@@ -105,7 +104,7 @@ public class InputStatusHandler {
 
                 failReason.append("\u00A7c)");
 
-                label += failReason;
+                labelText += failReason;
             }
 
             finished = true;

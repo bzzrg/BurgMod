@@ -7,9 +7,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -95,6 +97,21 @@ public class GeneralUtils {
         }
 
         return best != null ? new BlockPos(best.minX, best.minY, best.minZ) : null;
+    }
+
+    public static BlockPos getBlockLookingAt() {
+        Entity entity = mc.getRenderViewEntity();
+        if (entity == null) return null;
+
+        MovingObjectPosition mop = entity.rayTrace(50, 1);
+
+        if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            BlockPos pos = mop.getBlockPos();
+            if (getCollisionBox(pos) != null) {
+                return pos;
+            }
+        }
+        return null;
     }
 
     public static AxisAlignedBB getCollisionBox(BlockPos pos) {

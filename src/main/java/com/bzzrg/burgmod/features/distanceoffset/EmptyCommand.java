@@ -1,4 +1,4 @@
-package com.bzzrg.burgmod.features.distance;
+package com.bzzrg.burgmod.features.distanceoffset;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;

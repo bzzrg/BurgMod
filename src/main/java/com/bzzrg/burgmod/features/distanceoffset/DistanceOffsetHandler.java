@@ -1,11 +1,9 @@
-package com.bzzrg.burgmod.features.distance;
+package com.bzzrg.burgmod.features.distanceoffset;
 
 import com.bzzrg.burgmod.config.files.mainconfigsections.DistanceOffsetConfig;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -24,7 +22,7 @@ public class DistanceOffsetHandler {
 
     private static AxisAlignedBB jumpBB;
 
-    private static String label = color1 + "Distance Offset: \u00A7r?";
+    private static double distanceOffset = 0;
 
     private static class CustomGuiChat extends GuiChat {
 
@@ -84,20 +82,7 @@ public class DistanceOffsetHandler {
         }
     }
 
-    private static BlockPos getBlockLookingAt() {
-        Entity entity = mc.getRenderViewEntity();
-        if (entity == null) return null;
 
-        MovingObjectPosition mop = entity.rayTrace(50, 1);
-
-        if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            BlockPos pos = mop.getBlockPos();
-            if (getCollisionBox(pos) != null) {
-                return pos;
-            }
-        }
-        return null;
-    }
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
@@ -118,11 +103,11 @@ public class DistanceOffsetHandler {
 
             String finalLabel;
             if (mmBlock == null) {
-                finalLabel = color1 + "Distance Offset: \u00A74No MM Block Set";
+                finalLabel = color1 + "Distance Offset: \u00A74MM Block Unset";
             } else if (lb == null) {
-                finalLabel = color1 + "Distance Offset: \u00A74No LB Set";
+                finalLabel = color1 + "Distance Offset: \u00A74LB Unset";
             } else {
-                finalLabel = label;
+                finalLabel = formatDp("%sDistance Offset: %s%dp", color1, color2, distanceOffset);
             }
 
             mc.fontRendererObj.drawStringWithShadow(finalLabel, DistanceOffsetConfig.labelX, DistanceOffsetConfig.labelY, -1);
@@ -146,7 +131,7 @@ public class DistanceOffsetHandler {
             AxisAlignedBB lbBB = getCollisionBox(lb);
             AxisAlignedBB mmBlockBB = getCollisionBox(mmBlock);
 
-            if (lbBB != null && mmBlockBB != null && mc.thePlayer.posY <= lbBB.maxY) {
+            if (lbBB != null && mmBlockBB != null && mc.thePlayer.posY - 1.0E-10 <= lbBB.maxY) {
 
                 double mmOffset;
                 double landOffset;
@@ -161,28 +146,33 @@ public class DistanceOffsetHandler {
                 double offset = landOffset + mmOffset;
 
                 if (landOffset >= -1) {
-                    if (mmBlock.getZ() <= lb.getZ()) {
-                        System.out.printf("mmOffset: %.5f (mmBlockBB.maxZ: %.5f - jumpBB.minZ: %.5f), landOffset: %.5f (lastPlayerBB.maxZ: %.5f - lbBB.minZ: %.5f), offset: %.5f%n",
-                                mmOffset, mmBlockBB.maxZ, jumpBB.minZ,
-                                landOffset, lastPlayerBB.maxZ, lbBB.minZ,
-                                offset);
-                    } else {
-                        System.out.printf("mmOffset: %.5f (jumpBB.maxZ: %.5f - mmBlockBB.minZ: %.5f), landOffset: %.5f (lbBB.maxZ: %.5f - lastPlayerBB.minZ: %.5f), offset: %.5f%n",
-                                mmOffset, jumpBB.maxZ, mmBlockBB.minZ,
-                                landOffset, lbBB.maxZ, lastPlayerBB.minZ,
-                                offset);
-                    }
-
-                    label = formatDp("%sDistance Offset: %s%dp", color1, color2, offset);
+                    distanceOffset = offset;
+                    jumpBB = null;
 
                     if (offset > 0) {
-                        sendTitle(DistanceOffsetConfig.titleWhenPositive.replace("&", "\u00A7"), "", 5, 40, 5);
-                        if (DistanceOffsetConfig.soundWhenPositive) {
-                            playSound("mob.enderdragon.growl", DistanceOffsetConfig.volumeOfSound, 0.8f);
+
+                        if (landOffset < 0) { // Didn't land the jump
+
+                            if (DistanceOffsetConfig.titleWhenPositive) {
+                                sendTitle(DistanceOffsetConfig.titleTextPositive.replace("&", "\u00A7"), "", 5, 40, 5);
+                            }
+                            if (DistanceOffsetConfig.soundWhenPositive) {
+                                playSound("mob.enderdragon.growl", DistanceOffsetConfig.soundVolumePositive, 0.8f);
+                            }
+
+                        } else { // Did land the jump
+
+                            if (DistanceOffsetConfig.titleWhenLand) {
+                                sendTitle(DistanceOffsetConfig.titleTextLand.replace("&", "\u00A7"), "", 5, 40, 5);
+                            }
+                            if (DistanceOffsetConfig.soundWhenLand) {
+                                playSound("random.levelup", DistanceOffsetConfig.soundVolumeLand, 0.6f);
+                            }
+
                         }
+
                     }
 
-                    jumpBB = null;
                 }
 
 

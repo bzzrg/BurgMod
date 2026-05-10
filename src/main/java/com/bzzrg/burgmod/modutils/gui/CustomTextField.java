@@ -61,6 +61,7 @@ public class CustomTextField {
 
         field.setEnableBackgroundDrawing(false);
         field.setTextColor(0xFFFFFFFF);
+        field.setMaxStringLength(200);
     }
 
     public void draw(int mouseX, int mouseY) {

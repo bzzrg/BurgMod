@@ -3,7 +3,6 @@ package com.bzzrg.burgmod.features.strategy;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetHandler;
-import com.bzzrg.burgmod.features.turnhelper.TurnHelperHandler;
 import com.bzzrg.burgmod.modutils.gui.BMListGui;
 import com.bzzrg.burgmod.modutils.gui.CustomButton;
 import com.bzzrg.burgmod.modutils.gui.CustomSlider;
@@ -19,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig.*;
-import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.color1;
 import static com.bzzrg.burgmod.features.strategy.InputType.*;
 import static com.bzzrg.burgmod.features.strategy.StrategyRecorder.recordedStrategy;
 import static com.bzzrg.burgmod.modutils.GeneralUtils.*;
@@ -160,13 +158,11 @@ public class StrategyListGui extends BMListGui {
             if (StrategyRecorder.recording) {
                 ResetHandler.movedSinceReset = false;
 
-                InputStatusHandler.label = color1 + "Input Status: \u00A7r?";
+                InputStatusHandler.labelText = "\u00A7r?";
 
-                P45OffsetHandler.autoLabel = color1 + "Perfect 45 Offset (?): \u00A7r?";
-                P45OffsetHandler.xLabel = color1 + "Perfect 45 Offset (X?): \u00A7r?";
-                P45OffsetHandler.zLabel = color1 + "Perfect 45 Offset (Z?): \u00A7r?";
-
-                TurnHelperHandler.turnAccuracyLabel = color1 + "Turn Accuracy: \u00A7r?";
+                P45OffsetHandler.autoLabel = "Perfect 45 Offset (?): \u00A7r?";
+                P45OffsetHandler.xLabel = "Perfect 45 Offset (X?): \u00A7r?";
+                P45OffsetHandler.zLabel = "Perfect 45 Offset (Z?): \u00A7r?";
 
             } else {
 

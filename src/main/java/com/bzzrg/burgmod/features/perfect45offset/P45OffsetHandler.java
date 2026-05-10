@@ -36,9 +36,9 @@ public class P45OffsetHandler {
 
     public static float ja = 0;
 
-    public static String autoLabel = color1 + "Perfect 45 Offset (?): \u00A7r?";
-    public static String xLabel = color1 + "Perfect 45 Offset (X?): \u00A7r?";
-    public static String zLabel = color1 + "Perfect 45 Offset (Z?): \u00A7r?";
+    public static String autoLabel = "Perfect 45 Offset (?): \u00A7r?";
+    public static String xLabel = "Perfect 45 Offset (X?): \u00A7r?";
+    public static String zLabel = "Perfect 45 Offset (Z?): \u00A7r?";
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
@@ -48,7 +48,7 @@ public class P45OffsetHandler {
                 if (StrategyRecorder.recording) {
                     mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (?): \u00A7bRecording Strategy...", P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, -1);
                 } else {
-                    mc.fontRendererObj.drawStringWithShadow(autoLabel, P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, -1);
+                    mc.fontRendererObj.drawStringWithShadow(color1 + autoLabel, P45OffsetConfig.autoLabelX, P45OffsetConfig.autoLabelY, -1);
                 }
 
             }
@@ -56,14 +56,14 @@ public class P45OffsetHandler {
                 if (StrategyRecorder.recording) {
                     mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (X?): \u00A7bRecording Strategy...", P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, -1);
                 } else {
-                    mc.fontRendererObj.drawStringWithShadow(xLabel, P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, -1);
+                    mc.fontRendererObj.drawStringWithShadow(color1 + xLabel, P45OffsetConfig.xLabelX, P45OffsetConfig.xLabelY, -1);
                 }
             }
             if (showZOffset) {
                 if (StrategyRecorder.recording) {
                     mc.fontRendererObj.drawStringWithShadow(color1 + "Perfect 45 Offset (Z?): \u00A7bRecording Strategy...", P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, -1);
                 } else {
-                    mc.fontRendererObj.drawStringWithShadow(zLabel, P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, -1);
+                    mc.fontRendererObj.drawStringWithShadow(color1 + zLabel, P45OffsetConfig.zLabelX, P45OffsetConfig.zLabelY, -1);
                 }
             }
         }
@@ -138,7 +138,7 @@ public class P45OffsetHandler {
         if (invalidStates.contains(1)) return;
 
         if (invalidStates.contains(2)) {
-            setAllLabels("\u00A74No Strategy Set");
+            setAllLabels("\u00A74Strategy Unset");
             return;
         } else if (invalidStates.contains(3)) {
             bmChat("\u00A7cWARN: # of 45s inside perfect 45 offset config is more than # of jumps inside your strategy!");
@@ -172,8 +172,8 @@ public class P45OffsetHandler {
 
         ja = (((getJumpAngle() == null ? mc.thePlayer.rotationYaw : getJumpAngle()) + 180) % 360 + 360) % 360 - 180; // can be values -180 <= value < 180, 180 outputs -180 which is expected
 
-        xLabel = String.format(color1 + "%s45 Offset (X%s): \u00A7r?", shortenLabels ? "P" : "Perfect ", ja <= 0 ? "+" : "-");
-        zLabel = String.format(color1 + "%s45 Offset (Z%s): \u00A7r?", shortenLabels ? "P" : "Perfect ", (-90 <= ja && ja <= 90) ? "+" : "-");
+        xLabel = String.format("%s45 Offset (X%s): \u00A7r?", shortenLabels ? "P" : "Perfect ", ja <= 0 ? "+" : "-");
+        zLabel = String.format("%s45 Offset (Z%s): \u00A7r?", shortenLabels ? "P" : "Perfect ", (-90 <= ja && ja <= 90) ? "+" : "-");
 
         autoLabel = (EnumFacing.fromAngle(ja).getAxis() == EnumFacing.Axis.X) ? xLabel : zLabel;
 

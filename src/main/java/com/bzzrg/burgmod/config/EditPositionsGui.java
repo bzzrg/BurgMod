@@ -2,6 +2,7 @@ package com.bzzrg.burgmod.config;
 
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
+import com.bzzrg.burgmod.config.files.mainconfigsections.CollisionOffsetConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.DistanceOffsetConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.InputStatusConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.P45OffsetConfig;
@@ -101,6 +102,24 @@ public class EditPositionsGui extends GuiScreen {
                 v -> DistanceOffsetConfig.labelX = v,
                 v -> DistanceOffsetConfig.labelY = v,
                 () -> DistanceOffsetConfig.enabled
+        ));
+
+        labels.add(new Label(
+                () -> String.format("%sX Col Offset: %sRelocating...", color1, color2),
+                () -> CollisionOffsetConfig.xLabelX,
+                () -> CollisionOffsetConfig.xLabelY,
+                v -> CollisionOffsetConfig.xLabelX = v,
+                v -> CollisionOffsetConfig.xLabelY = v,
+                () -> CollisionOffsetConfig.enabled && CollisionOffsetConfig.showXLabel
+        ));
+
+        labels.add(new Label(
+                () -> String.format("%sZ Col Offset: %sRelocating...", color1, color2),
+                () -> CollisionOffsetConfig.zLabelX,
+                () -> CollisionOffsetConfig.zLabelY,
+                v -> CollisionOffsetConfig.zLabelX = v,
+                v -> CollisionOffsetConfig.zLabelY = v,
+                () -> CollisionOffsetConfig.enabled && CollisionOffsetConfig.showZLabel
         ));
     }
 

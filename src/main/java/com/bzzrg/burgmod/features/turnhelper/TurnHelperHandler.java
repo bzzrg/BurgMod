@@ -24,12 +24,20 @@ public class TurnHelperHandler {
     public static boolean finished = true;
     public static Float resetYaw = null;
     public static List<Float> turnAccuracyPercents = new ArrayList<>();
-    public static String turnAccuracyLabel = color1 + "Turn Accuracy: \u00A7r?";
+    public static float turnAccuracy = 100f;
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
         if (TurnHelperConfig.enabled && TurnHelperConfig.showTurnAccuracy) {
-            mc.fontRendererObj.drawStringWithShadow(turnAccuracyLabel, TurnHelperConfig.turnAccuracyLabelX, TurnHelperConfig.turnAccuracyLabelY, -1);
+
+            String finalLabel;
+            if (yawPoints.isEmpty()) {
+                finalLabel = color1 + "Turn Accuracy: \u00A74No Yaw Points";
+            } else {
+                finalLabel = formatDp("%sTurn Accuracy: %s%dp%%", color1, color2, turnAccuracy);
+            }
+
+            mc.fontRendererObj.drawStringWithShadow(finalLabel, TurnHelperConfig.turnAccuracyLabelX, TurnHelperConfig.turnAccuracyLabelY, -1);
         }
     }
 
@@ -65,11 +73,7 @@ public class TurnHelperHandler {
         turnAccuracyPercents.clear();
         TurnHelperDrawer.resetMoving();
 
-        if (yawPoints.isEmpty()) {
-            turnAccuracyLabel = color1 + "Turn Accuracy: \u00A74No Yaw Points";
-        } else {
-            turnAccuracyLabel = formatDp("%sTurn Accuracy: %s%dp%%", color1, color2, 100f);
-        }
+        turnAccuracy = 100f;
     }
 
     @SubscribeEvent
@@ -96,8 +100,7 @@ public class TurnHelperHandler {
             float percent = Math.max(0f, (1f - (Math.abs(diff) / 45f)) * 100f);
 
             turnAccuracyPercents.add(percent);
-            float mean = (float) turnAccuracyPercents.stream().mapToDouble(f -> f).average().orElse(0);
-            turnAccuracyLabel = formatDp("%sTurn Accuracy: %s%dp%%", color1, color2, mean);
+            turnAccuracy = (float) turnAccuracyPercents.stream().mapToDouble(f -> f).average().orElse(0);
 
         }
         if (tickNum == lastYawTickNum) {

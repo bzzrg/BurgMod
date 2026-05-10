@@ -1,5 +1,6 @@
 package com.bzzrg.burgmod;
 
+import com.bzzrg.burgmod.command.BMCommand;
 import com.bzzrg.burgmod.config.MainConfigGui;
 import com.bzzrg.burgmod.config.MainConfigGuiBinds;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.PosCheckersConfig;
@@ -8,8 +9,9 @@ import com.bzzrg.burgmod.config.files.jsonconfigfiles.StrategyConfig;
 import com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig;
 import com.bzzrg.burgmod.config.files.mainconfigsections.*;
 import com.bzzrg.burgmod.config.files.utils.MainConfigSection;
-import com.bzzrg.burgmod.features.distance.DistanceOffsetHandler;
-import com.bzzrg.burgmod.features.distance.EmptyCommand;
+import com.bzzrg.burgmod.features.collisionoffset.CollisionOffsetHandler;
+import com.bzzrg.burgmod.features.distanceoffset.DistanceOffsetHandler;
+import com.bzzrg.burgmod.features.distanceoffset.EmptyCommand;
 import com.bzzrg.burgmod.features.inputstatus.InputStatusHandler;
 import com.bzzrg.burgmod.features.perfect45offset.FixStrat45sCommand;
 import com.bzzrg.burgmod.features.perfect45offset.P45OffsetDrawer;
@@ -48,7 +50,7 @@ public class BurgMod {
 
     public static final String MODID = "burgmod";
     public static final String MODNAME = "BurgMod";
-    public static final String VERSION = "1.4.0";
+    public static final String VERSION = "1.4.1";
 
     public static Minecraft mc;
     public static Logger logger;
@@ -66,6 +68,7 @@ public class BurgMod {
         modConfigFolder = new File(event.getModConfigurationDirectory(), "BurgMod");
         createDirectory(modConfigFolder);
 
+        new CollisionOffsetConfig();
         new DistanceOffsetConfig();
         new GeneralConfig();
         new InputStatusConfig();
@@ -86,8 +89,7 @@ public class BurgMod {
 
         ClientCommandHandler.instance.registerCommand(new FixStrat45sCommand());
         ClientCommandHandler.instance.registerCommand(new DownloadLatestCommand());
-
-        ClientCommandHandler.instance.registerCommand(new EmptyCommand("bm"));
+        ClientCommandHandler.instance.registerCommand(new BMCommand());
 
         // if the command isn't already registered (from MPKMod or CyvClient/CyvForge), then register an empty command to avoid invalid usage.
         // If this is just running before the other mods' code, then this will be overridden because last registration takes priority
@@ -120,6 +122,7 @@ public class BurgMod {
         MinecraftForge.EVENT_BUS.register(new TurnHelperHandler());
         MinecraftForge.EVENT_BUS.register(new TickNumLabelHandler());
         MinecraftForge.EVENT_BUS.register(new DistanceOffsetHandler());
+        MinecraftForge.EVENT_BUS.register(new CollisionOffsetHandler());
 
 
     }

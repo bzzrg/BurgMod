@@ -307,20 +307,50 @@ Advanced parkour features for precise movement, strategy validation, and jump an
   Distance Offset calculates what offset you would have had if your MM offset was perfect (equal to 0). Mathematically, distance offset is just MM Offset + Land Offset. Note that this feature works best for linear jumps and 45 jumps.
 
 - **How Do I Set MM Block/LB?**  
-  Use `/cyv setmm target` and `/cyv setlb target`. Using `/mpk` and `/bm` instead of `/cyv` also works. If you don't add target at the end, it uses the block you're standing on instead of the block you're looking at. CyvClient/CyvForge and MPKMod are NOT required for this to work. It just shares the same command name so setting MM Block and LB is more convenient for users of those mods.
+  Use `/cyv setmm target` and `/cyv setlb target`. Using `/mpk` and `/bm` instead of `/cyv` also works. If you don't add `target` at the end, it uses the block you're standing on instead of the block you're looking at. CyvClient/CyvForge and MPKMod are NOT required for this to work. It just shares the same command name so setting MM Block and LB is more convenient for users of those mods.
 
 ### Config
 - **Title When +**  
-  The title that displays on your screen if your distance offset is positive. Set it to empty if you don't want a title. Use & for MC format codes (example: &1 is dark blue and &l is bold, search up "Minecraft Format Codes" to see all format codes).
+  Toggles displaying a title on screen if your distance offset is positive. The text field below it is to customize the title. Use & for MC format codes (example: &1 is dark blue and &l is bold, search up "Minecraft Format Codes" to see all format codes).
 
 - **Sound When +**  
   Plays a dragon growl sound if your distance offset is positive.
+
+- **Title When Land**  
+  Toggles displaying a title on screen if you land your jump. The text field below it is to customize the title. Use & for MC format codes (example: &1 is dark blue and &l is bold, search up "Minecraft Format Codes" to see all format codes).
+
+- **Sound When Land**  
+  Plays a level up sound if you land your jump.
 
 ### Showcase
 
 [![Distance Offset Showcase](https://img.youtube.com/vi/9SsDgxpBN7o/0.jpg)](https://www.youtube.com/watch?v=9SsDgxpBN7o)
 
 [▶ Watch Showcase](https://www.youtube.com/watch?v=9SsDgxpBN7o)
+
+---
+
+## Collision Offset
+
+### General
+- **What Does It Do?**
+  Collision Offset shows you by how much you clipped the block you have to pass.
+
+- **How Do I Set Collision Blocks?**  
+  Use `/bm setxcol` or `/bm setzcol` to set your X or Z collision blocks respectively to the block you are looking at. Use `/bm setbothcol` to set both your X and Z collision blocks to the block you are looking at.
+
+### Config
+- **Show X Label**  
+  Toggles the X Collision Label. This label displays how close you were to passing your X collision block on the X axis.
+  
+- **Show Z Label**  
+  Toggles the Z Collision Label. This label displays how close you were to passing your Z collision block on the Z axis.
+  
+### Showcase
+
+[![Collision Offset Showcase](https://img.youtube.com/vi/G65ZnoRxeQA/0.jpg)](https://www.youtube.com/watch?v=G65ZnoRxeQA)
+
+[▶ Watch Showcase](https://www.youtube.com/watch?v=G65ZnoRxeQA)
 
 ---
 

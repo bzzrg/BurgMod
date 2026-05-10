@@ -13,12 +13,12 @@ import static com.bzzrg.burgmod.config.files.mainconfigsections.GeneralConfig.co
 public class TickNumLabelHandler {
 
     private static int tickNum = 0;
-    private static String label = color1 + "Tick #: \u00A7r?";
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Text event) {
         if (StrategyConfig.showTickNum) {
-            mc.fontRendererObj.drawStringWithShadow(label, StrategyConfig.tickNumLabelX, StrategyConfig.tickNumLabelY, -1);
+
+            mc.fontRendererObj.drawStringWithShadow(String.format("%sTick #: %s%d", color1, color2, tickNum), StrategyConfig.tickNumLabelX, StrategyConfig.tickNumLabelY, -1);
         }
     }
 
@@ -31,10 +31,8 @@ public class TickNumLabelHandler {
 
         if (ResetHandler.movedSinceReset) {
             tickNum++;
-            label = String.format("%sTick #: %s%d", color1, color2, tickNum);
         } else {
             tickNum = 0;
-            label = String.format("%sTick #: %s...", color1, color2);
         }
     }
 
