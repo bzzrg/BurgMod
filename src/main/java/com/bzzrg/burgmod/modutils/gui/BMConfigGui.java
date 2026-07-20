@@ -73,7 +73,7 @@ public class BMConfigGui extends GuiScreen {
                     try {
                         T cur = Enum.valueOf(enumClass, get.get());
                         T next = getNextEnumValue(cur);
-                        set.accept(next.toString());
+                        set.accept(next.name());
                     } catch (Exception ignored) {}
                 }
         );

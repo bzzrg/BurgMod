@@ -157,7 +157,7 @@ public class DistanceOffsetHandler {
                                 sendTitle(DistanceOffsetConfig.titleTextPositive.replace("&", "\u00A7"), "", 5, 40, 5);
                             }
                             if (DistanceOffsetConfig.soundWhenPositive) {
-                                playSound("mob.enderdragon.growl", DistanceOffsetConfig.soundVolumePositive, 0.8f);
+                                playSound("random.levelup", DistanceOffsetConfig.soundVolumePositive, 0.8f);
                             }
 
                         } else { // Did land the jump
@@ -166,7 +166,7 @@ public class DistanceOffsetHandler {
                                 sendTitle(DistanceOffsetConfig.titleTextLand.replace("&", "\u00A7"), "", 5, 40, 5);
                             }
                             if (DistanceOffsetConfig.soundWhenLand) {
-                                playSound("random.levelup", DistanceOffsetConfig.soundVolumeLand, 0.6f);
+                                playSound("mob.enderdragon.growl", DistanceOffsetConfig.soundVolumeLand, 0.6f);
                             }
 
                         }

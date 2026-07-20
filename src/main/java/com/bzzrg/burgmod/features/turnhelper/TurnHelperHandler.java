@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.bzzrg.burgmod.BurgMod.mc;
 import static com.bzzrg.burgmod.config.files.jsonconfigfiles.TurnHelperConfig.deltaYaws;
@@ -42,6 +43,11 @@ public class TurnHelperHandler {
     }
 
     public static List<Float> getYaws() {
+
+        if ("ALL_TARGETS_ON".equals(TurnHelperConfig.mode)) {
+            return yawPoints.stream().map(yp -> yp.yaw).collect(Collectors.toList());
+        }
+
         List<Float> result = new ArrayList<>();
         List<YawPoint> sortedYawPoints = new ArrayList<>(yawPoints);
         sortedYawPoints.sort(Comparator.comparingInt(yawPoint -> yawPoint.tickNum));
